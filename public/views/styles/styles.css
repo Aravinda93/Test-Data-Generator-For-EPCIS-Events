@@ -1,0 +1,49 @@
+
+
+.navbar-brand
+{
+    width: 100%;
+    left: 0;
+    text-align: center;
+    margin:0 auto;
+}
+
+.bold {
+ font-weight: bold;
+}
+
+input::placeholder{
+   text-align: center;
+}
+
+
+h4{
+  color: navy;
+  margin-left: 20px;
+}
+/*
+textarea {
+	overflow-y: scroll;
+	height: 1000px;
+	margin-bottom: 7px;
+}*/
+
+textarea.form-control {
+    height: 400px;
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+	display: none !important;
+}
+
+#wheresection {
+  border: 2px solid;
+}
+
+.table td {
+   text-align: center;   
+}
+
+.table > tbody > tr > td {
+    vertical-align: middle;
+}	

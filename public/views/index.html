@@ -1,0 +1,735 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+	<head>
+		<meta charset="utf-8">
+		<title>EPCIS Events Test Data Generator</title>
+		<link rel="icon" href="images/logo.jpg">
+
+		<!-- jQuery CDN starts -->
+		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+
+		<!-- jQuery CDN Ends -->
+
+		<!-- Bootstrap Themes Start -->
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+		<!-- Bootstrap Themes End -->
+
+		<!-- Font Awesome CDN Starts-->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+		<!--My CSS Files Starts-->
+		<link rel="stylesheet" type="text/css" href="./styles/styles.css">
+		<!--My CSS Files Ends-->
+
+		<!-- Angularjs CDN Starts -->
+		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
+		<script src="https://cdn.rawgit.com/zenorocha/clipboard.js/master/dist/clipboard.min.js"></script>
+		<!-- Angularjs CDN Ends -->
+
+		<!-- My Javascript Files Starts-->
+		<script src="./js/app.js"></script>
+		<script src="./js/homeScript.js"></script>
+		<script src="./js/form-modifier.js"></script>
+		<script src="./js/TemplatesController.js"></script>
+		<script src="./js/CopyToClipboard.js"></script>
+		<!-- My Javascript file Ends-->
+
+		<!-- Alertify CDN Starts -->
+		<script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/alertify.min.js"></script>
+		<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/alertify.min.css"/>
+		<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/themes/default.min.css"/>
+		<!-- Alertify CDN Ends -->
+
+		<!-- Format the Text Area-->
+
+	</head>
+
+	<body  ng-controller="AppController" ng-init="init()">
+
+		<nav class="navbar navbar-inverse" style="background-color: #082c6c">
+			<a class="navbar-brand" href="#" style="color:#ffffff">Test Data Generator for EPCIS events</a>
+		</nav>
+		<br/>
+		<div class="container-fluid" ng-controller="AppController2">
+			
+			<div>
+				<button class="btn btn-info pull-right"><a href="Templates.html" style="color:#ffffff">Templates</a></button>
+			</div>
+			
+			<div ng-include="'Modals.html'"></div>
+			
+			<div id="inputElements" ng-cloak ng-show="inputElements">
+				<div class="row" ng-cloak>
+					<label for="DatasetName" style="padding-top:0.4%;font-weight;bold;padding-left: 3.5%;" class="control-label"> Dataset Name </label>
+					<div class="col-md-3">
+						<input type="text" class="form-control" id="DatasetName" ng-model="DatasetName" placeholder="Enter the Dataset name" ng-disabled="isDisabled"></input>
+					</div>
+				</div>
+				<br/>
+				<div class="row" ng-cloak>
+					<form class="form-horizontal" autocomplete="off" method='POST' ng-submit="createEvents()">
+						<table class="table table-bordered">
+							<tbody>
+								<tr>
+									<td rowspan="{{ EventTypeRowSpan }}" style="background-color: #F2F3F4;"></td>
+									<td> Event Count </td>
+									<td>
+										<input type="number" min="0" class="form-control" ng-model="formdata.eventcount" placeholder="Number of events required" required ></input>
+									</td>
+								</tr>
+								<tr>
+									<td rowspan="2" class="column2"> Event Type </td>
+									<td>
+										<select id="eventtype1" ng-model="formdata.eventtype1" class="form-control" ng-change="EventTypeChange()" ng-options='eventtype1.value as eventtype1.text  for eventtype1 in eventType' required>
+											<option class="dropdown-item" value="" disabled selected>Select Event Type</option>
+											<option class="dropdown-item" value="{{eventtype1.value}}"> {{ eventtype1.text }} </option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<select id="eventtype2" ng-model="formdata.eventtype2" class="form-control">
+											<option  class="dropdown-item" value="ordinaryevent" ng-selected="true">Ordinary Event</option>
+											<option  class="dropdown-item" value="errordeclaration"> Error Declaration </option>
+										</select>
+									</td>
+								</tr>
+								<tr>
+									<td class="column2"> Event ID </td>
+									<td>
+										<input type="text" class="form-control" id="EventId" ng-model="formdata.EventId" placeholder="Enter the Event Id"></input>
+									</td>
+								</tr>
+								<tr ng-cloak ng-show="formdata.eventtype1 == 'ObjectEvent' || formdata.eventtype1 == 'AggregationEvent' || formdata.eventtype1 == 'TransactionEvent' ">
+									<td class="column2">Action</td>
+									<td>
+										<select ng-model="formdata.action" class="form-control">
+											<option class="dropdown-item" value="" selected> Choose </option>
+											<option class="dropdown-item" value="ADD"> ADD </option>
+											<option class="dropdown-item" value="OBSERVE"> OBSERVE </option>
+											<option class="dropdown-item" value="DELETE"> DELETE </option>
+										</select>
+									</td>
+								</tr>
+
+								<!-- If the Error Declaration Has been selected then show the following fields -->
+								<tr ng-show="formdata.eventtype2 == 'errordeclaration' ">
+									<td rowspan="4" style="background-color: #cc0000;text-align: center;"> Error </td>
+									<td style="background-color: #f2c2c2;"> Declaration Time </td>
+									<td>
+										<input type="datetime-local" ng-model="formdata.ErrorDeclarationTime" placeholder="Declaration Time" class="form-control">
+									</td>
+								</tr>
+
+								<tr ng-show="formdata.eventtype2 == 'errordeclaration' ">
+									<td style="background-color: #f2c2c2;text-align: center;"> Reason </td>
+									<td>
+										<select ng-model="formdata.ErrorReasonType" class="form-control">
+											<option class="dropdown-item" value="" selected> Choose </option>
+											<option class="dropdown-item" value="did_not_occur"> Did Not Occur </option>
+											<option class="dropdown-item" value="incorrect_data"> Incorrect Data </option>
+											<option class="dropdown-item" value="Other"> Other </option>
+										</select>
+									</td>
+									
+									<td ng-show="formdata.ErrorReasonType == 'Other' ">
+										<input type="text" ng-model="formdata.ErrorReasonOther"  class="form-control" placeholder="Enter Error Reason"></input>
+									</td>
+								</tr>
+
+								<tr ng-show="formdata.eventtype2 == 'errordeclaration' ">
+									<td style="background-color: #f2c2c2;text-align: center;"> Corrective IDs </td>
+									<td>
+										<button ng-click="AddErrorCorrectiveIds()" type="button" class="btn-btn-info" >Add Another</button><br/>
+										<span ng-repeat="(key,value) in ErrorCorrectiveIds" class="form-inline">
+											<br/><br/>
+											<span>
+												<button title="Delete Corrective ID" type="button" ng-click="DeleteErrorCorrectiveID(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
+											</span>
+											<span>
+												<input type="text" class="form-control" ng-model="value.CorrectiveText" ng-blur="AddCorrectiveText(value.CorrectiveText, value.ID)">
+											</span>
+										</span>
+									</td>
+								</tr>
+
+								<tr ng-show="formdata.eventtype2 == 'errordeclaration' ">
+									<td style="background-color: #f2c2c2;text-align: center;"> Extension </td>
+									<td>
+										<button ng-click="ErrorExtensionAddModal()" type="button" class="btn-btn-info" >Add Another</button><br/>
+										<span ng-repeat="(key,value) in ErrorExtensionList" class="form-inline">
+											<br/><br/>
+											<span>
+												<button title="Delete Error Extension" type="button" ng-click="DeleteErrorExtension(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>
+												<button title="Edit Error Extension" type="button" ng-click="EditErrorExtension(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
+											</span>&ensp;
+											{{value.NameSpace+':'+value.LocalName}}
+											<span>
+												<input type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddErrorExtensionText(value.FreeText, value.ID)">
+											</span>
+										</span>
+									</td>
+								</tr>
+
+
+								<!-- WHEN DIMENSION FIELFDS -->
+								<tr>
+									<td rowspan="2" style="background-color: #a854a8;text-align: center;"> WHEN </td>
+									<td style="background-color: #eedded;"  class="column2"> Event Time </td>
+									
+									<td>
+										<select ng-model="formdata.EventTimeSelector" class="form-control">
+											<option class="dropdown-item" value="" selected> Choose </option>
+											<option class="dropdown-item" value="SpecificTime"> Specific Time </option>
+											<option class="dropdown-item" value="TimeRange"> Time Range </option>
+										</select>
+									</td>
+									
+									<td ng-show="formdata.EventTimeSelector == 'SpecificTime' ">
+										<input type="datetime-local" class="form-control" ng-model="formdata.eventtimeSpecific" id="eventtime" title="Set Specific Event Time">
+									</td>
+									
+									<td ng-show="formdata.EventTimeSelector == 'TimeRange' " class="form-inline">
+										<span> FROM </span>&ensp;
+										<input type="datetime-local" class="form-control" ng-model="formdata.EventTimeFrom" title="Event Time Range FROM">&ensp;&ensp;
+										<span> TO </span>&ensp;
+										<input type="datetime-local" class="form-control" ng-model="formdata.EventTimeTo" title="Event Time Range TO">
+									</td>
+								</tr>
+								<tr>
+									<td style="background-color: #eedded;"> Record Time </td>
+									
+									<td class="form-inline" style="display: block;margin: auto;">
+										<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" class="custom-control-input" value="yes" ng-model="formdata.RecordTimeOption" name="RecordTimeOption" id="RecordTimeOption1">
+											<label class="custom-control-label" for="RecordTimeOption1">Yes</label>
+										</div>
+										
+										<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" class="custom-control-input" value="no" ng-model="formdata.RecordTimeOption" name="RecordTimeOption" id="RecordTimeOption2">
+											<label class="custom-control-label" for="RecordTimeOption2">No</label>
+										</div>
+									</td>
+									
+									<td ng-show="formdata.RecordTimeOption == 'yes'" class="form-inline" style="display: block;margin: auto;">
+										<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" class="custom-control-input" value="RecordTimeCurrentTime" ng-model="formdata.RecordTimeOptionType" name="RecordTimeOptionType" id="RecordTimeOption3">
+											<label class="custom-control-label" for="RecordTimeOption3">Current Time</label>
+										</div>
+										
+										<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" class="custom-control-input" value="RecordTimeSameAsEventTime" ng-model="formdata.RecordTimeOptionType" name="RecordTimeOptionType" id="RecordTimeOption4">
+											<label class="custom-control-label" for="RecordTimeOption4">Same As Event Time</label>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td rowspan="{{ rowspanWHAT }}" style="background-color: #607fbf;text-align: center;"> WHAT </td>
+									<!--When No EVENT TYPE has been selected-->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == '' "></td>
+									<td ng-show="formdata.eventtype1 == '' "> Please Select the Event type </td>
+
+									<!-- When OBJECT EVENT has been selected -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'ObjectEvent' " class="column2"> EPC </td>
+
+									<!-- Show the Add Button for the OBJECT EVENT EPCS -->
+									<td ng-cloak  ng-show="formdata.eventtype1 == 'ObjectEvent'">
+										<button ng-show="ObjectEventEPCSbutton" ng-click="ObjectEventEPCsAdd()" type="button" class="btn-btn-info" >Add EPCs</button>
+
+										<span ng-hide="ObjectEventEPCSbutton">
+											<button title="Delete EPCs" type="button" ng-click="ObjectEventEPCsDelete(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
+											EPCs has been added
+										</span>
+									</td>
+
+									<!-- When AGGREGATION EVENT has been selected -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'AggregationEvent' "> Parent ID </td>
+
+									<td ng-cloak  ng-show="formdata.eventtype1 == 'AggregationEvent'">
+										<button ng-show="ParentButton" ng-click="AggregationEventParent()" type="button" class="btn-btn-info" >Add Parent</button>
+										<span ng-repeat="(key, value) in AggregationEventParentURI">
+											<span>
+													<button title="Delete Parent" type="button" ng-click="Delete_AggregateParent()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>{{value}}</span>
+										</span>
+									</td>
+
+									<!-- When TRANSACTION EVENT has been Selected show PARENT ID -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransactionEvent' "> Parent ID </td>
+									<td ng-show="formdata.eventtype1 == 'TransactionEvent' ">
+										<button ng-show="TransactionEventParent" ng-click="TransactionEventParentId()" type="button" class="btn-btn-info" >Add Event</button>
+										<span ng-repeat="(key,value) in TransactionEventParentIDURI">
+											<span>
+												<button title="Delete Parent ID" type="button" ng-click="Delete_TransactionParent(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>{{value}}</span>
+										</span>
+									</td>
+
+									<!-- When TRANSFORMATION EVENT has been selected -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransformationEvent' " class="column2"> Xform ID </td>
+									<td ng-show="formdata.eventtype1 == 'TransformationEvent' ">
+										<input type="text" class="form-control" id="transformationXformId" ng-model="formdata.transformationXformId" placeholder="Transformation ID URI (Optional)"></input>
+									</td>
+
+									<!-- When ASSOCIATION EVENT has been selected -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'AssociationEvent' "> Parent ID </td>
+									<td ng-cloak  ng-show="formdata.eventtype1 == 'AssociationEvent'">
+										<button ng-show="AssociationEventParentButton" ng-click="AssociationEventParent()" type="button" class="btn-btn-info" >Add Parent</button>
+										<span ng-repeat="(key, value) in AssociationEventParentURI">
+											<span>
+													<button title="Delete Parent" type="button" ng-click="AssociationEventParentDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>{{value}}</span>
+										</span>
+									</td>
+								</tr>
+								<!-- SECOND ELELEMNT OF WHAT DIMENSION -->
+								<tr ng-show="formdata.eventtype1 == 'ObjectEvent' ||  formdata.eventtype1 == 'AggregationEvent' || formdata.eventtype1 == 'TransactionEvent' || formdata.eventtype1 == 'TransformationEvent' || formdata.eventtype1 == 'AssociationEvent' ">
+									<!-- When OBJECT EVENT has been selected -->
+									<td rowspan="{{OEQuantities}}" style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'ObjectEvent' "> Quantities </td>
+
+									<td ng-show="formdata.eventtype1 == 'ObjectEvent'">
+										<button ng-show="OEAddQuantitiesButton" ng-click="ObjectEventQuantitiesClick()" type="button" class="btn-btn-info" >Add Quantites</button>
+										<span ng-hide="OEAddQuantitiesButton">
+											<button title="Delete Quantities" type="button" ng-click="OEQuantitiesDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											&ensp;<span>Quantities Added
+										</span>
+									</td>
+
+									<!-- When AGGREGATION EVENT has been selected -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'AggregationEvent' "> Child EPCs </td>
+									<td ng-show="formdata.eventtype1 == 'AggregationEvent' ">
+										<button ng-show="AEChildEPCButton" ng-click="AggregationEventChildEPCs()" type="button" class="btn-btn-info" >Add Child EPCS</button>
+										<span ng-hide="AEChildEPCButton">
+											<button title="Delete Child EPCS" type="button" ng-click="AEChildEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
+											Child EPCs has been added
+										</span>
+									</td>
+
+									<!-- When TRANSACTION EVENT has been Selected show EPCS -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransactionEvent' "> EPCs </td>
+									<td ng-show="formdata.eventtype1 == 'TransactionEvent' ">
+										<button ng-show="TransactionEventEPCSbutton" ng-click="TransactionEventEPCS()" type="button" class="btn-btn-info" >Add Child EPCS</button>
+										<span ng-hide="TransactionEventEPCSbutton">
+											<button title="Delete Child EPCS" type="button" ng-click="TransactionEventChildEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
+											<span>Child EPCs has been added</span>
+										</span>
+									</td>
+
+									<!-- When TRANSFORMATION EVENT has been selected -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransformationEvent' " class="column2"> Input EPCs </td>
+									<td ng-show="formdata.eventtype1 == 'TransformationEvent' ">
+										<button ng-show="TransformInputEPCsButton" ng-click="TransformationEventInputEPCs()" type="button" class="btn-btn-info" >Add EPCs</button>
+										<span ng-hide="TransformInputEPCsButton">
+											<span>
+												<button title="Delete Input EPCs" type="button" ng-click="TransformationEventInputEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>Input EPCs added</span>
+										</span>
+									</td>
+
+									<!-- When ASSOCIATION EVENT has been selected -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'AssociationEvent' "> Child EPCs </td>
+									<td ng-show="formdata.eventtype1 == 'AssociationEvent' ">
+										<button ng-show="AssociationEventChildEPCSButton" ng-click="AssociationEventChildEPCS()" type="button" class="btn-btn-info" >Add Child EPCS</button>
+										<span ng-hide="AssociationEventChildEPCSButton">
+											<button title="Delete Child EPCS" type="button" ng-click="AssociationEventChildEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
+											Child EPCs has been added
+										</span>
+									</td>
+								</tr>
+
+								<!-- WHAT DIMENSION 3rd element -->
+								<tr>
+									<!-- AGGREGATION EVENT Child Quantites -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'AggregationEvent' "> Child Quantities </td>
+									<td ng-show="formdata.eventtype1 == 'AggregationEvent' ">
+										<button ng-show="AEChildQuantitiesButton" ng-click="AggregationEventChildQuantities()" type="button" class="btn-btn-info" >Add Child Quantities</button>
+										<span ng-hide="AEChildQuantitiesButton">
+											<span>
+												<button title="Delete Child Quantites" type="button" ng-click="AEChildQuantitiesDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>Child Quantites Added</span>
+										</span>
+									</td>
+
+									<!-- TRANSACTION EVENT Quantities -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransactionEvent' " class="column2"> Quantities </td>
+									<td ng-show="formdata.eventtype1 == 'TransactionEvent' ">
+										<button ng-show="TransactionEventQuantitiesButton" ng-click="TransactionEventQuantities()" type="button" class="btn-btn-info" >Add Quantities</button>
+										<span ng-hide="TransactionEventQuantitiesButton">
+											<span>
+												<button title="Delete Quantites" type="button" ng-click="TransactionEventQuantitiesDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>Quantites Added</span>
+										</span>
+									</td>
+
+									<!--TRANSFORMATION EVENT INPUT Quantites -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransformationEvent' " class="column2"> Input Quantities </td>
+									<td ng-show="formdata.eventtype1 == 'TransformationEvent' ">
+										<button ng-show="TransformationEventInputQuantitiesButton" ng-click="TransformationEventInputQuantities()" type="button" class="btn-btn-info" >Add Input Quantity</button>
+										<span ng-hide="TransformationEventInputQuantitiesButton">
+											<span>
+												<button title="Delete Input Quantites" type="button" ng-click="TransformationEventInputQuantitiesDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>Input Quantites Added</span>
+										</span>
+									</td>
+
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'AssociationEvent' "> Child Quantities </td>
+									<td ng-show="formdata.eventtype1 == 'AssociationEvent' ">
+										<button ng-show="AssociationEventChildQuantitiesButton" ng-click="AssociationEventChildQuantities()" type="button" class="btn-btn-info" >Add Child Quantities</button>
+										<span ng-hide="AssociationEventChildQuantitiesButton">
+											<span>
+												<button title="Delete Child Quantites" type="button" ng-click="AssociationEventChildQuantitiesDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>Child Quantites Added</span>
+										</span>
+									</td>
+
+								</tr>
+
+								<!-- When TRANSFORMATION EVENT has been selected -->
+								<tr ng-show="formdata.eventtype1 == 'TransformationEvent' ">
+									<!-- Transformation Event OUTPUT EPCS -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransformationEvent' " class="column2"> Output EPCs </td>
+									<td ng-show="formdata.eventtype1 == 'TransformationEvent' ">
+										<button ng-show="TransformOutputEPCsButton" ng-click="TransformationEventOutputEPCs()" type="button" class="btn-btn-info" >Add Output EPCs</button>
+										<span ng-hide="TransformOutputEPCsButton">
+											<span>
+												<button title="Delete Output EPCs" type="button" ng-click="TransformationEventOutputEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>Output EPCs added</span>
+										</span>
+									</td>
+								</tr>
+
+								<!-- When TRANSFORMATION EVENT has been selected -->
+								<tr ng-show="formdata.eventtype1 == 'TransformationEvent' ">
+
+									<!-- TRANSFORMATION EVENT OUTPUT Quantites -->
+									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransformationEvent' "> Ouput Quantities </td>
+									<td ng-show="formdata.eventtype1 == 'TransformationEvent' ">
+										<button ng-show="TransformationEventOutputQuantitiesButton" ng-click="TransformationEventOutputQuantities()" type="button" class="btn-btn-info" >Add Output EPCs</button>
+										<span ng-hide="TransformationEventOutputQuantitiesButton">
+											<span>
+												<button title="Delete Output Quantities" type="button" ng-click="TransformationEventOutputQuantitiesDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>Output Quantites Added</span>
+										</span>
+									</td>
+								</tr>
+
+								<!-- WHERE DIMENSION START -->
+								<tr>
+									<td rowspan="2" style="background-color: #478f77;text-align: center;"> WHERE </td>
+									<td style="background-color: #dae9e4;" class="column2"> Read Point </td>
+									<td>
+										<select ng-model="formdata.readpointselector" id="readpointselector" class="form-control">
+											<option value="" selected>Choose Read Point type</option>
+											<option value="" style="font-weight:bold;" disabled>GS1 Key</option>
+											<option value="sgln">&nbsp; SGLN + ext (Al 414 + Al 254)</option>
+											<option value="" style="font-weight:bold;" disabled>Other</option>
+											<option value="manually">&nbsp; Enter URI manually</option>
+										</select>
+									</td>
+
+									<td ng-show="formdata.readpointselector == 'manually' " class="form-inline form-control">
+										<span> URI </span>&ensp;
+										<input type="text" class="form-control" ng-model="formdata.readpoint" id="readpoint" placeholder="Ex: urn:epc:id:1234.121"></input>
+									</td>
+
+									<td ng-show="formdata.readpointselector == 'sgln'" class="form-inline form-control">
+										<span> (414) </span>&ensp;
+										<input type="text" class="form-control" id="readpointsgln1" ng-model="formdata.readpointsgln1" pattern="[0-9]{13,13}" maxlength="13" oninput="this.value=this.value.replace(/[^0-9]/g,'');" title="GLN must be 13 digits"></input>&ensp;
+										<span> (254) </span>&ensp;
+										<input type="text" class="form-control" id="readpointsgln2" ng-model="formdata.readpointsgln2"></input>&ensp;
+										<span> GS1 Company Prefix Length </span> &ensp;
+										<select ng-model="formdata.ReadPointCompanyPrefix" id="ReadPointCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs" ng-required="formdata.readpointselector == 'sgln'">
+											<option value="" selected> Choose </option>
+											<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
+										</select>
+									</td>
+								</tr>
+
+								<tr>
+									<td style="background-color: #dae9e4;"> Business Location </td>
+									<td>
+										<select ng-model="formdata.businesslocationselector" id="businesslocationselector" class="form-control">
+											<option value="" selected>Choose Business Location type</option>
+											<option value="" style="font-weight:bold;" disabled>GS1 Key</option>
+											<option value="sgln">&nbsp; SGLN + ext (Al 414 + Al 254) </option>
+											<option value="" style="font-weight:bold;" disabled>Other</option>
+											<option value="manually">&nbsp; Enter URI manually</option>
+										</select>
+									</td>
+
+									<td ng-show="formdata.businesslocationselector == 'manually' " class="form-inline form-control">
+										<span> URI </span>&ensp;
+										<input type="text" class="form-control" ng-model="formdata.businesslocation" id="businesslocation" placeholder="Ex: urn:epc:id:1234.121"></input>
+									</td>
+
+									<td ng-show="formdata.businesslocationselector == 'sgln' " class="form-inline form-control">
+										<span> (414) </span>&ensp;
+										<input type="text" class="form-control" id="businesspointsgln1" ng-model="formdata.businesspointsgln1" pattern="[0-9]{13,13}" maxlength="13" oninput="this.value=this.value.replace(/[^0-9]/g,'');" title="GLN must be 13 digits"></input>&ensp;
+										<span> (254) </span>&ensp;
+										<input type="text" class="form-control" id="businesspointsgln2" ng-model="formdata.businesspointsgln2"></input>&ensp;
+										<span> GS1 Company Prefix Length </span> &ensp;
+										<select ng-model="formdata.BusinessLocationPrefix" id="BusinessLocationPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs" ng-required="formdata.businesslocationselector == 'sgln' ">
+											<option value="" selected> Choose </option>
+											<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
+										</select>
+									</td>
+
+								</tr>
+								<!-- WHERE DIMENSION END -->
+
+								<!--WHY DIMESION START -->
+								<tr>
+									<td rowspan="{{ rowspanWHY }}" style="background-color: #e6c72e;text-align: center;"> WHY </td>
+									<td style="background-color: #faf4d5;" class="column2"> Business Step </td>
+									<td>
+										<select ng-model="formdata.businessStep" id="businessStep"  ng-options='businessStep.value as businessStep.text for businessStep in businessSteps' class="form-control">
+											<option value="" disabled selected>Select Business Step</option>
+											<option value="{{ businessStep.value }}"> {{ businessStep.text }} </option>
+										</select>
+									</td>
+									<td ng-show="formdata.businessStep == 'BusinessStepEnter'">
+										<input type="text" class="form-control" id="EnterBusinessStepText" ng-model="formdata.EnterBusinessStepText" placeholder="Enter Business Step"></input>
+									</td>
+								</tr>
+								<tr>
+									<td style="background-color: #faf4d5;" class="column2"> Disposition </td>
+									<td>
+										<select ng-model="formdata.disposition" id="disposition" class="form-control" ng-options='disposition.value as disposition.text for disposition in dispositions'>
+											<option value="" disabled selected>Select Disposition</option>
+											<option value="{{ disposition.value }}"> {{ disposition.value }} </option>
+										</select>
+									</td>
+
+									<td ng-show="formdata.disposition == 'DispositionEnter'">
+										<input type="text" class="form-control" id="EnterDispositionText" ng-model="formdata.EnterDispositionText" placeholder="Enter Disposition"></input>
+									</td>
+								</tr>
+								<tr>
+									<td style="background-color: #faf4d5;" class="column2"> Biz Transactions </td>
+									<td>
+										<input type="text" class="form-control" id="biztransactions" ng-model="formdata.biztransactions"></input>
+									</td>
+								</tr>
+
+								<!-- WHY DIMENSION OBJECT EVENT has been selected -->
+								<tr  ng-show="formdata.eventtype1 == 'ObjectEvent' || formdata.eventtype1 == 'AggregationEvent' || formdata.eventtype1 == 'TransactionEvent'  || formdata.eventtype1 == 'AssociationEvent'  ">
+									<td style="background-color: #faf4d5;" class="column2"> Sources </td>
+									<td>
+										<select id="sourcesType" ng-model="formdata.sourcesType" class="form-control" ng-change="SourceChanges()">
+											<option value='' selected> Choose Source Type </option>
+											<option class="dropdown-item" value="owning_party"> Owning Party (CBV) </option>
+											<option class="dropdown-item" value="processing_party"> Processing Party (CBV)</option>
+											<option class="dropdown-item" value="location"> Location (CBV) </option>
+											<option class="dropdown-item" value="other"> Other </option>
+										</select>
+									</td>
+									<td ng-show="formdata.sourcesType" class="form-inline">
+
+										<span ng-show="formdata.sourcesType == 'owning_party' || formdata.sourcesType == 'processing_party'">
+											<select id="SourceLNType" ng-model="formdata.SourceLNType" class="form-control" ng-init="formdata.SourceLNType='sgln'">
+												<option class="dropdown-item" value='sgln' selected> SGLN </option>
+												<option class="dropdown-item" value="pgln"> PGLN </option>
+											</select>
+										</span>&ensp;
+										
+										<span ng-show="formdata.sourcesType == 'owning_party' || formdata.sourcesType == 'processing_party'">
+											<span ng-show='formdata.SourceLNType == "sgln"'> (414) &ensp;</span>
+											<span ng-show='formdata.SourceLNType == "pgln"'> (417) &ensp;</span>
+											<input type="text" ng-model="formdata.SourceGLN" pattern="\d{13}" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="13"  oninvalid="this.setCustomValidity('Source GLN must be 13 digits')"placeholder="Source GLN 13 digits" class="form-control"></input>&ensp;
+											<span ng-show='formdata.SourceLNType == "sgln"'> (254) &ensp;</span>
+											<span ng-show='formdata.SourceLNType == "sgln"'>
+												<input type="text" ng-model="formdata.SourceGLNExtension" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="13"  oninvalid="this.setCustomValidity('Sources Extension is required and must be in digits')" placeholder="Source GLN Extension digits" class="form-control"></input>&ensp;
+											</span>
+											<select ng-model="formdata.SourcesCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs" >
+												<option value="" selected> Company Prefix </option>
+												<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
+											</select>&ensp;
+										</span>
+										
+										<span ng-show="formdata.sourcesType == 'location' ">
+											<input type="text" ng-model="formdata.SourceLocationURI" class="form-control"  placeholder="Enter a Source"></input>&ensp;
+										</span>
+
+										<span ng-show="formdata.sourcesType == 'other' ">
+											<input type="text" id="OtherSourceURI1" ng-model="formdata.OtherSourceURI1" placeholder="Enter Source Type"  class="form-control"></input>&ensp;
+											<input type="text" id="OtherSourceURI2" ng-model="formdata.OtherSourceURI2" placeholder="Enter Source URI" class="form-control"></input>&ensp;
+										</span>
+									</td>
+								</tr>
+								<!-- -->
+								<tr  ng-show="formdata.eventtype1 == 'ObjectEvent' || formdata.eventtype1 == 'AggregationEvent' || formdata.eventtype1 == 'TransactionEvent' || formdata.eventtype1 == 'AssociationEvent' ">
+									<td style="background-color: #faf4d5;" class="column2"> Destinations </td>
+									<td>
+										<select id="destinationsType" ng-model="formdata.destinationsType" ng-change="DestinationChanges()" class="form-control" >
+											<option value="" selected> Choose Destination Type </option>
+											<option class="dropdown-item" value="owning_party"> Owning Party (CBV) </option>
+											<option class="dropdown-item" value="processing_party"> Processing Party (CBV)</option>
+											<option class="dropdown-item" value="location"> Location (CBV) </option>
+											<option class="dropdown-item" value="other"> Other </option>
+										</select>
+									</td>
+									<td ng-show="formdata.destinationsType" class="form-inline">
+											<span ng-show="formdata.destinationsType == 'owning_party' || formdata.destinationsType == 'processing_party'">
+												<select id="DestinationLNType" ng-model="formdata.DestinationLNType" class="form-control" ng-init="formdata.DestinationLNType='sgln'">
+													<option class="dropdown-item" value='sgln' selected> SGLN </option>
+													<option class="dropdown-item" value="pgln"> PGLN </option>
+												</select>&ensp;
+											</span>
+											
+											<span ng-show="formdata.destinationsType == 'owning_party' || formdata.destinationsType == 'processing_party'">
+												<span ng-show='formdata.DestinationLNType == "sgln"'> (414) &ensp;</span>
+												<span ng-show='formdata.DestinationLNType == "pgln"'> (417) &ensp;</span>
+												<input type="text" ng-model="formdata.DestinationGLN" pattern="\d{13}" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="13"  oninvalid="this.setCustomValidity('Destination GLN must be 13 digits')"placeholder="Destination GLN 13 digits" class="form-control"></input>&ensp;
+												<span ng-show='formdata.DestinationLNType == "sgln"'> (254) &ensp;</span>
+												<span ng-show='formdata.DestinationLNType == "sgln"'>
+													<input type="text" ng-model="formdata.DestinationGLNExtension" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="13"  oninvalid="this.setCustomValidity('Destination Extension is required and must be in digits')" placeholder="Destination GLN Extension digits" class="form-control"></input>&ensp;
+												</span>
+												
+												<select ng-model="formdata.DestinationCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs">
+													<option value="" selected> Company Prefix </option>
+													<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
+												</select>&ensp;
+											</span>
+											
+											<span ng-show="formdata.destinationsType == 'location'">
+												<input type="text" ng-model="formdata.DestinationLocationURI" class="form-control"  placeholder="Enter a Destination"></input>&ensp;
+											</span>										
+											
+											<span ng-show="formdata.destinationsType == 'other'">
+												<input type="text" id="OtherDestinationURI1" ng-model="formdata.OtherDestinationURI1"  placeholder="Enter Destination Type" class="form-control"></input>&ensp;
+												<input type="text" id="OtherDestinationURI2" ng-model="formdata.OtherDestinationURI2"  placeholder="Enter Destination URI" class="form-control"></input>&ensp;
+											</span>											
+									</td>
+								</tr>
+								<tr  ng-show="formdata.eventtype1 == 'ObjectEvent' || formdata.eventtype1 == 'TransformationEvent' ">
+									<td style="background-color: #faf4d5;" class="column2"> ILMD </td>
+									<td>
+										<button ng-click="AddILMDModalShow()" type="button" class="btn-btn-info" >Add ILMD</button><br/>
+										<span ng-show="formdata.eventtype1 == 'ObjectEvent'">
+											<span ng-repeat="(key, value) in ObjectEventILMDList" class="form-inline">
+												<br/><br/>
+												<span>
+													<button title="Delete ILMD" type="button" ng-click="DeleteObjectEventILMD(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+												</span>&ensp;
+												<span>
+													<button title="Edit ILMD" type="button" ng-click="EditObjectEventILMD(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
+												</span>&ensp;
+												<span>
+													{{ value.NameSpace + ":" + value.LocalName }}
+												</span>&ensp;
+												<input type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddObjectEventILMDFreeText(value.FreeText,value.ID)">
+											</span>
+										</span>
+										<span ng-show="formdata.eventtype1 == 'TransformationEvent'">
+											<span ng-repeat="(key, value) in TransformationEventILMDList" class="form-inline">
+												<br/><br/>
+												<span>
+													<button title="Delete ILMD" type="button" ng-click="DeleteTransformationEventILMD(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+												</span>&ensp;
+												<span>
+													<button title="Edit ILMD" type="button" ng-click="EditTransformationEventILMD(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
+												</span>&ensp;
+												<span>
+													{{ value.NameSpace + ":" + value.LocalName }}
+												</span>&ensp;
+												<input type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddTransformationEventILMDFreeText(value.FreeText,value.ID)">
+											</span>
+										</span>
+									</td>
+								</tr>
+
+								<tr>
+									<td style="background-color: #faf4d5;"> Extension </td>
+									<td>
+										<button ng-click="AddExtensionsModalShow()" type="button" class="btn-btn-info" >Add Extension</button><br/>
+										<span ng-repeat="(key, value) in CommonExtensionsList" class="form-inline">
+											<br/><br/>
+											<span>
+												<button title="Delete Extension" type="button" id="{{value.ID}}" ng-click="Delete_Extension(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>
+												<button title="Edit Extension" type="button" ng-click="Edit_Extension(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
+											</span>&ensp;
+											<span>
+												{{ value.NameSpace + ":" + value.LocalName }}
+											</span>&ensp;
+											<input type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddExtensionText(value.FreeText,value.ID)">
+										</span>
+									</td>
+								</tr>
+								<!-- HOW DIMENSION -->
+								<tr>
+									<td rowspan="{{ 1 }}" style="background-color: #08A9A8;text-align: center;"> HOW </td>
+									<td style="background-color: #A5FBFA;"> Sensor Data </td>
+									<td>
+										<button ng-click="AddSensorData()" type="button" class="btn-btn-info" >Add Sensor Info</button><br/>
+										<span ng-repeat="(key,value) in TotalSensorElementsArray" class="form-inline">
+											<br/>
+											<button title="Delete Sensor Element" type="button" id="{{key}}" ng-click="DeleteTotalSensorElement(key)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+											&ensp;<span class="badge badge-light">Sensor Element added</span>
+										</span>
+									</td>
+								</tr>
+								<!--WHY DIMENSION ENDS -->
+
+							</tbody>
+						</table>
+						<div class="row">
+							<div class="col-md-5"></div>
+							<div class="col-md-2">
+								<button type="submit" class="btn btn-success"> Submit </button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+			<br/>
+			<div id="outputElements" ng-cloak ng-show="outputElements">
+				<div class="row">
+					<div class="col-md-2">
+						<button class="btn btn-info" ng-click="showInputData()"> Back </button>
+					</div>
+				</div>
+				<br/>
+				<div class="row">
+					<div class="col-md-2"></div>
+					<div class="col-md-8">
+						<h5>Test Events in XML :</h5>
+						<textarea stryle="height: 400px;" class="form-control" id="xmldata" ng-model="xmldata"></textarea>
+					</div>
+					<div class="col-md-2">
+						<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+						<button ng-click="copytoclipboard('XML')" class="btn btn-default">Copy XML</button>
+					</div>
+				</div>
+				<br/>
+				<div class="row">
+					<div class="col-md-2"></div>
+					<div class="col-md-8">
+						<h5>Test Events in JSON :</h5>
+						<textarea class="form-control" id="jsondata" ng-model="jsondata"></textarea>
+						<br/><br/>
+					</div>
+					<div class="col-md-2">
+						<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+						<button ng-click="copytoclipboard('JSON')" class="btn btn-default">Copy JSON</button>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

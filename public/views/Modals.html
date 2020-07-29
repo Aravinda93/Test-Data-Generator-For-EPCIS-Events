@@ -1,0 +1,614 @@
+<!-- MODAL FOR SENSOR INFORMATION -->
+<div class="modal fade" id="SensorInformation" style="overflow-y: auto;">
+	<div class="modal-dialog" style="max-height:90%; max-width:85%;  margin-top: 5%; margin-bottom:5%;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Sensor Information</h4>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<form method="post" id="SensorInformationForm" ng-submit="SensorInformationSubmit()">
+				<div class="modal-body">
+					<div class="form-group form-check form-check-inline">
+						<label class="form-check-label" for="MetaDataCheck">Sensor Metadata</label>&nbsp;&nbsp;
+						<input type="checkbox" ng-model="SensorForm.MetaDataCheck" id="MetaDataCheck" class="form-check-input">
+					</div>
+					<div class="pull-right">
+						<button class="btn btn-info" ng-click="AddSensorElement($event);">Add</button>
+					</div>
+					
+					<!--Show the Information for MetaData-->
+					<div class="form-group" ng-show="SensorForm.MetaDataCheck">
+						<span class="form-group form-inline">
+							<label class="form-label" for="MetaDataDateTime">Datetime: </label>&nbsp;&nbsp;
+							<input type="datetime-local" ng-model="SensorForm.MetaDataDateTime" class="form-control" id="MetaDataDateTime"/>
+							&nbsp;&nbsp;
+							<label class="form-label" for="MetaDataStartTime">Start Time:</label>&nbsp;&nbsp;
+							<input type="datetime-local" ng-model="SensorForm.MetaDataStartTime" class="form-control" id="MetaDataStartTime"/>
+							&nbsp;&nbsp;
+							<label class="form-label" for="MetaDataEndTime">End Time:</label>&nbsp;&nbsp;
+							<input type="datetime-local" ng-model="SensorForm.MetaDataEndTime" class="form-control" id="MetaDataEndTime"/>
+						</span>
+					</div>
+				
+					<!-- Show the Sensor Element on click of the button -->
+					<div class="form-group" ng-repeat="SensorElementCount in SensorElementsArray">
+						<div class="form-inline">
+							<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementType[SensorElementCount.ID]" style="width:15%">
+								<option class="dropdown-item" value='' selected> Report Type </option>
+								<option class="dropdown-item" ng-repeat="SensorElement in SensorElements" value="{{SensorElement.value}}"> {{ SensorElement.text }} </option>
+							</select>
+							
+							<!--Type of Values for Sensor Elements-->
+							&nbsp;&nbsp;
+							<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementCountType[SensorElementCount.ID]" style="width:10%">
+								<option class="dropdown-item" value='' selected> No. Of Elements </option>
+								<option class="dropdown-item" value='single'> Single </option>
+								<option class="dropdown-item" value='multiple'> Multiple </option>
+							</select>&nbsp;&nbsp;							
+							
+							<!--If single value is selected -->
+							<span ng-show="SensorForm.SensorElementCountType[SensorElementCount.ID] == 'single' ">
+							
+								<!--Type of values required for Sensor Elements-->
+								<span  style="width:10%">
+									<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementValueType[SensorElementCount.ID]">
+										<option class="dropdown-item" value='' selected> Value Type </option>
+										<option class="dropdown-item" ng-repeat="SensorValueType in SensorValueTypes" value="{{SensorValueType.value}}"> {{ SensorValueType.text }} </option>
+									</select>&nbsp;
+								</span>
+							
+								<!-- Show the Fields for Single Value -->								
+								<span ng-show="SensorForm.SensorElementValueType[SensorElementCount.ID] == 'Discrete' ">									
+									<span style="width:10%">
+										<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementValue[SensorElementCount.ID]" class="form-control" placeholder="Discrete Value Eg: 26.0"/>
+									</span>	
+								</span>
+								
+								<!--Show the Fields for Range MAX VALUE MIN VALUE-->
+								<span ng-show="SensorForm.SensorElementValueType[SensorElementCount.ID] == 'Range' ">
+									<span style="width:10%">
+										<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementMinValue[SensorElementCount.ID]" class="form-control" placeholder="Min Value Eg: 10.0"/>&nbsp;
+									</span>
+									<span style="width:10%">
+										<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementMaxValue[SensorElementCount.ID]" class="form-control" placeholder="Max Value Eg: 30.0"/>&nbsp;
+									</span>
+								</span>	
+
+								<!-- If Boolean is selected for Value Type-->
+								<span ng-show="SensorForm.SensorElementValueType[SensorElementCount.ID] == 'Boolean' " style="width:10%">
+									<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementCountBoolean[SensorElementCount.ID]">
+										<option class="dropdown-item" value='true' ng-selected="true"> True </option>
+										<option class="dropdown-item" value='false'> False </option>
+									</select>&nbsp;&nbsp;
+								</span>
+								
+								<!-- If Boolean is selected for Value Type-->
+								<span ng-show="SensorForm.SensorElementValueType[SensorElementCount.ID] == 'User_Defined' " style="width:10%">
+									<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementUserDefinedValue[SensorElementCount.ID]" class="form-control" placeholder="URI"/>&nbsp;
+								</span>
+								
+							</span>
+							
+							
+							<!--If Multiple value is selected -->
+							<span ng-show="SensorForm.SensorElementCountType[SensorElementCount.ID] == 'multiple' ">
+								<!--FROM Value TO value-->								
+								<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorMultipleFrom[SensorElementCount.ID]" class="form-control" placeholder="From Eg: 20.0" />&nbsp;
+								<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorMultipleTo[SensorElementCount.ID]" class="form-control" placeholder="To Eg: 40.0" />&nbsp;
+								<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorMultipleNumber[SensorElementCount.ID]" class="form-control" placeholder="Count Eg: 10" />&nbsp;
+							</span>&nbsp;
+							
+							<!-- Show the UOM -->							
+							<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementUOM[SensorElementCount.ID]" style="width:15%">
+								<option class="dropdown-item" value='' selected> Report UOM </option>
+								<option class="dropdown-item" ng-repeat="SensorUOM in SensorUOMs |filter:{UOMtype:SensorForm.SensorElementType[SensorElementCount.ID]}" value="{{ SensorUOM.value  }}" ng-class="SensorUOM.class" ng-disabled="SensorUOM.disabled"> {{ SensorUOM.text }} </option>							
+							</select>&nbsp;
+							
+							<!-- Show the Time -->
+							<input type="datetime-local" ng-model="SensorForm.SensorElementTime[SensorElementCount.ID]" class="form-control"/>&nbsp;&nbsp;
+							
+							
+							<!-- Add Delete button for each row -->
+							<button ng-click="RemoveSensorElement(SensorElementCount.ID,$event)" class="btn btn-danger"><span><i class="fa fa-trash" aria-hidden="true"></i></span></button>
+							
+						</div>											
+					</div>
+					
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-success">Add</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Modal for adding the new Extension -->
+<div class="modal fade" id="AddExtensionModal" style="overflow-y: auto;">
+	<div class="modal-dialog" style="max-height:90%;  margin-top: 5%; margin-bottom:5%;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Add Another Element</h4>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<form method="post" id="Add_Extension_Submit" ng-submit="AddNewExtension()">
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="recipient-name" class="col-form-label">Data Form</label>
+						<select class="form-control" id="AddExtensionXMLElement" ng-model="AddExtensionForm.AddExtensionXMLElement">
+							<option class="dropdown-item" value="XML Element" ng-selected="true"> XML Element </option>
+							<option class="dropdown-item" value="XML Attribute"> XML Attribute </option>
+							<option class="dropdown-item" value="Text within mixed content"> Text within mixed content </option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="message-text" class="col-form-label">Namespace URI:</label>
+						<input type="text" class="form-control" id="AddExtensionNamespaceURI" ng-model="AddExtensionForm.AddExtensionNamespaceURI" autocomplete="off"></input>
+					</div>
+					<div class="form-group">
+						<label for="message-text" class="col-form-label">Local Name:</label>
+						<input type="text" pattern="^[A-Za-z0-9 ]*$" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Invalid Characters in Local Name field')" class="form-control" ng-model="AddExtensionForm.AddExtensionLocalName" autocomplete="off"></input>
+					</div>
+					<div class="form-group">
+						<label for="AddExtensionDataType" class="col-form-label">Data Type:</label>
+						<select class="form-control" id="AddExtensionDataType" ng-model="AddExtensionForm.AddExtensionDataType">
+							<option class="dropdown-item" value="String" ng-selected="true"> String </option>
+							<option class="dropdown-item" value="Complex"> Complex </option>
+						</select>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-success">Add</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Modal for Modifying the Added Extension -->
+<div class="modal fade" id="EditExtensionModal" style="overflow-y: auto;">
+	<div class="modal-dialog" style="max-height:90%;  margin-top: 5%; margin-bottom:5%;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Edit Extension Element</h4>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<form method="post" id="Edit_Extension_Submit" ng-submit="EditExtension()">
+				<div class="modal-body">
+					<div class="form-group">
+						<label for="EditExtensionXMLElement" class="col-form-label">Data Form</label>
+						<select class="form-control" id="EditExtensionXMLElement" ng-model="EditExtensionForm.EditExtensionXMLElement">
+							<option class="dropdown-item" value="XML Element"> XML Element </option>
+							<option class="dropdown-item" value="XML Attribute"> XML Attribute </option>
+							<option class="dropdown-item" value="Text within mixed content"> Text within mixed content </option>
+						</select>
+					</div>
+					<div class="form-group">
+						<label for="EditExtensionNamespaceURI" class="col-form-label">Namespace URI:</label>
+						<input type="text" class="form-control" id="EditExtensionNamespaceURI" ng-model="EditExtensionForm.EditExtensionNamespaceURI" autocomplete="off"></input>
+					</div>
+					<div class="form-group">
+						<label for="EditExtensionLocalName" class="col-form-label">Local Name:</label>
+						<input type="text" pattern="^[A-Za-z0-9 ]*$" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Invalid Characters in Local Name field')" class="form-control" ng-model="EditExtensionForm.EditExtensionLocalName" autocomplete="off"></input>
+					</div>
+					<div class="form-group">
+						<label for="EditExtensionDataType" class="col-form-label">Data Type:</label>
+						<select class="form-control" id="EditExtensionDataType" ng-model="EditExtensionForm.EditExtensionDataType">
+							<option class="dropdown-item" value="String"> String </option>
+							<option class="dropdown-item" value="Complex"> Complex </option>
+						</select>
+					</div>
+					<input type="hidden" id="EditInsertId" ng-model="EditExtensionForm.EditInsertId" class="form-control"></input>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-success">Add</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Show Quantities Modal -->
+<div class="modal fade" id="ChildTypeModal" style="overflow-y: auto;">
+	<div class="modal-dialog" style="max-height:90%; max-width:50%;  margin-top: 5%; margin-bottom:5%;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Add Event Data</h4>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<form method="post" id="CommonEventQuantities" ng-submit="CommonEventQuantities()">
+				<div class="modal-body">
+					<div class="form-group">
+						<select class="form-control" id="ObjectEventquantities" ng-model="CommonFormQuantity.ObjectEventquantities" ng-change="ObjectEventQuantityChange()">
+							<option class="dropdown-item" value='' selected> Choose </option>
+							<option class="dropdown-item" ng-repeat="ObjectEventQuantity in ObjectEventQuantities" value="{{ ObjectEventQuantity.value  }}" ng-class="ObjectEventQuantity.class" ng-disabled="ObjectEventQuantity.disabled"> {{ ObjectEventQuantity.text }} </option>
+						</select>
+					</div>
+					<div class="form-inline" ng-show="CommonFormQuantity.ObjectEventquantities">
+						<span ng-show="OEQuantityLGTINDisplay">
+							<span>(01)</span>&nbsp;
+							<input type="text" ng-required="OEQuantityLGTINDisplay" id="OEQLGTIN1" ng-model="CommonFormQuantity.OEQLGTIN1"  oninput="this.value=this.value.replace(/[^0-9]/g,'');" maxlength="14"  oninvalid="this.setCustomValidity('GTIN must be 14 digits')" class="form-control" style="width:200px" autocomplete="off"></input>&nbsp;
+							<span>(10)</span>&nbsp;
+						</span>
+						
+						<span ng-show="OEQuantityGTINDisplay">
+							<span>(01)</span>&nbsp;
+							<input type="text" ng-required="OEQuantityGTINDisplay" id="OEQGTIN" ng-model="CommonFormQuantity.OEQGTIN"  oninput="this.value=this.value.replace(/[^0-9]/g,'');" maxlength="14"  oninvalid="this.setCustomValidity('GTIN must be 14 digits')" class="form-control" style="width:200px"></input>&nbsp;
+						</span>
+						
+						<span ng-show="OEQuantityGRAIDisplay">
+							<span>(8003) 0</span>&nbsp;
+							<input type="text" ng-required="OEQuantityGRAIDisplay"  id="OEQGRAI" ng-model="CommonFormQuantity.OEQGRAI" maxlength="13" pattern="([0-9]{13})" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GRAI must be 13 digits')" placeholder="Enter GRAI digits" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+																
+						<span ng-show="OEQuantityGDTIDisplay">
+							<span>(253)</span>&nbsp;
+							<input type="text" ng-required="OEQuantityGDTIDisplay" id="OEQGDTI" ng-model="CommonFormQuantity.OEQGDTI" maxlength="13" pattern="([0-9]{13})$" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GDTI must be 13 digits')" placeholder="Enter GDTI digits" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<span ng-show="OEQuantityGCNDisplay">
+							<span>(255)</span>&nbsp;
+							<input type="text" ng-required="OEQuantityGCNDisplay" id="OEQGCN" ng-model="CommonFormQuantity.OEQGCN" maxlength="13" pattern="([0-9]{13})$" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GCN must be 13 digits')" placeholder="Enter GCN digits" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<span ng-show="OEQuantityCPIDisplay">
+							<span>(8010)</span>&nbsp;
+							<input type="text" ng-required="OEQuantityCPIDisplay" id="OEQCPI" ng-model="CommonFormQuantity.OEQCPI" maxlength="30" pattern="([0-9]{7,30})$" oninvalid="this.setCustomValidity('CPI must be between 7 and 30 digits')" placeholder="Enter CPI Digits" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" style="width: 200px;">&nbsp;
+						</span>
+						
+						<span ng-show="OEQuantityITIPDisplay">
+							<span>(8006)</span>&nbsp;
+							<input type="text" ng-required="OEQuantityITIPDisplay" id="OEQITIP" ng-model="CommonFormQuantity.OEQITIP" maxlength="18" pattern="([0-9]{18})$" oninvalid="this.setCustomValidity('ITIP must be 18 digits')" placeholder="Enter ITIP digits" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" style="width: 200px;">&nbsp;
+						</span>
+						
+						<span ng-show="OEQuantityUPUIDisplay">
+							<span>(01)</span>&nbsp;
+							<input type="text" ng-required="OEQuantityUPUIDisplay" id="OEQUPUI" ng-model="CommonFormQuantity.OEQUPUI" maxlength="14" pattern="([0-9]{14})$" oninvalid="this.setCustomValidity('UPUI must be 14 digits')" placeholder="Enter UPUI digits" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" style="width: 200px;">&nbsp;
+						</span>
+						
+						<span ng-show="OEQuantityManualURIDisplay">
+							<span> URI </span>&nbsp;
+							<input type="text" ng-required="OEQuantityManualURIDisplay" id="OEQManualURI"  ng-model="CommonFormQuantity.OEQManualURI" pattern='^.*:.*$' oninvalid="this.setCustomValidity('Please Enter Valid URI')" oninput="setCustomValidity('');" placeholder="Enter the URI Manually" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Options for Random Number !-->
+						<span ng-show="CommonFormQuantity.Quantitysgtintype == 'range' ">
+							<input type="number" id="QuantitysgtnGTINFrom" 	ng-model="CommonFormQuantity.QuantitysgtnGTINFrom"  placeholder="From" title="Enter the Range From" class="form-control" ng-required="CommonFormQuantity.Quantitysgtintype == 'range'" style="width:120px;"></input>&nbsp;
+							<input type="number" id="QuantitysgtnGTINTo" 	ng-model="CommonFormQuantity.QuantitysgtnGTINTo" 	placeholder="To" title="Enter the Range To" class="form-control" ng-required="CommonFormQuantity.Quantitysgtintype == 'range'" style="width:120px;"></input>&nbsp;
+						</span>
+						
+						<span ng-show="CommonFormQuantity.Quantitysgtintype == 'random' ">
+							<input type="number" id="QuantityrandomCount" 	class="form-control" ng-model="CommonFormQuantity.QuantityrandomCount" placeholder="Number of Objects" title="Enter the Number of Objects" ng-required="CommonFormQuantity.Quantitysgtintype == 'random'"></input>&nbsp;
+						</span>
+						
+						<span ng-show="CommonFormQuantity.Quantitysgtintype == 'none' && NoneValuesShow">
+							<input type="text" ng-required="CommonFormQuantity.sgtintype == 'none' && NoneValuesShow"  id="QuantitysingleObjectId" ng-model="CommonFormQuantity.singleObjectId" oninput="this.value=this.value.replace(/[^0-9]/g,'');" oninvalid="this.setCustomValidity('Missing Serial')" maxwidth="17" class="form-control" placeholder="Enter Object Id" title="Enter the Object Id"></input>&nbsp;
+						</span>		
+						
+						<span ng-show="OEQuantityCompanyPrefixDisplay">
+							 &ensp;<span> Company Prefix: </span>&nbsp;
+							<select ng-model="CommonFormQuantity.OEQuantityCompanyPrefix" id="OEQuantityCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs" ng-required="OEQuantityCompanyPrefixDisplay">
+								<option value="" selected> Choose </option>
+								<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
+							</select>
+						</span>
+					</div>
+					<div class="form-group">
+						<div class="form-inline" ng-show="CommonFormQuantity.ObjectEventquantities">
+							<span ng-cloak ng-show="AutoGenerate" style="margin-top:10px;">
+								<br/>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" ng-required="AutoGenerateRequired" ng-model="CommonFormQuantity.Quantitysgtintype" class="custom-control-input" value="range" id="Quantitysgtintype1" name="Quantitysgtintype">
+									<label class="custom-control-label" for="Quantitysgtintype1">Range</label>
+								</div>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" ng-required="AutoGenerateRequired" ng-model="CommonFormQuantity.Quantitysgtintype" class="custom-control-input" value="random" id="Quantitysgtintype2" name="Quantitysgtintype">
+									<label class="custom-control-label" for="Quantitysgtintype2">Random Number</label>
+								</div>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" ng-required="AutoGenerateRequired" ng-model="CommonFormQuantity.Quantitysgtintype" class="custom-control-input" value="none" id="Quantitysgtintype3" name="Quantitysgtintype">
+									<label class="custom-control-label" for="Quantitysgtintype3">None</label>
+								</div>
+							</span>		
+						</div>
+						
+						<div class="form-inline" ng-show="CommonFormQuantity.ObjectEventquantities && CommonFormQuantity.Quantitysgtintype == 'random'">									
+							<br/><br/>
+							<span>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" class="custom-control-input" value="numeric" ng-model="CommonFormQuantity.QuantityrandomType" ng-required="CommonFormQuantity.Quantitysgtintype == 'random'" name="QuantityrandomType" id="QuantityrandomType1">
+									<label class="custom-control-label" for="QuantityrandomType1">Numeric</label>
+								</div>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" class="custom-control-input" value="alphaNumeric" ng-model="CommonFormQuantity.QuantityrandomType" ng-required="CommonFormQuantity.Quantitysgtintype == 'random'" name="QuantityrandomType" id="QuantityrandomType2">
+									<label class="custom-control-label" for="QuantityrandomType2">AlphaNumeric</label>
+								</div>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" class="custom-control-input" value="alphaNumericwithSpecial" ng-model="CommonFormQuantity.QuantityrandomType" ng-required="CommonFormQuantity.Quantitysgtintype == 'random'" name="QuantityrandomType" id="QuantityrandomType3">
+									<label class="custom-control-label" for="QuantityrandomType3">AlphaNumeric with Special Characters</label>
+								</div>
+							</span>	
+						</div>
+						<div ng-show="CommonFormQuantity.ObjectEventquantities && CommonFormQuantity.Quantitysgtintype == 'random'">
+							<br/>
+							<div class="custom-control-inline">
+								<label class="custom-control-label" for="QuantityradomMinLength">Min. Length: </label>
+								<input id="QuantityradomMinLength"  ng-model="CommonFormQuantity.QuantityradomMinLength"  type="number" min="1" max="16" class="form-control" placeholder="Ex: 2"  title="Please Enter a Number between 1 and 16" style="width:80px;"/>
+							</div>
+							
+							<div class="custom-control-inline">
+								<label class="custom-control-label" for="QuantityrandomMaxLength">Max. Length: </label>
+								<input id="QuantityrandomMaxLength" ng-model="CommonFormQuantity.QuantityrandomMaxLength" type="number" min="2" max="16" class="form-control" placeholder="Ex: 10" title="Please Enter a Number between 2 and 16" style="width:80px;"/>
+							</div>									
+						</div>
+					</div>							
+					<div class="form-group" ng-show="CommonFormQuantity.ObjectEventquantities">
+						<br/>&nbsp;	&nbsp;	
+						<div class="form-inline">
+							<select class="form-control" id="ObjectEventQuantityType" ng-model="CommonFormQuantity.ObjectEventQuantityType">
+								<option class="dropdown-item" value="" selected>Choose</option>
+								<option class="dropdown-item" value="Fixed Measure Quantity">Fixed Measure Quantity</option>
+								<option class="dropdown-item" value="Variable Measure Quantity">Variable Measure Quantity</option>
+								<option class="dropdown-item" value="Unspecified Quantity">Unspecified Quantity</option>
+							</select>&nbsp;&nbsp;								
+							<span ng-show="CommonFormQuantity.ObjectEventQuantityType == 'Fixed Measure Quantity' || CommonFormQuantity.ObjectEventQuantityType == 'Variable Measure Quantity'">
+								<input type="text" id="ObjectEventQuantityQuantity" ng-model="CommonFormQuantity.ObjectEventQuantityQuantity" placeholder="Quantity" class="form-control" style="width:200px;" autocomplete="off">&nbsp;
+							</span>
+							<span ng-show="CommonFormQuantity.ObjectEventQuantityType == 'Variable Measure Quantity' ">
+								<select class="form-control" ng-model="CommonFormQuantity.ObjectEventQuantityQuantityUOM" style="width:200px;">
+									<option class="dropdown-item" value='' selected> Choose </option>
+									<option class="dropdown-item" ng-repeat="UOM in UOMs" value="{{ UOM.value  }}" ng-class="UOM.class" ng-disabled="UOM.disabled"> {{ UOM.text }} </option>
+								</select>
+								<!--<input type="text" name="QuantityUOM" id="QuantityUOM" ng-model="CommonFormQuantity.ObjectEventQuantityQuantityUOM" ng-keyup="QuantityUOMAutoComplete(CommonFormQuantity.ObjectEventQuantityQuantityUOM)" class="form-control" />  
+								<ul class="list-group" ng-model="UOMsList" ng-hide="hidethis">  
+									<li class="list-group-item" ng-repeat="UOM in QuantityUOMsList" ng-click="fillQUantityUOMTextbox(UOM.text)">{{UOM.text}}</li>  
+								</ul>--> 							
+							</span>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-success">Add</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Show the addition of the OBJECT EVENT EPCS MODAL -->
+<div class="modal fade" id="ParentTypeModal" style="overflow-y: auto;">
+	<div class="modal-dialog" style="max-height:100%; max-width:55%;  margin-top: 10%; margin-bottom:10%;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title">Add Event Data</h4>
+				<button type="button" class="close" data-dismiss="modal">&times;</button>
+			</div>
+			<form method="post" id="CommonEventFormat" ng-submit="CommonEventFormat()">
+				<div class="modal-body">
+					<div class="form-group">
+						<select class="form-control" ng-change="AggregationEventParentChange()" ng-model="CommonForm.AggregationEventParentID">
+							<option class="dropdown-item" value='' selected> Choose </option>
+							<option class="dropdown-item" ng-repeat="ObjectEventEpcsType in ObjectEventEpcsTypes" value="{{ ObjectEventEpcsType.value  }}" ng-class="ObjectEventEpcsType.class" ng-disabled="ObjectEventEpcsType.disabled"> {{ ObjectEventEpcsType.text }} </option>
+						</select>
+					</div>
+					<div class="form-inline" ng-show="CommonForm.AggregationEventParentID">		
+						<!-- Aggregation Event Parent Id is SGTIN -->
+						<span  ng-show="AEPSGTINDisp">
+							<span>(01)</span>&nbsp;
+							<input type="text" ng-required="AEPSGTINDisp" ng-model="CommonForm.AEPSGTIN1" maxlength="14" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GTIN must be 14 digits')"  title="14 characters length required" placeholder="Enter 14 Digit Code" class="form-control" style="width: 200px;">&nbsp;
+							<span>(21)</span>&nbsp;
+							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPSGTIN2" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Aggregation Event Parent ID is SSCC (Al 00) -->
+						<span ng-show="AEPSSCCDisp">
+							<span>(00)</span>&nbsp;
+							<input type="text" ng-required="AEPSSCCDisp" ng-model="CommonForm.AEPSSCC" maxlength="18" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC must be 18 digit')"  title="Enter company Prefix Upto 18 digits" placeholder="Company Prefix Upto 18 digits" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Aggregation Event Parent ID is GRAI (Al 8003) -->
+						<span ng-show="AEPGRAIDisp">
+							<span>(8003) 0</span>&nbsp;
+							<input type="text" ng-required="AEPGRAIDisp" ng-model="CommonForm.AEPGRAI" maxlength="30" pattern="^\d{14}[a-zA-Z]{0,16}$" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GRAI with Serial must be 14 digits followed by 1 to 16 alphanumeric characters')" placeholder="Enter 14 Digit Code" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Aggregation Event Parent ID is GIAI (Al 8004) -->
+						<span ng-show="AEPGIAIDisp">
+							<span>(8004)</span>&nbsp;
+							<input type="text" ng-required="AEPGIAIDisp" ng-model="CommonForm.AEPGIAI" pattern=".{7,30}" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GIAI must be between 7 and 30 alphanumeric characters'" placeholder="GIAI Code" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Aggregation Event Parent ID is GSRN (Al 8018) -->
+						<span ng-show="AEPGSRNDisp">
+							<span>(8018)</span>&nbsp;
+							<input type="text" ng-required="AEPGSRNDisp" ng-model="CommonForm.AEPGSRN" maxlength="18" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" placeholder="Enter GSRN Company Code" oninvalid="this.setCustomValidity('GSRN must be upto 18 digits')" title="GSRN must be 18 digits" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Aggregation Event Parent ID is GSRNP (Al 8017) -->
+						<span ng-show="AEPGSRNPDisp">
+							<span>(8017)</span>&nbsp;
+							<input type="text" ng-required="AEPGSRNPDisp" ng-model="CommonForm.AEPGSRNP" maxlength="18" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" placeholder="Enter GSRNP Company Code" oninvalid="this.setCustomValidity('GSRNP must be upto 18 digits')" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Aggregation Event Parent ID is GDTI (Al 253) -->
+						<span ng-show="AEPGDTIDisp">
+							<span>(253)</span>&nbsp;
+							<input type="text" ng-required="AEPGDTIDisp" ng-model="CommonForm.AEPGDTI" maxlength="30" pattern="^\d{13}[a-zA-Z0-9]{0,17}$" oninput="setCustomValidity('');"  oninvalid="this.setCustomValidity('GDTI with Serial must be 13 digits followed by 1 to 17 alphanumeric characters')" placeholder="Enter GDTI Digit Code" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Aggregation Event Parent ID is GCN (Al 255) -->
+						<span ng-show="AEPGSNDisp">
+							<span>(255)</span>&nbsp;
+							<input type="text" ng-required="AEPGSNDisp" ng-model="CommonForm.AEPGSN" maxlength="25" pattern="^\d{14,25}$" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GCN with Serial must be between 14 and 25 digits')" title="GCN with Serial must be between 14 and 25 digits"  placeholder="Enter GCN Digit code" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Aggregation Event Parent ID is CPI (Al 8010 8011) -->
+						<span ng-show="AEPCPIDisp">
+							<span>(8010)</span>&nbsp;										
+							<input type="text" ng-required="AEPCPIDisp" ng-model="CommonForm.AEPCPI1" pattern="^\d{7,30}$" maxlength="30" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('CPI must be between 7 and 30 digits')" title="CPI must be between 7 and 30 digits" placeholder="Enter CPI code digits" class="form-control" style="width: 200px;">&nbsp;
+							<span>(8011)</span>&nbsp;
+							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPCPI2"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('All characters of the Serial must be digits')" placeholder="Enter CPI code digits" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Aggregation Event Parent ID is GINC (Al 401) -->
+						<span ng-show="AECGINCDisp">
+							<span>(401)</span>&nbsp;
+							<input type="text" ng-required="AECGINCDisp" ng-model="CommonForm.AECGINC" pattern="^[0-9A-Za-z]{7,30}$" maxlength="30" oninvalid="this.setCustomValidity('GINC must be between 7 and 30 digits')" oninput="setCustomValidity('');" title="GINC must be between 9 and 30 alphanumeric characters" placeholder="Enter GINC code" class="form-control" style="width: 200px;">&nbsp;
+						</span>								
+						
+						
+						<!-- Aggregation Event Parent ID is GSIN (Al 402) -->
+						<span ng-show="AEPGSINDISP">
+							<span>(402)</span>&nbsp;
+							<input type="text" ng-required="AEPGSINDISP" ng-model="CommonForm.AEPGSIN" pattern="\d{17}" maxlength="17" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');"  oninvalid="this.setCustomValidity('GSIN must be 17 digits')" placeholder="Enter GSIN code" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Aggregation Event Parent ID is ITIP (Al 8006 + Al 21) -->
+						<span  ng-show="AEPITIPDISP">
+							<span>(8006)</span>&nbsp;
+							<input type="text" ng-required="AEPITIPDISP" ng-model="CommonForm.AEPITIP1" pattern="\d{18}" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="18"  oninvalid="this.setCustomValidity('ITIP must be 18 Numeric Characters')" placeholder="Enter 18 digits ITCP code" class="form-control" style="width: 200px;">&nbsp;
+							<span>(21)</span>&nbsp;
+							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPITIP2" placeholder="UPUI Serial Number" class="form-control" style="width: 200px;">&nbsp;
+
+						</span>
+						
+						<!-- Aggregation Event Parent ID is UPI_UI (Al 01 + Al 235) -->
+						<span  ng-show="AEPUPIUIDISP">
+							<span>(01)</span>&nbsp;
+							<input type="text" ng-required="AEPUPIUIDISP" ng-model="CommonForm.AEPUPIUI1" pattern="\d{14}" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="14"  oninvalid="this.setCustomValidity('UPUI must be 14 digits')" placeholder="UPUI must be 14 digits" class="form-control" style="width: 200px;">&nbsp;
+							<span>(235)</span>&nbsp;
+							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPUPIUI2" placeholder="UPUI Serial Number" class="form-control" style="width: 200px;">&nbsp;
+						</span>																																								
+						
+						
+						<!--Show the Fields for GID -->
+						<span ng-show="AEPGIDDisp">
+							<span>Manager</span>&nbsp;
+							<input type="text" ng-required="AEPGIDDisp"	ng-model="CommonForm.AEPGID1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="9"  oninvalid="this.setCustomValidity('GID Manager must be upto 9 digits')" 	placeholder="Upto 9 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							<span>Class</span>&nbsp;
+							<input type="text" ng-required="AEPGIDDisp" ng-model="CommonForm.AEPGID2"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="8"  oninvalid="this.setCustomValidity('GID Class must be upto 8 digit')" 	placeholder="Upto 8 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							<span>Serial</span>&nbsp;
+							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPGID3" 	 oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="11" oninvalid="this.setCustomValidity('GID Serial must be upto 11 digit')" 	placeholder="Upto 11 digits" 	class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Show the Fields for USDoD -->
+						<span ng-show="AEPDSDODDisp">
+							<span>CAGE/DoDAAC</span>&nbsp;
+							<input type="text" ng-required="AEPDSDODDisp" ng-model="CommonForm.AEPDSDOD1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="6"  oninvalid="this.setCustomValidity('USDoD CAGE/DoDAAC must be upto 6 digits')" placeholder="Upto 6 digits" 	class="form-control" style="width: 200px;">&nbsp;	
+							<span>Serial</span>&nbsp;
+							<input type="text" ng-required="AEPDSDODDisp" ng-model="CommonForm.AEPDSDOD2" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="11"  oninvalid="this.setCustomValidity('USDoD Serial must be upto 11 digits')" 	 placeholder="Upto 11 digits" 	class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Show the Fields for ADI -->
+						<span ng-show="AEPADIDisp">
+							<span>CAGE/DoDAAC</span>&nbsp;
+							<input type="text" ng-required="AEPADIDisp" ng-model="CommonForm.AEPADI1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="6"   oninvalid="this.setCustomValidity('ADI CAGE/DoDAAC must be upto 6 digits')" 	placeholder="Upto 6 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							<span>PNO</span>&nbsp;
+							<input type="text" ng-required="AEPADIDisp" ng-model="CommonForm.AEPADI2"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="20"  oninvalid="this.setCustomValidity('ADI PNO must be upto 20 digits')" placeholder="Upto 20 digits" class="form-control" style="width: 200px;">&nbsp;
+							<span>Serial</span>&nbsp;
+							<input type="text" ng-required="AEPADIDisp" ng-model="CommonForm.AEPADI3" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="20" oninvalid="this.setCustomValidity('ADI Serial must be upto 20 digits')" placeholder="Upto 20 digits" 	class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Show the Fields for BIC -->
+						<span ng-show="AEPBICDisp">
+							<span>BIC</span>&nbsp;
+							<input type="text" ng-required="AEPBICDisp" ng-model="CommonForm.AEPBIC" oninvalid="this.setCustomValidity('Not a valid pure identity URI scheme')" oninput="setCustomValidity('');" placeholder="Enter URI Scheme" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Show the Fields for IMOVN -->
+						<span ng-show="AEPIMOVNDisp">
+							<span>IMOVN</span>&nbsp;
+							<input type="text" ng-required="AEPIMOVNDisp" ng-model="CommonForm.AEPIMOVN" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="7" oninvalid="this.setCustomValidity('Not a valid pure identity URI scheme')" 	placeholder="7 Digits IMOV" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Show the fields for MANUAL URI -->
+						<span ng-show="AEPManualURIDisp">
+							<span>URI</span>&nbsp;
+							<input type="text" ng-required="AEPManualURIDisp" ng-model="CommonForm.AEPManualURI" oninvalid="this.setCustomValidity('Incomplete URI')" oninput="setCustomValidity('');" placeholder="Enter URI Manually" class="form-control" style="width: 200px;">&nbsp;
+						</span>
+						
+						<!-- Options for Random Number !-->
+						<span ng-show="CommonForm.sgtintype == 'range' ">
+							<input type="number" id="sgtnGTINFrom" 	ng-model="CommonForm.sgtnGTINFrom"  placeholder="From" title="Enter the Range From" class="form-control" ng-required="CommonForm.sgtintype == 'range'" style="width:120px;"></input>&nbsp;
+							<input type="number" id="sgtnGTINTo" 	ng-model="CommonForm.sgtnGTINTo" 	  placeholder="To" title="Enter the Range To" class="form-control" ng-required="CommonForm.sgtintype == 'range'" style="width:120px;"></input>&nbsp;
+						</span>
+						
+						<span ng-show="CommonForm.sgtintype == 'random' ">
+							<input type="number" id="randomCount" 	class="form-control" ng-model="CommonForm.randomCount" placeholder="Number of Objects" title="Enter the Number of Objects" ng-required="CommonForm.sgtintype == 'random'"></input>&nbsp;
+						</span>
+						
+						<span ng-show="CommonForm.sgtintype == 'none' && NoneValuesShow">
+							<input type="text" ng-required="CommonForm.sgtintype == 'none' && NoneValuesShow"  id="singleObjectId" ng-model="CommonForm.singleObjectId" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Missing Serial')" maxwidth="17" class="form-control" placeholder="Enter Object Id" title="Enter the Object Id"></input>&nbsp;
+						</span>	
+						
+						<!-- Aggregation Event Parent Id Company Prefix -->
+						<span ng-show="AEPCompanyDisp">
+							<span> Company Prefix: </span> &ensp;
+							<select ng-required="AEPCompanyDisp" ng-model="CommonForm.AEPCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs">
+								<option value="" selected> Choose </option>
+								<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
+							</select>
+						</span>
+					</div>
+					<div class="form-group">
+						<div class="form-inline" ng-show="CommonForm.AggregationEventParentID">
+							<span ng-cloak ng-show="AutoGenerate" style="margin-top:10px;">
+								<br/>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" ng-required="AutoGenerateRequired" ng-model="CommonForm.sgtintype" class="custom-control-input" value="range" id="sgtintype1" name="sgtintype">
+									<label class="custom-control-label" for="sgtintype1">Range</label>
+								</div>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" ng-required="AutoGenerateRequired" ng-model="CommonForm.sgtintype" class="custom-control-input" value="random" id="sgtintype2" name="sgtintype">
+									<label class="custom-control-label" for="sgtintype2">Random Number</label>
+								</div>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" ng-required="AutoGenerateRequired" ng-model="CommonForm.sgtintype" class="custom-control-input" value="none" id="sgtintype3" name="sgtintype">
+									<label class="custom-control-label" for="sgtintype3">None</label>
+								</div>
+							</span>		
+						</div>
+						
+						<div class="form-inline" ng-show="CommonForm.AggregationEventParentID && CommonForm.sgtintype == 'random'">									
+							<br/><br/>
+							<span>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" class="custom-control-input" value="numeric" ng-model="CommonForm.randomType" ng-required="CommonForm.sgtintype == 'random'" name="randomType" id="randomType1">
+									<label class="custom-control-label" for="randomType1">Numeric</label>
+								</div>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" class="custom-control-input" value="alphaNumeric" ng-model="CommonForm.randomType" ng-required="CommonForm.sgtintype == 'random'" name="randomType" id="randomType2">
+									<label class="custom-control-label" for="randomType2">AlphaNumeric</label>
+								</div>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" class="custom-control-input" value="alphaNumericwithSpecial" ng-model="CommonForm.randomType" ng-required="CommonForm.sgtintype == 'random'" name="randomType" id="randomType3">
+									<label class="custom-control-label" for="randomType3">AlphaNumeric with Special Characters</label>
+								</div>
+							</span>	
+						</div>
+						<div ng-show="CommonForm.AggregationEventParentID && CommonForm.sgtintype == 'random'">
+							<br/>
+							<div class="custom-control-inline">
+								<label class="custom-control-label" for="radomMinLength">Min. Length: </label>
+								<input id="radomMinLength"  ng-model="CommonForm.radomMinLength"  type="number" min="1" max="16" class="form-control" placeholder="Ex: 2"  title="Please Enter a Number between 1 and 16" style="width:80px;"/>
+							</div>
+							
+							<div class="custom-control-inline">
+								<label class="custom-control-label" for="randomMaxLength">Max. Length: </label>
+								<input id="randomMaxLength" ng-model="CommonForm.randomMaxLength" type="number" min="2" max="16" class="form-control" placeholder="Ex: 10" title="Please Enter a Number between 2 and 16" style="width:80px;"/>
+							</div>									
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+					<button type="submit" class="btn btn-success">Add</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
