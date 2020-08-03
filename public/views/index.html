@@ -26,6 +26,7 @@
 		<!-- Angularjs CDN Starts -->
 		<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.4.8/angular.min.js"></script>
 		<script src="https://cdn.rawgit.com/zenorocha/clipboard.js/master/dist/clipboard.min.js"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular-route.min.js"></script>
 		<!-- Angularjs CDN Ends -->
 
 		<!-- My Javascript Files Starts-->
@@ -53,10 +54,8 @@
 		</nav>
 		<br/>
 		<div class="container-fluid" ng-controller="AppController2">
-			
-			<div>
-				<button class="btn btn-info pull-right"><a href="Templates.html" style="color:#ffffff">Templates</a></button>
-			</div>
+			<!--<button class="btn btn-info pull-right"><a href="Templates.html" style="color:#ffffff">Templates</a></button>-->
+			<button ng-model="NewDataSet" ng-click="ReloadTable();" class="btn btn-info pull-right">Reset</button><br/>
 			
 			<div ng-include="'Modals.html'"></div>
 			
@@ -76,7 +75,7 @@
 									<td rowspan="{{ EventTypeRowSpan }}" style="background-color: #F2F3F4;"></td>
 									<td> Event Count </td>
 									<td>
-										<input type="number" min="0" class="form-control" ng-model="formdata.eventcount" placeholder="Number of events required" required ></input>
+										<input type="number" min="1" max="1000" class="form-control" ng-model="formdata.eventcount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');"  oninvalid="this.setCustomValidity('Number of Events must be between 1 and 1000')" placeholder="Number of events required" required ></input>
 									</td>
 								</tr>
 								<tr>
@@ -119,7 +118,22 @@
 									<td rowspan="4" style="background-color: #cc0000;text-align: center;"> Error </td>
 									<td style="background-color: #f2c2c2;"> Declaration Time </td>
 									<td>
+										<select ng-model="formdata.ErrorDeclarationTimeSelector" class="form-control">
+											<option class="dropdown-item" value="" selected> Choose </option>
+											<option class="dropdown-item" value="SpecificTime"> Specific Time </option>
+											<option class="dropdown-item" value="TimeRange"> Time Range </option>
+										</select>
+									</td>
+									
+									<td ng-show='formdata.ErrorDeclarationTimeSelector == "SpecificTime" '>
 										<input type="datetime-local" ng-model="formdata.ErrorDeclarationTime" placeholder="Declaration Time" class="form-control">
+									</td>
+									
+									<td ng-show="formdata.ErrorDeclarationTimeSelector == 'TimeRange' " class="form-inline">
+										<span> FROM </span>&ensp;
+										<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeFrom" title="Event Time Range FROM">&ensp;&ensp;
+										<span> TO </span>&ensp;
+										<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeTo" title="Event Time Range TO">
 									</td>
 								</tr>
 
@@ -232,7 +246,7 @@
 									<!--When No EVENT TYPE has been selected-->
 									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == '' "></td>
 									<td ng-show="formdata.eventtype1 == '' "> Please Select the Event type </td>
-
+										
 									<!-- When OBJECT EVENT has been selected -->
 									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'ObjectEvent' " class="column2"> EPC </td>
 
@@ -502,7 +516,7 @@
 										</select>
 									</td>
 									<td ng-show="formdata.businessStep == 'BusinessStepEnter'">
-										<input type="text" class="form-control" id="EnterBusinessStepText" ng-model="formdata.EnterBusinessStepText" placeholder="Enter Business Step"></input>
+										<input ng-model="formdata.EnterBusinessStepText" type="text" class="form-control" placeholder="Enter Business Step URI" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Please Enter a valid URI')" title="Please Enter a valid URI"></input>
 									</td>
 								</tr>
 								<tr>
@@ -521,7 +535,16 @@
 								<tr>
 									<td style="background-color: #faf4d5;" class="column2"> Biz Transactions </td>
 									<td>
-										<input type="text" class="form-control" id="biztransactions" ng-model="formdata.biztransactions"></input>
+										<button class="btn-btn-info" ng-click="AddBTT($event);">Add BTT</button><br/>
+										<span ng-repeat="BTTId in BusinessTransactionList" class="form-inline">
+											<br/><br/>
+											<select ng-change="AddBTTInformation(BTTId.ID);" ng-model="BTT.BTTType[BTTId.ID]" class="form-control">
+												<option class="dropdown-item" value=""> Choose </option>
+												<option class="dropdown-item" ng-repeat="BusinessTransaction in BusinessTransactions" value="{{BusinessTransaction.value}}"> {{ BusinessTransaction.text }} </option>
+											</select>&ensp;											
+											<input ng-blur="AddBTTInformation(BTTId.ID);" type="text" ng-model="BTT.BTTValue[BTTId.ID]" class="form-control" id="biztransactions"></input>&ensp;
+											<button ng-click="DeleteBTT(BTTId.ID)" type="button" title="Delete Business Transaction" ><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+										</span>
 									</td>
 								</tr>
 
@@ -543,25 +566,21 @@
 											<select id="SourceLNType" ng-model="formdata.SourceLNType" class="form-control" ng-init="formdata.SourceLNType='sgln'">
 												<option class="dropdown-item" value='sgln' selected> SGLN </option>
 												<option class="dropdown-item" value="pgln"> PGLN </option>
-											</select>
-										</span>&ensp;
+											</select>&ensp;
+										</span>
 										
-										<span ng-show="formdata.sourcesType == 'owning_party' || formdata.sourcesType == 'processing_party'">
-											<span ng-show='formdata.SourceLNType == "sgln"'> (414) &ensp;</span>
+										<span ng-show="formdata.sourcesType == 'owning_party' || formdata.sourcesType == 'processing_party' || formdata.sourcesType == 'location'">
+											<span ng-show='formdata.SourceLNType == "sgln" || formdata.sourcesType == "location"'> (414) &ensp;</span>
 											<span ng-show='formdata.SourceLNType == "pgln"'> (417) &ensp;</span>
 											<input type="text" ng-model="formdata.SourceGLN" pattern="\d{13}" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="13"  oninvalid="this.setCustomValidity('Source GLN must be 13 digits')"placeholder="Source GLN 13 digits" class="form-control"></input>&ensp;
-											<span ng-show='formdata.SourceLNType == "sgln"'> (254) &ensp;</span>
-											<span ng-show='formdata.SourceLNType == "sgln"'>
+											<span ng-show='formdata.SourceLNType == "sgln" || formdata.sourcesType == "location"'> (254) &ensp;</span>
+											<span ng-show='formdata.SourceLNType == "sgln" || formdata.sourcesType == "location"'>
 												<input type="text" ng-model="formdata.SourceGLNExtension" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="13"  oninvalid="this.setCustomValidity('Sources Extension is required and must be in digits')" placeholder="Source GLN Extension digits" class="form-control"></input>&ensp;
 											</span>
 											<select ng-model="formdata.SourcesCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs" >
 												<option value="" selected> Company Prefix </option>
 												<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
 											</select>&ensp;
-										</span>
-										
-										<span ng-show="formdata.sourcesType == 'location' ">
-											<input type="text" ng-model="formdata.SourceLocationURI" class="form-control"  placeholder="Enter a Source"></input>&ensp;
 										</span>
 
 										<span ng-show="formdata.sourcesType == 'other' ">
@@ -590,12 +609,12 @@
 												</select>&ensp;
 											</span>
 											
-											<span ng-show="formdata.destinationsType == 'owning_party' || formdata.destinationsType == 'processing_party'">
-												<span ng-show='formdata.DestinationLNType == "sgln"'> (414) &ensp;</span>
+											<span ng-show="formdata.destinationsType == 'owning_party' || formdata.destinationsType == 'processing_party' || formdata.destinationsType == 'location'">
+												<span ng-show='formdata.DestinationLNType == "sgln" || formdata.destinationsType == "location"'> (414) &ensp;</span>
 												<span ng-show='formdata.DestinationLNType == "pgln"'> (417) &ensp;</span>
 												<input type="text" ng-model="formdata.DestinationGLN" pattern="\d{13}" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="13"  oninvalid="this.setCustomValidity('Destination GLN must be 13 digits')"placeholder="Destination GLN 13 digits" class="form-control"></input>&ensp;
 												<span ng-show='formdata.DestinationLNType == "sgln"'> (254) &ensp;</span>
-												<span ng-show='formdata.DestinationLNType == "sgln"'>
+												<span ng-show='formdata.DestinationLNType == "sgln" || formdata.destinationsType == "location"'>
 													<input type="text" ng-model="formdata.DestinationGLNExtension" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="13"  oninvalid="this.setCustomValidity('Destination Extension is required and must be in digits')" placeholder="Destination GLN Extension digits" class="form-control"></input>&ensp;
 												</span>
 												
@@ -603,11 +622,7 @@
 													<option value="" selected> Company Prefix </option>
 													<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
 												</select>&ensp;
-											</span>
-											
-											<span ng-show="formdata.destinationsType == 'location'">
-												<input type="text" ng-model="formdata.DestinationLocationURI" class="form-control"  placeholder="Enter a Destination"></input>&ensp;
-											</span>										
+											</span>									
 											
 											<span ng-show="formdata.destinationsType == 'other'">
 												<input type="text" id="OtherDestinationURI1" ng-model="formdata.OtherDestinationURI1"  placeholder="Enter Destination Type" class="form-control"></input>&ensp;

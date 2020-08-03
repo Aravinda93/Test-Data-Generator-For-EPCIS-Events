@@ -15,12 +15,13 @@ exports.createXMLData	=	function(Query,callback){
 	var File 			= 	'XML';
 	var RecordTimeArray	=	[];
 	var EventTimeArray	=	[];
+	var ErrorTimeArray	=	[];
 	
 	var xml;	
 	var root 	= 	builder.create('epcis:EPCISDocument')
 					root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
 					root.att('xmlns:gs1', "https://gs1.de")
-					root.att('schemaVersion', "1.2")
+					root.att('schemaVersion', "2.0")
 					root.att('creationDate', now)
 					root.ele('EPCISBody')
 					root.ele('EventList')
@@ -104,7 +105,6 @@ exports.createXMLData	=	function(Query,callback){
 		if(input.eventtype2 == 'errordeclaration' || input.EventId != "")
 		{
 			//Add the error declaration if its populated
-			if(input.eventtype2 == 'errordeclaration')
 			if(input.EventId != "" && input.EventId != null && typeof input.EventId != undefined)
 			{
 				var baseExtension		=	ObjectEvent.ele('baseExtension')
@@ -117,28 +117,56 @@ exports.createXMLData	=	function(Query,callback){
 				var baseExtension		=	ObjectEvent.ele('baseExtension')
 				var errorDeclaration	=	baseExtension.ele('errorDeclaration')
 				
-				input.ErrorDeclarationTime	=	moment(input.ErrorDeclarationTime).format();
-			
-				//Add Error Declaration Time
-				errorDeclaration.ele('declarationTime',input.ErrorDeclarationTime)
-				
-				//Add Error Reason
-				if(input.ErrorReasonType == 'Other')
+				//Check what type of error declaration has been choosen
+				if(input.ErrorDeclarationTimeSelector != '')
 				{
-					errorDeclaration.ele('reason',input.ErrorReasonOther)
-				}
-				else
-				{
-					errorDeclaration.ele('reason','urn:epcglobal:cbv:er:'+input.ErrorReasonType)
+					if(input.ErrorDeclarationTimeSelector == 'SpecificTime')
+					{
+						//Add Error Declaration Time
+						input.ErrorDeclarationTime	=	moment(input.ErrorDeclarationTime).format();
+						errorDeclaration.ele('declarationTime',input.ErrorDeclarationTime)
+					}
+					else if(input.ErrorDeclarationTimeSelector == 'TimeRange')
+					{
+						var From			=	input.ErrorDeclarationTimeFrom;
+						var To				=	input.ErrorDeclarationTimeTo;
+						var EventCount		=	input.eventcount;
+						
+						//Call the random function to generate the random date
+						if(count == 0)
+						{
+							ErrorTimeArray	=	[];
+							xml_json_functions.RandomEventTimeGenerator(From,To,EventCount,File,function(RandomErrorTime){
+								ErrorTimeArray	= RandomErrorTime;
+							});	
+						}
+						
+						errorDeclaration.ele('declarationTime',ErrorTimeArray[count])	
+					}
 				}
 				
+				//Add Error Reason type if its populated
+				if(input.ErrorReasonType != "" && input.ErrorReasonType != null && typeof input.ErrorReasonType != undefined)
+				{
+					if(input.ErrorReasonType == 'Other')
+					{
+						errorDeclaration.ele('reason',input.ErrorReasonOther)
+					}
+					else
+					{
+						errorDeclaration.ele('reason','urn:epcglobal:cbv:er:'+input.ErrorReasonType)
+					}
+				}
 				
 				//Loop and add the Corrective Event Ids
-				var correctiveEventIDs	=	errorDeclaration.ele('correctiveEventIDs')
-				for(var e=0; e<Query.ErrorCorrection.length; e++)
+				if(Query.ErrorCorrection.length > 0)
 				{
-					correctiveEventIDs.ele('correctiveEventID',Query.ErrorCorrection[e].CorrectiveText)
-				}
+					var correctiveEventIDs	=	errorDeclaration.ele('correctiveEventIDs')
+					for(var e=0; e<Query.ErrorCorrection.length; e++)
+					{
+						correctiveEventIDs.ele('correctiveEventID',Query.ErrorCorrection[e].CorrectiveText)
+					}				
+				}			
 				
 				//Loop and add the Extension for Error
 				if(Query.ErrorExtension.length > 0)
@@ -525,36 +553,59 @@ exports.createXMLData	=	function(Query,callback){
 			}
 		}
 		
+		//Populate The Business Transacation List
+		if(Query.BTT.length > 0)
+		{
+			var bizTransactionList	=	extension.ele('bizTransactionList')
+			
+			for(var b=0; b<Query.BTT.length; b++)
+			{
+				var BTT 			=	Query.BTT[b]
+				var bizTransaction 	=	bizTransactionList.ele('bizTransaction',BTT.BTT.Value)
+				bizTransaction.att('type','urn:epcglobal:cbv:btt:'+BTT.BTT.Type)
+			}			
+		}
+		
 		//Check for the Source and Source type
 		if(input.sourcesType != '' && input.sourcesType != null && input.sourcesType != undefined)
 		{
 			var sourceList 	= extension.ele('sourceList')			
 			
-			if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party')
+			if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party' || input.sourcesType == 'location')
 			{
 				var SourceGLN			=	input.SourceGLN;
 				var SourceCompanyPrefix	=	input.SourcesCompanyPrefix;
+				var FormattedData;
 				
 				xml_json_functions.SourceDestinationFormatter(SourceGLN,SourceCompanyPrefix,function(data)
-				{					
+				{	
+					FormattedData	=	data;
+				});
+
+				if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party')
+				{
 					//If PGLN then directly append
 					if(input.SourceLNType == 'pgln')
 					{
-						var sources 	= 	sourceList.ele('source',data)
+						var sources 	= 	sourceList.ele('source',FormattedData)
 						sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)						
 					}
 					else if(input.SourceLNType == 'sgln')
 					{
-						data			=	data + '.' + input.SourceGLNExtension;
-						var sources 	= 	sourceList.ele('source',data)
+						FormattedData	=	FormattedData + '.' + input.SourceGLNExtension;
+						var sources 	= 	sourceList.ele('source',FormattedData)
 						sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)	
 					}
-				});				
-			}
-			else if(input.sourcesType == 'location')
-			{
-				var sources 		=	sourceList.ele('source', input.SourceLocationURI)
-				sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)
+				}
+				
+				if(input.sourcesType == 'location')
+				{
+					FormattedData	=	FormattedData + '.' + input.SourceGLNExtension;
+					var sources 	= 	sourceList.ele('source',FormattedData)
+					sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)	
+				}
+				
+				
 			}
 			else if(input.sourcesType == 'other')
 			{
@@ -568,31 +619,39 @@ exports.createXMLData	=	function(Query,callback){
 		{
 			var destinationList 	= 	extension.ele('destinationList')
 			
-			if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party')
+			if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party' || input.destinationsType == 'location')
 			{
 				var destinationGLN				=	input.DestinationGLN;
 				var destinationCompanyPrefix	=	input.DestinationCompanyPrefix;
+				var FormattedData;
 				
 				xml_json_functions.SourceDestinationFormatter(destinationGLN,destinationCompanyPrefix,function(data)
-				{					
+				{	
+					FormattedData	=	data;
+				});
+				
+				if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party')
+				{
 					//If PGLN then directly append
 					if(input.DestinationLNType == 'pgln')
 					{
-						var destinations 	=	destinationList.ele('destination', data)
+						var destinations 	=	destinationList.ele('destination', FormattedData)
 						destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)						
 					}
 					else if(input.DestinationLNType == 'sgln')
 					{
-						data				=	data + '.' + input.DestinationGLNExtension;
-						var destinations 	= 	destinationList.ele('destination',data)
+						FormattedData		=	FormattedData + '.' + input.DestinationGLNExtension;
+						var destinations 	= 	destinationList.ele('destination',FormattedData)
 						destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)	
 					}
-				});
-			}
-			else if(input.destinationsType == 'location')
-			{
-				var destinations 		=	destinationList.ele('destination', input.DestinationLocationURI)
-				destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
+				}
+				
+				if(input.destinationsType == 'location')
+				{
+					FormattedData		=	FormattedData + '.' + input.DestinationGLNExtension;
+					var destinations 	= 	destinationList.ele('destination',FormattedData)
+					destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
+				}
 			}
 			else if(input.destinationsType == 'other')
 			{
@@ -600,6 +659,7 @@ exports.createXMLData	=	function(Query,callback){
 				destinations.att('type',input.OtherDestinationURI1)
 			}
 		}
+		
 		
 		//Sensor Information
 		//console.log(Query);

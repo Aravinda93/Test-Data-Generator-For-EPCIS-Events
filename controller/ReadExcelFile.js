@@ -63,7 +63,7 @@ exports.ReadExcelFileContent	=	function(callback){
 
 
 exports.DrawDataXML		=	function(Query,callback){
-	var input						=	Query.input;
+	var input						=	Query.AllEventArray;
 	var currentTime 				= 	moment().format();
 	
 	var root 						= 	builder.create('epcis:EPCISDocument')
@@ -73,14 +73,15 @@ exports.DrawDataXML		=	function(Query,callback){
 											root.att('creationDate', currentTime)
 											root.ele('EPCISBody')
 											root.ele('EventList')
-											
+	console.log(input);
+	
 	var obj							=	new Object();
 	obj.AggregationEventParentID	=	'SGTIN (Al 01 + Al 21)';
 	obj.sgtintype					=	'random';
 	obj.radomMinLength				=	4;
 	obj.randomMaxLength				=	6;
 	obj.randomType					=	'numeric';
-	obj.randomCount					=	input[0].Fields['NumberofElement'];
+	obj.randomCount					=	input[0].EventCount;
 	obj.AEPSGTIN1					=	'1234567678901234';
 	obj.AEPCompanyPrefix			=	6;		
 	var reqData						=	JSON.stringify({input:obj,MultiValues:true});
@@ -93,9 +94,35 @@ exports.DrawDataXML		=	function(Query,callback){
 	CreateAggregationEventURI.CreateAggregationEventURI(reqData,function(data){
 		ObjectPCSArray	=	data;
 	});
+	console.log(ObjectPCSArray);
+	
+	for(var i=0; i<input.length;i++)
+	{
+		var ObjectEvent	= 	root.ele('objectEvent')
+		var epcList 	= 	ObjectEvent.ele('epcList')
+		var CountNumber	=	parseInt(input[i].EventCount, 10);
+		CountNumber		=	GlobalCount	+ parseInt(input[i].EventCount);
+		
+		for(var EventCount=GlobalCount; EventCount<CountNumber;EventCount++)
+		{
+			epcList.ele('epc',ObjectPCSArray[EventCount]).up
+			GlobalCount++;
+			
+			if(GlobalCount >= parseInt(input[i].EventCount, 10) && GlobalCount == ObjectPCSArray.length)
+			{				
+				GlobalCount	=	0;
+			}
+		}
+		
+		ObjectEvent.ele('bizStep','urn:epcglobal:cbv:bizstep:'+input[i].BusinessStep)	
+	}
+	
+	xml = root.end({ pretty: true});
+	console.log(xml);
+	callback(xml);
 	
 	//Loop through number of rectangular box and create events
-	for(var i=0; i<input.length;i++)
+	/*for(var i=0; i<input.length;i++)
 	{
 		var ObjectEvent	= 	root.ele('objectEvent')
 		var epcList 	= 	ObjectEvent.ele('epcList')
@@ -119,4 +146,7 @@ exports.DrawDataXML		=	function(Query,callback){
 	
 	xml = root.end({ pretty: true});
 	callback(xml);
+	*/
+	
+	
 }

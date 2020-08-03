@@ -1,4 +1,4 @@
-app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$copyToClipboard){
+app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$copyToClipboard,$window){
 	
 	//On enter of the Qunatity UOM show the suggestions
 	/*$scope.QuantityUOMAutoComplete	=	function(enteredData){
@@ -18,6 +18,13 @@ app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$
            $scope.CommonFormQuantity.ObjectEventQuantityQuantityUOM = UOMText;  
            $scope.hidethis = true;  
       } */
+	  
+	//Reset all the fields onclick of Reset Button
+	$scope.ReloadTable	=	function(){
+		//console.log("JRJRJ");
+		$window.location.reload();
+		//$route.reload();
+	}	
 	 
 	
 	//Copy to Clipboard the XML and JSON data

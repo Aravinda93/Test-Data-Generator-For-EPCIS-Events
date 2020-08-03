@@ -36,7 +36,7 @@ exports.createJSONData	=	function(Query,callback){
 												"@context"		: 	"https://id.gs1.org/epcis-context.jsonld",
 												"isA"			:	"EPCISDocument",
 												"creationDate"	:	now,
-												"schemaVersion"	: 	1.2,
+												"schemaVersion"	: 	2.0,
 												"format"		: 	"application/ld+json",
 												"epcisBody"		:	{}
 											}
@@ -128,24 +128,49 @@ exports.createJSONData	=	function(Query,callback){
 			{
 				ObjectEvent['baseExtension']			=	{};
 				var ErrorValue = ObjectEvent.baseExtension['errorDeclaration']	=	{};
-
-				//Change the format of the Declaration time
-				input.ErrorDeclarationTime 			= 	moment(input.ErrorDeclarationTime).format();
-
-				//Add Error Declaration Time
-				ObjectEvent.baseExtension.errorDeclaration['declarationTime']		=	input.ErrorDeclarationTime;
+				
+								//Check what type of error declaration has been choosen
+				if(input.ErrorDeclarationTimeSelector != '')
+				{
+					if(input.ErrorDeclarationTimeSelector == 'SpecificTime')
+					{
+						//Add Error Declaration Time
+						input.ErrorDeclarationTime	=	moment(input.ErrorDeclarationTime).format();
+						ObjectEvent.baseExtension.errorDeclaration['declarationTime']		=	input.ErrorDeclarationTime;
+					}
+					else if(input.ErrorDeclarationTimeSelector == 'TimeRange')
+					{
+						var From			=	input.ErrorDeclarationTimeFrom;
+						var To				=	input.ErrorDeclarationTimeTo;
+						var EventCount		=	input.eventcount;
+						
+						//Call the random function to generate the random date
+						if(count == 1)
+						{
+							ErrorTimeArray	=	[];
+							xml_json_functions.RandomEventTimeGenerator(From,To,EventCount,File,function(RandomErrorTime){
+								ErrorTimeArray	= RandomErrorTime;
+							});	
+						}
+						
+						ObjectEvent.baseExtension.errorDeclaration['declarationTime']		=	ErrorTimeArray[count-1];	
+					}
+				}
 
 				//Add Error Reason
-				if(input.ErrorReasonType == 'Other')
+				if(input.ErrorReasonType != "" && input.ErrorReasonType != null && typeof input.ErrorReasonType != undefined)
 				{
-					ObjectEvent.baseExtension.errorDeclaration['reason']	=	input.ErrorReasonOther;
-				}
-				else
-				{
-					ObjectEvent.baseExtension.errorDeclaration['reason']	=	'urn:epcglobal:cbv:er:'+input.ErrorReasonType;
-				}
+					if(input.ErrorReasonType == 'Other')
+					{
+						ObjectEvent.baseExtension.errorDeclaration['reason']	=	input.ErrorReasonOther;
+					}
+					else
+					{
+						ObjectEvent.baseExtension.errorDeclaration['reason']	=	'urn:epcglobal:cbv:er:'+input.ErrorReasonType;
+					}
+				}				
 				
-
+				//Loop and add the Corrective Event Ids
 				if(Query.ErrorCorrection.length > 0)
 				{
 						ObjectEvent.baseExtension.errorDeclaration['correctiveEventIDs']	=	{};
@@ -601,10 +626,24 @@ exports.createJSONData	=	function(Query,callback){
 							QuantityEPCs.push(obj);
 						}
 					}
-				}
-				
+				}				
 				ObjectEvent.extension['quantityList']	=	QuantityEPCs;				
 			}
+		}
+		
+		//Populate the Business Transaction List 
+		if(Query.BTT.length > 0)
+		{
+			var BTTArray	=	 [];
+			for(var b=0; b<Query.BTT.length; b++)
+			{
+				var BTT 					=	Query.BTT[b];
+				var BTTObj					=	new Object();
+				BTTObj['type']				=	'urn:epcglobal:cbv:btt:'+BTT.BTT.Type;
+				BTTObj['bizTransaction']	=	BTT.BTT.Value;				
+				BTTArray.push(BTTObj)
+			}
+			ObjectEvent['bizTransactionList']		=	BTTArray;			
 		}
 
 		//Check for the Source and Source type
@@ -612,31 +651,38 @@ exports.createJSONData	=	function(Query,callback){
 		{
 			ObjectEvent['sourceList']		=	{};
 			
-			if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party')
+			if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party' || input.sourcesType == 'location')
 			{
 				ObjectEvent.sourceList['type']	=	'urn:epcglobal:cbv:sdt:'+input.sourcesType;
 				var SourceGLN			=	input.SourceGLN;
 				var SourceCompanyPrefix	=	input.SourcesCompanyPrefix;
+				var FormattedSource;
 				
 				xml_json_functions.SourceDestinationFormatter(SourceGLN,SourceCompanyPrefix,function(data)
-				{				
+				{	
+					FormattedSource	=	data;
+				});
+				
+				if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party')
+				{
 					//If PGLN then directly append
 					if(input.SourceLNType == 'pgln')
 					{						
-						ObjectEvent.sourceList['source']	=	data;
+						ObjectEvent.sourceList['source']	=	FormattedSource;
 											
 					}
 					else if(input.SourceLNType == 'sgln')
 					{
-						data								=	data + '.' + input.SourceGLNExtension;
-						ObjectEvent.sourceList['source']	=	data;							
+						FormattedSource						=	FormattedSource + '.' + input.SourceGLNExtension;
+						ObjectEvent.sourceList['source']	=	FormattedSource;							
 					}
-				});
-			}
-			else if(input.sourcesType == 'location')
-			{
-				ObjectEvent.sourceList['type']		=	'urn:epcglobal:cbv:sdt:'+input.sourcesType;
-				ObjectEvent.sourceList['source']	=	input.SourceLocationURI;				
+				}
+
+				if(input.sourcesType == 'location')
+				{
+					FormattedSource						=	FormattedSource + '.' + input.SourceGLNExtension;
+					ObjectEvent.sourceList['source']	=	FormattedSource;
+				}
 			}
 			else if(input.sourcesType == 'other')
 			{
@@ -650,31 +696,40 @@ exports.createJSONData	=	function(Query,callback){
 		{
 			ObjectEvent['destinationList']		=	{};
 
-			if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party')
+			if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party' || input.destinationsType == 'location')
 			{
 				var destinationGLN				=	input.DestinationGLN;
 				var destinationCompanyPrefix	=	input.DestinationCompanyPrefix;
+				var FormattedDestination;
 				
 				xml_json_functions.SourceDestinationFormatter(destinationGLN,destinationCompanyPrefix,function(data)
+				{
+					FormattedDestination	=	data;
+				});
+				
+				if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party')
 				{
 					//If PGLN then directly append
 					if(input.DestinationLNType == 'pgln')
 					{
-						ObjectEvent.destinationList['destination']	=	data
-						ObjectEvent.destinationList['type']			=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;		
+						ObjectEvent.destinationList['type']			=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
+						ObjectEvent.destinationList['destination']	=	FormattedDestination								
 					}
 					else if(input.DestinationLNType == 'sgln')
 					{
-						data				=	data + '.' + input.DestinationGLNExtension;
-						ObjectEvent.destinationList['destination']	=	data
-						ObjectEvent.destinationList['type']	=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;	
-					}
-				});
-			}
-			else if(input.destinationsType == 'location')
-			{
-				ObjectEvent.destinationList['type']			=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
-				ObjectEvent.destinationList['destination']	=	input.DestinationLocationURI;
+						ObjectEvent.destinationList['type']			=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
+						FormattedDestination						=	FormattedDestination + '.' + input.DestinationGLNExtension;
+						ObjectEvent.destinationList['destination']	=	FormattedDestination							
+					}	
+				}
+				
+				if(input.destinationsType == 'location')
+				{
+					ObjectEvent.destinationList['type']				=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
+					FormattedDestination							=	FormattedDestination + '.' + input.DestinationGLNExtension;
+					ObjectEvent.destinationList['destination']		=	FormattedDestination						
+				}
+					
 			}
 			else if(input.destinationsType == 'other')
 			{
@@ -711,6 +766,8 @@ exports.createJSONData	=	function(Query,callback){
 				}
 			}
 		}
+		
+		
 		
 		//Check for sensor Elements and populate the data
 		if(Query.SensorForm.length > 0)

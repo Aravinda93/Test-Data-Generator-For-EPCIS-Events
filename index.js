@@ -25,8 +25,11 @@ app.set('views', reqPath + "\\public\\views");
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
 app.use(express.static(path.join(reqPath, '/public/views')));
-app.use(bodyParser.json()); 
-app.use(bodyParser.urlencoded({ extended: true }));
+//app.use(bodyParser.json()); 
+//app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(bodyParser.json({limit: '50mb'}));
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 
 //Display the Index page when user hits the URL in browser
 app.get('/', function(req,res){

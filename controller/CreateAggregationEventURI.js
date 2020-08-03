@@ -14,6 +14,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 	{
 		if(input.AggregationEventParentID == 'SGTIN (Al 01 + Al 21)')
 		{
+			console.log(input)
 			var companyPrefixInput	=	input.AEPSGTIN1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
 				companyPrefixInput 	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
@@ -52,46 +53,63 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 			
 		}
 		else if(input.AggregationEventParentID == 'SSCC (Al 00)')
-		{
-			var companyPrefixInput	=	input.AEPSSCC.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
-			
-			if(input.sgtintype == 'none')
-			{
-				var epcID	=	'urn:epc:id:sscc:'+companyPrefixInput;
-				EpcLists.push(epcID);
+		{	
+			var GCP			=	String(input.AEPSSCC);
+			var Extension	=	String(input.AEPSSCCExtDigit);		
+			var Count		=	input.AEPSSCCCount;	
+				GCP			=	GCP +'.'+Extension;
+				
+			if(input.SSCCType == 'userCustomized')
+			{				
+				var Start	=	parseInt(input.AEPSSCCStartValue,10);
+				
+				for(var i=0; i<=Count; i++)
+				{
+					var EPCValue	=	GCP + Start;
+					var EPCValueLen	=	EPCValue.length;
+					var StartLen	=	String(Start).length;
+					var AppendLen	=	18-EPCValueLen+StartLen;
+					var AppendVal	=	Start.toString().padStart(AppendLen,'0');
+					var FinalVal	=	GCP + AppendVal;
+					FinalVal		=	FinalVal.substring(0,18)
+					var epcID		=	'urn:epc:id:sscc:'+FinalVal;
+					EpcLists.push(epcID);
+					Start++;
+				}
 				callback(EpcLists);
 			}
-			else if(input.sgtintype == 'range')
+			else if(input.SSCCType == 'random')
 			{
-				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+				var GCPLen			=	GCP.length;
+				var RequiredLen		=	18-GCPLen;
+				console.log(RequiredLen);
+				var min_Length		=	RequiredLen;
+				var max_Length		=	RequiredLen;
+				var randomType		=	'numeric';
+				var randomCount		=	parseInt(Count, 10);
+				var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				
+				for(var r=0; r<data.length; r++)
 				{
-					var appendValue	=	companyPrefixInput+"."+id;
-						appendValue	=	appendValue.substring(0,18)
-					var epcID		=	'urn:epc:id:sscc:'+appendValue;
+					var epcID 	=	'urn:epc:id:sscc:'+GCP+companyPrefixNormal(data[r],input.SSCCCompanyPrefix);
 					EpcLists.push(epcID);
 				}
 				callback(EpcLists);
-			}
-			else if(input.sgtintype == 'random')
-			{
-				var min_Length	=	parseInt(input.radomMinLength, 10);
-				var max_Length	=	parseInt(input.randomMaxLength, 10);
-				var randomType	=	input.randomType;
-				var randomCount	=	parseInt(input.randomCount, 10);
-				//Call the function to generate the Random numbers then create XML elements
-				var data 				= RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				/*
+				var min_Length	=	17;
+				var max_Length	=	17;
+				var randomType	=	'numeric';
+				var randomCount	=	parseInt(input.AEPSSCCRandomCount, 10);
+				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 				
-				for(var arrCount=0; arrCount<data.length; arrCount++)
-				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-						appendValue	=	appendValue.substring(0,18)
-					var epcID		=	'urn:epc:id:sscc:'+appendValue;
-					EpcLists.push(epcID);	
+				for(var r=0; r<data.length; r++)
+				{
+					var epcID 	=	'urn:epc:id:sscc:'+companyPrefixNormal(data[r],input.SSCCCompanyPrefix);
+					EpcLists.push(epcID);
 				}
-				callback(EpcLists);
+				callback(EpcLists);*/
 			}
+			
 		}
 		else if(input.AggregationEventParentID == 'GRAI (Al 8003)')
 		{

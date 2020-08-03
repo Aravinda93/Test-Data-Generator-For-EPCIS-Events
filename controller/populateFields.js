@@ -1,6 +1,6 @@
 exports.BusinessStep = function(callback){
 	var businessStep		=	[
-									{value:'BusinessStepEnter',			text:'Manually'},
+									{value:'BusinessStepEnter',			text:'User-Specific'},
 									{value:'accepting', 				text:'Accepting'},
 									{value:'arriving', 					text:'Arriving'},
 									{value:'collecting', 				text:'Collecting'},
@@ -25,6 +25,18 @@ exports.BusinessStep = function(callback){
 									{value:'replacing', 				text:'Replacing'},
 									{value:'retail_selling', 			text:'Retail Selling'},
 									{value:'shipping', 					text:'Shipping'}
+								];
+	
+	var BusinessTransactions=	[
+									{value:'bol',						text: 'Bill of Lading'},
+									{value:'boldesadv',					text: 'Despatch Advice'},
+									{value:'inv',						text: 'Invoice'},
+									{value:'pedigree',					text: 'Pedigree'},
+									{value:'po',						text: 'Purchase Order'},
+									{value:'poc',						text: 'Purchase Order Confirmation'},
+									{value:'prodorder',					text: 'Production Order'},
+									{value:'recadv',					text: 'Receiving Advice'},
+									{value:'rma',						text: 'Return Merchandise Authorisation'}									
 								];
 		
 	var dispositions 		= 	[
@@ -292,7 +304,8 @@ exports.BusinessStep = function(callback){
 						'businessStep'			: 	businessStep, 
 						'eventType'				:	eventType, 
 						'dispositions'			:	dispositions, 
-						'companyPrefixs'		:	companyPrefixs, 
+						'companyPrefixs'		:	companyPrefixs,
+						'BusinessTransactions'	:	BusinessTransactions,
 						'ObjectEventEpcsTypes'	:	ObjectEventEpcsTypes,
 						'ObjectEventQuantities'	:	ObjectEventQuantities,
 						'UOMs'					:	UOMs,

@@ -276,12 +276,12 @@
 						
 						<!-- Options for Random Number !-->
 						<span ng-show="CommonFormQuantity.Quantitysgtintype == 'range' ">
-							<input type="number" id="QuantitysgtnGTINFrom" 	ng-model="CommonFormQuantity.QuantitysgtnGTINFrom"  placeholder="From" title="Enter the Range From" class="form-control" ng-required="CommonFormQuantity.Quantitysgtintype == 'range'" style="width:120px;"></input>&nbsp;
-							<input type="number" id="QuantitysgtnGTINTo" 	ng-model="CommonFormQuantity.QuantitysgtnGTINTo" 	placeholder="To" title="Enter the Range To" class="form-control" ng-required="CommonFormQuantity.Quantitysgtintype == 'range'" style="width:120px;"></input>&nbsp;
+							<input type="number" ng-model="CommonFormQuantity.QuantitysgtnGTINFrom" min="1"  placeholder="From" title="Enter the Range From" class="form-control" ng-required="CommonFormQuantity.Quantitysgtintype == 'range'" style="width:120px;"></input>&nbsp;
+							<input type="number" ng-model="CommonFormQuantity.QuantitysgtnGTINTo" 	placeholder="To" title="Enter the Range To" class="form-control" ng-required="CommonFormQuantity.Quantitysgtintype == 'range'" style="width:120px;"></input>&nbsp;
 						</span>
 						
 						<span ng-show="CommonFormQuantity.Quantitysgtintype == 'random' ">
-							<input type="number" id="QuantityrandomCount" 	class="form-control" ng-model="CommonFormQuantity.QuantityrandomCount" placeholder="Number of Objects" title="Enter the Number of Objects" ng-required="CommonFormQuantity.Quantitysgtintype == 'random'"></input>&nbsp;
+							<input type="number" class="form-control" ng-model="CommonFormQuantity.QuantityrandomCount" min="1" placeholder="Number of Objects" title="Enter the Number of Objects" ng-required="CommonFormQuantity.Quantitysgtintype == 'random'"></input>&nbsp;
 						</span>
 						
 						<span ng-show="CommonFormQuantity.Quantitysgtintype == 'none' && NoneValuesShow">
@@ -406,8 +406,36 @@
 						
 						<!-- Aggregation Event Parent ID is SSCC (Al 00) -->
 						<span ng-show="AEPSSCCDisp">
-							<span>(00)</span>&nbsp;
-							<input type="text" ng-required="AEPSSCCDisp" ng-model="CommonForm.AEPSSCC" maxlength="18" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC must be 18 digit')"  title="Enter company Prefix Upto 18 digits" placeholder="Company Prefix Upto 18 digits" class="form-control" style="width: 200px;">&nbsp;
+							<span>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" ng-required="AEPSSCCDisp" ng-model="CommonForm.SSCCType" class="custom-control-input" value="random" id="SSCCType1" name="SSCCType">
+									<label class="custom-control-label" for="SSCCType1">Random</label>
+								</div>
+								<div class="custom-control custom-radio custom-control-inline">
+									<input type="radio" ng-required="AEPSSCCDisp" ng-model="CommonForm.SSCCType" class="custom-control-input" value="userCustomized" id="SSCCType2" name="SSCCType">
+									<label class="custom-control-label" for="SSCCType2">User Customized</label>
+								</div>
+							</span>							
+							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">
+								<br/><br/>
+								<input type="text" ng-model="CommonForm.AEPSSCC" 			ng-required="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random'" maxlength="12" pattern="^\d{6,12}$"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC company prefix must be between 6 and 12 digit')"  title="Enter company Prefix Upto between 6 and 12 digits" placeholder="Company Prefix b/w 6 and 12 digits" class="form-control" style="width: 300px;">&nbsp;
+								<input type="text" ng-model="CommonForm.AEPSSCCExtDigit" 	ng-required="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random'" maxlength="1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Extension Digit must be 1 digit')" title="SSCC Extension Digit must be 1 digit" placeholder="SSCC Extension digit" class="form-control" style="width: 200px;">&nbsp;
+								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
+									<input type="text" ng-model="CommonForm.AEPSSCCStartValue"  ng-required="CommonForm.SSCCType == 'userCustomized'" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Start Value required')"  title="SSCC Start value" placeholder="SSCC Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+								</span>
+								<input type="text" ng-model="CommonForm.AEPSSCCCount" 		ng-required="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random'" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Count required')" title="SSCC Count" placeholder="SSCC Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>
+							<!--
+							<span ng-show="CommonForm.SSCCType == 'random' ">
+								<br/><br/>
+								<input type="text" ng-model="CommonForm.AEPSSCCRandomCount"	ng-required="CommonForm.SSCCType == 'random'" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Count required')" title="SSCC Count" placeholder="SSCC Count" class="form-control" style="width: 200px;">&nbsp;
+								<span> Company Prefix: </span> &ensp;
+								<select ng-required="CommonForm.SSCCType == 'random'" ng-model="CommonForm.SSCCCompanyPrefix" class="form-control">
+									<option class="dropdown-item" value="" selected> Choose </option>
+									<option class="dropdown-item" ng-repeat="companyPrefix in companyPrefixs" value="{{companyPrefix.value}}">{{companyPrefix.text}}</option>
+								</select>
+							</span>
+							-->
 						</span>
 						
 						<!-- Aggregation Event Parent ID is GRAI (Al 8003) -->
@@ -538,11 +566,11 @@
 						</span>
 						
 						<span ng-show="CommonForm.sgtintype == 'random' ">
-							<input type="number" id="randomCount" 	class="form-control" ng-model="CommonForm.randomCount" placeholder="Number of Objects" title="Enter the Number of Objects" ng-required="CommonForm.sgtintype == 'random'"></input>&nbsp;
+							<input type="number" id="randomCount" min="1"	class="form-control" ng-model="CommonForm.randomCount" placeholder="Number of Objects" title="Enter the Number of Objects" ng-required="CommonForm.sgtintype == 'random'" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Number of Objects required and should be greater than 0')"></input>&nbsp;
 						</span>
 						
 						<span ng-show="CommonForm.sgtintype == 'none' && NoneValuesShow">
-							<input type="text" ng-required="CommonForm.sgtintype == 'none' && NoneValuesShow"  id="singleObjectId" ng-model="CommonForm.singleObjectId" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Missing Serial')" maxwidth="17" class="form-control" placeholder="Enter Object Id" title="Enter the Object Id"></input>&nbsp;
+							<input type="text" ng-required="CommonForm.sgtintype == 'none' && NoneValuesShow" id="singleObjectId" ng-model="CommonForm.singleObjectId" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Missing Serial')" maxwidth="17" class="form-control" placeholder="Enter Object Id" title="Enter the Object Id"></input>&nbsp;
 						</span>	
 						
 						<!-- Aggregation Event Parent Id Company Prefix -->

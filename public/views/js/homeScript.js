@@ -12,6 +12,9 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	$scope.OEQuantities							=	1;
 	$scope.CommonExtensionsList					=	[];
 	$scope.CommonExtensionsID					=	0;
+	$scope.BusinessTransactionList				=	[];
+	$scope.BusinessTransactionCount				=	0;
+	$scope.BTT									=	{};
 		
 	//Object Event	
 	$scope.ObjectEventEpcsURI					=	[];
@@ -921,6 +924,50 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	/* ERROR DECLARATION FIELD SETTING ENDS */
 	
+	/* BUSINESS TRANSACTION TYPE STARTS */
+	
+	//Increment the count for the array
+	$scope.AddBTT	=	function(e){
+		e.preventDefault();
+		var BTTObj		=	new Object();
+		BTTObj['ID']	=	$scope.BusinessTransactionCount;
+		BTTObj['BTT']	=	{};
+		$scope.BusinessTransactionList.push(BTTObj);
+		$scope.BusinessTransactionCount++;
+		console.log($scope.BusinessTransactionList);
+	}
+	
+	//Add the information into the BTT Array
+	$scope.AddBTTInformation	=	function(BTTId){
+		for(var b=0; b<$scope.BusinessTransactionList.length; b++)
+		{
+			if($scope.BusinessTransactionList[b].ID == BTTId)
+			{
+				$scope.BusinessTransactionList[b].BTT['Type']	=	$scope.BTT.BTTType[BTTId];
+				$scope.BusinessTransactionList[b].BTT['Value']	=	$scope.BTT.BTTValue[BTTId];
+				break;
+			}
+		}
+		console.log($scope.BusinessTransactionList);
+	}
+	
+	//Remove the element from the BTT array
+	$scope.DeleteBTT	=	function(Delete_BTT_ID){
+		console.log(Delete_BTT_ID);
+		for(var b=0; b<$scope.BusinessTransactionList.length; b++)
+		{
+			if($scope.BusinessTransactionList[b].ID == Delete_BTT_ID)
+			{
+				$scope.BusinessTransactionList.splice(b,1);
+				break;
+			}
+		}
+		console.log($scope.BusinessTransactionList);
+	}
+	
+	
+	/* BUSINESS TRANSACTION TYPE ENDS */
+	
 	
 	/* SENSOR INFORMATION STARTS */
 	
@@ -942,8 +989,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Close the modal for Sensor data as information is already saved
 	$scope.SensorInformationSubmit	=	function(){
-		angular.element('#SensorInformation').modal('hide');
-		
+		angular.element('#SensorInformation').modal('hide');		
 		var TemporaryArray				=	[];
 		var MetaDataItem				=	{};
 		MetaDataItem["CheckBox"]		=	$scope.SensorForm.MetaDataCheck
@@ -1007,6 +1053,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			$scope.businessSteps 		=	response.businessStep;
 			$scope.eventType			=	response.eventType;	
 			$scope.dispositions			=	response.dispositions;
+			$scope.BusinessTransactions	=	response.BusinessTransactions;
 			$scope.companyPrefixs		=	response.companyPrefixs;
 			$scope.ObjectEventEpcsTypes	=	response.ObjectEventEpcsTypes;
 			$scope.ObjectEventQuantities=	response.ObjectEventQuantities;
@@ -1025,7 +1072,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		//params: 	{input:$scope.formdata,Extension:$scope.ExtensionList}	
 		//headers: 	{'Content-Type': 'application/x-www-form-urlencoded'},
 		//Based on the Selected Event Send the respective values
-		console.log("HHHHRHR");
+		
 		if($scope.formdata.eventtype1 == 'ObjectEvent')
 		{
 			var data 	=	JSON.stringify({	
@@ -1037,6 +1084,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
 												ErrorExtension	:	$scope.ErrorExtensionList,
 												SensorForm		:	$scope.TotalSensorElementsArray,
+												BTT				:	$scope.BusinessTransactionList,
 												File			:	'ObjectEvent'
 											});
 		}
@@ -1050,6 +1098,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												ChildQuantities :	$scope.AggregationEventChildQuantitiesURI,
 												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
 												ErrorExtension	:	$scope.ErrorExtensionList,
+												BTT				:	$scope.BusinessTransactionList,
 												File			:	'AggregationEvent'
 											});
 		}
@@ -1063,6 +1112,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												Quantities		:	$scope.TransactionEventQuantitiesURI,
 												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
 												ErrorExtension	:	$scope.ErrorExtensionList,
+												BTT				:	$scope.BusinessTransactionList,
 												File			:	'TransactionEvent'
 											});
 		}
@@ -1078,6 +1128,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												Extension		:	$scope.CommonExtensionsList,
 												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
 												ErrorExtension	:	$scope.ErrorExtensionList,
+												BTT				:	$scope.BusinessTransactionList,
 												File			:	'TransformationEvent'
 											});
 		}
@@ -1091,6 +1142,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												ChildQuantities :	$scope.AssociationEventChildQuantitiesURI,
 												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
 												ErrorExtension	:	$scope.ErrorExtensionList,
+												BTT				:	$scope.BusinessTransactionList,
 												File			:	'AssociationEvent'
 											});
 		}
@@ -1118,13 +1170,15 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	$scope.showInputData = function(){
 		$location.hash('mainBody');
 		$anchorScroll();
-		$scope.outputElements 	= 	false;
-		$scope.inputElements 	= 	true;
-		$scope.isDisabled 		= 	false;
+		$scope.outputElements 		= 	false;
+		$scope.inputElements 		= 	true;
+		$scope.isDisabled 			= 	false;
 	}
-
+	
 	//Aggregation Event PARENT ID Change
 	$scope.AggregationEventParentChange		=	function(){
+		
+		$scope.NoneValuesShow = $scope.AEPCompanyDisp = $scope.AEPSGTINDisp	 = $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		
 		//Check if Multiple values are required
 		if($scope.ObjectEventAddEPCsFlag || $scope.AEChildEPCSFlage || $scope.TransactionEventChildEPCS || $scope.TransformationEventInputEPCsFlag || $scope.TransformationEventOutputEPCsFlag || $scope.AssociationEventChildEPCSFlag)
@@ -1142,140 +1196,101 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			$scope.AEPSGTINDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
 			$scope.NoneValuesShow	=	true;
-			
-			$scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'SSCC (Al 00)')
 		{
 			$scope.AEPSSCCDisp		= 	true;
-			$scope.AEPCompanyDisp	=	true;
+			$scope.AEPCompanyDisp	=	false;
 			$scope.NoneValuesShow	=	false;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GRAI (Al 8003)')
 		{
 			$scope.AEPGRAIDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
 			$scope.NoneValuesShow	=	false;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GIAI (Al 8004)')
 		{
 			$scope.AEPGIAIDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GSRN (Al 8018)')
 		{
 			$scope.AEPGSRNDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GSRNP (Al 8017)')
 		{
 			$scope.AEPGSRNPDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GDTI (Al 253)')
 		{
 			$scope.AEPGDTIDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GCN (Al 255)')
 		{
 			$scope.AEPGSNDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
-		
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'CPI (Al 8010 8011)')
 		{
 			$scope.AEPCPIDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
 			$scope.NoneValuesShow	=	true;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GINC (Al 401)')
 		{
 			$scope.AECGINCDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GSIN (Al 402)')
 		{
 			$scope.AEPGSINDISP		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
-		
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'ITIP (Al 8006 + Al 21)')
 		{
 			$scope.AEPITIPDISP		=	true;
 			$scope.AEPCompanyDisp	=	true;
 			$scope.NoneValuesShow	=	true;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
-		
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'UPI_UI (Al 01 + Al 235)')
 		{
 			$scope.AEPUPIUIDISP		=	true;
 			$scope.AEPCompanyDisp	=	true;
 			$scope.NoneValuesShow	=	true;
-			
-			$scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GID')
 		{
 			$scope.AEPGIDDisp		=	true;
 			$scope.NoneValuesShow	=	true;
-			$scope.AEPCompanyDisp = $scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'USDoD')
 		{
 			$scope.AEPDSDODDisp		=	true;
-			
-			$scope.AEPCompanyDisp = $scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'ADI')
 		{
 			$scope.AEPADIDisp	=	true;
-			
-			$scope.AEPCompanyDisp = $scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'BIC')
 		{
 			$scope.AEPBICDisp	=	true;
-			
-			$scope.AEPCompanyDisp = $scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'IMOVN')
 		{
 			$scope.AEPIMOVNDisp	=	true; 
-			
-			$scope.AEPCompanyDisp = $scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPManualURIDisp =  false;
 			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'Enter a URI Manually')
 		{
 			$scope.AEPManualURIDisp	=	true; 
-			
-			$scope.AEPCompanyDisp = $scope.AEPSGTINDisp	= $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = false;
 			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
 		}
 	}
