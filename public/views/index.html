@@ -4,18 +4,33 @@
 		<meta charset="utf-8">
 		<title>EPCIS Events Test Data Generator</title>
 		<link rel="icon" href="images/logo.jpg">
-
+		
 		<!-- jQuery CDN starts -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+		<!-- jQuery CDN Ends -->
+		
+		<!-- Bootstrap Themes Start -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+		<!-- Bootstrap Themes Ends -->
+		
+		
+		<!-- jQuery CDN Starts
 		<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-
+		-->
 		<!-- jQuery CDN Ends -->
 
-		<!-- Bootstrap Themes Start -->
+		
+		<!--
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-		<!-- Bootstrap Themes End -->
-
+		-->
+		<!-- Bootstrap Themes End -->	
+		
+		
 		<!-- Font Awesome CDN Starts-->
 		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
@@ -43,8 +58,16 @@
 		<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.2/build/css/themes/default.min.css"/>
 		<!-- Alertify CDN Ends -->
 
-		<!-- Format the Text Area-->
-
+		<!-- Multiselect Dropdown -->
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css">
+		
+		<style>
+			body {
+					-moz-transform: scale(0.8, 0.8); /* Moz-browsers */
+					zoom: 0.8; /* Other non-webkit browsers */
+					zoom: 80%; /* Webkit browsers */
+				}
+		</style>
 	</head>
 
 	<body  ng-controller="AppController" ng-init="init()">
@@ -54,8 +77,8 @@
 		</nav>
 		<br/>
 		<div class="container-fluid" ng-controller="AppController2">
-			<!--<button class="btn btn-info pull-right"><a href="Templates.html" style="color:#ffffff">Templates</a></button>-->
-			<button ng-model="NewDataSet" ng-click="ReloadTable();" class="btn btn-info pull-right">Reset</button><br/>
+			<button class="btn btn-info pull-right"><a href="Templates.html" style="color:#ffffff">Templates</a></button>
+			<button ng-model="NewDataSet" ng-show="ResetButtonDisplay" ng-click="ReloadTable();" class="btn btn-info pull-left">Reset</button><br/>
 			
 			<div ng-include="'Modals.html'"></div>
 			
@@ -578,7 +601,7 @@
 												<input type="text" ng-model="formdata.SourceGLNExtension" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="13"  oninvalid="this.setCustomValidity('Sources Extension is required and must be in digits')" placeholder="Source GLN Extension digits" class="form-control"></input>&ensp;
 											</span>
 											<select ng-model="formdata.SourcesCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs" >
-												<option value="" selected> Company Prefix </option>
+												<option value="" selected> GS1 Company Prefix Length</option>
 												<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
 											</select>&ensp;
 										</span>
@@ -619,7 +642,7 @@
 												</span>
 												
 												<select ng-model="formdata.DestinationCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs">
-													<option value="" selected> Company Prefix </option>
+													<option value="" selected> GS1 Company Prefix Length</option>
 													<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
 												</select>&ensp;
 											</span>									

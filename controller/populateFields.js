@@ -298,21 +298,57 @@ exports.BusinessStep = function(callback){
 									{value:"HN",					text:"Millimetres of mercury",				UOMtype:'Pressure'},
 									{value:"PS",					text:"Pound force per square inch",			UOMtype:'Pressure'}
 								];
+	
+	var SensorMetaDatas		=	[
+									{value:'Time',						text:'Time'},
+									{value:'Start Time',				text:'Start Time'},
+									{value:'End Time',					text:'End Time'},
+									{value:'Device ID',					text:'Device ID'},
+									{value:'Device Metadata',			text:'Device Metadata'},
+									{value:'Raw Data',					text:'Raw Data'},
+									{value:'Data Processing Method',	text:'Data Processing Method'},
+									{value:'Business Rules',			text:'Business Rules'}
+								];	
+									
+	var SensorReportDatas	=	[	
+									{value:'Device ID',					text:'Device ID'},
+									{value:'Device MetaData',			text:'Device MetaData'},
+									{value:'Raw Data',					text:'Raw Data'},
+									{value:'Data Processing Method',	text:'Data Processing Method'},
+									{value:'Time',						text:'Time'},
+									{value:'Microorganism',				text:'Microorganism'},
+									{value:'Chemical Substance',		text:'Chemical Substance'},
+									{value:'Value',						text:'Value'},
+									{value:'Component',					text:'Component'},
+									{value:'String Value',				text:'String Value'},
+									{value:'Boolean Value',				text:'Boolean Value'},
+									{value:'Hex Binary Value',			text:'Hex Binary Value'},
+									{value:'URI Value',					text:'URI Value'},
+									{value:'Min Value',					text:'Min Value'},
+									{value:'Max Value',					text:'Max Value'},
+									{value:'Mean Value',				text:'Mean Value'},
+									{value:'Standard Deviation',		text:'Standard Deviation'},
+									{value:'Perc Rank',					text:'Perc Rank'},
+									{value:'Perc Value',				text:'Perc Value'},
+									{value:'UOM',						text:'UOM'},
+								];	
 							
 
-	var returnData = {
-						'businessStep'			: 	businessStep, 
-						'eventType'				:	eventType, 
-						'dispositions'			:	dispositions, 
-						'companyPrefixs'		:	companyPrefixs,
-						'BusinessTransactions'	:	BusinessTransactions,
-						'ObjectEventEpcsTypes'	:	ObjectEventEpcsTypes,
-						'ObjectEventQuantities'	:	ObjectEventQuantities,
-						'UOMs'					:	UOMs,
-						'SensorElements'		:	SensorElements,
-						'SensorUOMs'			:	SensorUOMs,
-						'SensorValueTypes'		:	SensorValueTypes
-					};
-	
+		var returnData 		= 	{
+									'businessStep'			: 	businessStep, 
+									'eventType'				:	eventType, 
+									'dispositions'			:	dispositions, 
+									'companyPrefixs'		:	companyPrefixs,
+									'BusinessTransactions'	:	BusinessTransactions,
+									'ObjectEventEpcsTypes'	:	ObjectEventEpcsTypes,
+									'ObjectEventQuantities'	:	ObjectEventQuantities,
+									'UOMs'					:	UOMs,
+									'SensorElements'		:	SensorElements,
+									'SensorUOMs'			:	SensorUOMs,
+									'SensorValueTypes'		:	SensorValueTypes,
+									'SensorMetaDatas'		:	SensorMetaDatas,
+									'SensorReportDatas'		:	SensorReportDatas,
+								};
+		
 	callback(returnData);
 }

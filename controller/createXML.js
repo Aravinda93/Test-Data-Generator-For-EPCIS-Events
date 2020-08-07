@@ -196,11 +196,11 @@ exports.createXMLData	=	function(Query,callback){
 		
 		//IF the event type is Object event
 		if(input.eventtype1 == 'ObjectEvent')
-		{
-			var epcList = ObjectEvent.ele('epcList')
-			
+		{			
 			if(Query.EPCs.length > 0)
 			{
+				var epcList = ObjectEvent.ele('epcList')
+				
 				for(var o=0; o<Query.EPCs.length; o++)
 				{
 					var OEEPCS	=	Query.EPCs[o];
@@ -658,14 +658,11 @@ exports.createXMLData	=	function(Query,callback){
 				var destinations 		=	destinationList.ele('destination', input.OtherDestinationURI2)
 				destinations.att('type',input.OtherDestinationURI1)
 			}
-		}
-		
+		}		
 		
 		//Sensor Information
-		//console.log(Query);
 		if(Query.SensorForm.length > 0)
 		{
-			
 			var SensorForm			=	Query.SensorForm;
 			var sensorElementList	=	extension.ele('sensorElementList')
 			
@@ -677,43 +674,60 @@ exports.createXMLData	=	function(Query,callback){
 				//Loop through Each sensor Element
 				for(var t=0; t<SensorForm[sf].length; t++)
 				{
-					//Add the Sensor Metadata information
-					if(SensorForm[sf][t].CheckBox)
-					{
-						var sensorMetaData		=	sensorElement.ele('sensorMetaData')
-						sensorMetaData.att('time',moment(SensorForm[sf][t].Time).format())
-						sensorMetaData.att('startTime',moment(SensorForm[sf][t].StartTime).format())
-						sensorMetaData.att('endTime',moment(SensorForm[sf][t].EndTime).format())
-					}
+					var sensorMetaData		=	sensorElement.ele('sensorMetaData')
+					//sensorMetaData.att('time',moment(SensorForm[sf][t].Time).format())
 					
-					var SensorElements		=	SensorForm[sf][t].SENSORELEMENTS;
+					//Add the Sensor Metadata information if its populated
+					SensorMetaDataChecker(SensorForm[sf][t].Time,'time',sensorMetaData)
+					SensorMetaDataChecker(SensorForm[sf][t].StartTime,'startTime',sensorMetaData)
+					SensorMetaDataChecker(SensorForm[sf][t].EndTime,'endTime',sensorMetaData)
+					SensorMetaDataChecker(SensorForm[sf][t].DeviceID,'deviceID',sensorMetaData)
+					SensorMetaDataChecker(SensorForm[sf][t].DeviceMetadata,'deviceMetaData',sensorMetaData)
+					SensorMetaDataChecker(SensorForm[sf][t].RawData,'rawData',sensorMetaData)
+					SensorMetaDataChecker(SensorForm[sf][t].DataProcessingMethod,'dataProcessingMethod',sensorMetaData)
+					SensorMetaDataChecker(SensorForm[sf][t].BusinessRules,'bizRules',sensorMetaData)					
+					
+					var SensorElements		=	SensorForm[sf][t].SensorElements;
+					console.log(SensorForm[sf][t]);
 					//Loop through Each Sensor Report Data
-					for(var e=0;e<SensorElements.length;e++)
-					{
-						var sensorReport	=	sensorElement.ele('sensorReport')
-						var SensorType		=	SensorElements[e].SensorFields.Type;
-						var SensorValue		=	SensorElements[e].SensorFields.Value;
-						var SensorUOM		=	SensorElements[e].SensorFields.UOM
-						
-						if(SensorType != '' && SensorType != null && SensorType != undefined)
-						{							
-							sensorReport.att('type','gs1:'+SensorType)
-						}
-						
-						if(SensorValue != '' && SensorValue != null && SensorValue != undefined)
+					if(SensorElements != undefined)
+					{						
+						for(var e=0;e<SensorElements.length;e++)
 						{
-							sensorReport.att('value',SensorValue)
-						}
+							//sensorReport.att('type','gs1:'+SensorType)
+							var sensorReport	=	sensorElement.ele('sensorReport')
 							
-						if(SensorUOM != '' && SensorUOM != null && SensorUOM != undefined)
-						{
-							sensorReport.att('uom',SensorUOM)
+							var SensorType		=	SensorElements[e].SensorFields.Type;
+							
+							SensorMetaDataChecker(SensorElements[e].SensorFields.Time,'time',sensorReport)
+							
+							if(SensorType != '' && SensorType != null && SensorType != undefined){
+								sensorReport.att('type','gs1:'+SensorType)
+							}
+							
+							SensorMetaDataChecker(SensorElements[e].SensorFields.Value,'value',sensorReport)
+							SensorMetaDataChecker(SensorElements[e].SensorFields.MinValue,'minValue',sensorReport)
+							SensorMetaDataChecker(SensorElements[e].SensorFields.MaxValue,'maxValue',sensorReport)
+							SensorMetaDataChecker(SensorElements[e].SensorFields.MeanValue,'meanValue',sensorReport)
+							SensorMetaDataChecker(SensorElements[e].SensorFields.DeviceID,'deviceID',sensorReport)
+							SensorMetaDataChecker(SensorElements[e].SensorFields.DeviceMetaData,'deviceMetaData',sensorReport)
+							SensorMetaDataChecker(SensorElements[e].SensorFields.StandardDeviation,'sDev',sensorReport)							
+							SensorMetaDataChecker(SensorElements[e].SensorFields.ChemicalSubstance,'chemicalSubstance',sensorReport)
+							SensorMetaDataChecker(SensorElements[e].SensorFields.UOM,'uom',sensorReport)
+							
 						}
-						
 					}
 				}
 			}			
 		}
+		
+		function SensorMetaDataChecker(field, attValue, sensorMetaData){
+			if(field != '' && field != null && field != undefined)
+			{
+				sensorMetaData.att(attValue,field)
+			}
+		}
+		
 		
 		//Check if the ILMD has been added then add them
 		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "TransformationEvent")

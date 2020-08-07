@@ -1,56 +1,117 @@
-var app = angular.module('myApp', ['CopyToClipboard'], function() {});
-
-app.controller('AppController', function($scope,$http,$location,$anchorScroll,$copyToClipboard,$rootScope){
-	//Common
-	$scope.formdata								=	{eventtype1:''};
-	$scope.SensorForm							=	{Temperature:''};
-	$scope.AddExtensionForm						=	{};
-	$scope.EditExtensionForm					=	{};
-	$scope.EventTypeRowSpan						= 	4;
-	$scope.rowspanWHAT							=	1;
-	$scope.rowspanWHY							=	4;
-	$scope.OEQuantities							=	1;
-	$scope.CommonExtensionsList					=	[];
-	$scope.CommonExtensionsID					=	0;
-	$scope.BusinessTransactionList				=	[];
-	$scope.BusinessTransactionCount				=	0;
-	$scope.BTT									=	{};
+//Create the controller for Drag and Drop features
+syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
+	
+	$scope.formdata				=	{eventtype1:''};
+	$rootScope.AllEventsArray	=	[];
+	
+	//Onclick of the button show the Modal for formdata
+	$scope.ShowFormDataModal	=	function(event){
+		//Common
+		$scope.formdata								=	{eventtype1:''};
+		$scope.SensorForm							=	{Temperature:''};
+		$scope.AddExtensionForm						=	{};
+		$scope.EditExtensionForm					=	{};
+		$scope.EventTypeRowSpan						= 	4;
+		$scope.rowspanWHAT							=	1;
+		$scope.rowspanWHY							=	4;
+		$scope.OEQuantities							=	1;
+		$scope.CommonExtensionsList					=	[];
+		$scope.CommonExtensionsID					=	0;
+		$scope.BusinessTransactionList				=	[];
+		$scope.BusinessTransactionCount				=	0;
+		$scope.BTT									=	{};
 		
-	//Object Event	
-	$scope.ObjectEventEpcsURI					=	[];
-	$scope.ObjectEventQuantitiesURI				=	[];
-	$scope.ObjectEventILMDList					=	[];
-	$scope.ObjectEventILMDID					=	0;
+			
+		//Object Event	
+		$scope.ObjectEventEpcsURI					=	[];
+		$scope.ObjectEventQuantitiesURI				=	[];
+		$scope.ObjectEventILMDList					=	[];
+		$scope.ObjectEventILMDID					=	0;
+			
+		//Aggregation Event		
+		$scope.AggregationEventParentURI			=	[];
+		$scope.AggregationEventChildEPCsURI			=	[];
+		$scope.AggregationEventChildQuantitiesURI	=	[];
 		
-	//Aggregation Event		
-	$scope.AggregationEventParentURI			=	[];
-	$scope.AggregationEventChildEPCsURI			=	[];
-	$scope.AggregationEventChildQuantitiesURI	=	[];
+		//Transaction Event
+		$scope.TransactionEventParentIDURI			=	[];
+		$scope.TransactionEventEPCsURI				=	[];
+		$scope.TransactionEventQuantitiesURI		=	[];
+		
+		//Transformation Event
+		$scope.TransformationEventInputEPCsURI		=	[];
+		$scope.TransformationEventInputQuantityURI	=	[];
+		$scope.TransformationEventOutputEPCSURI		=	[];
+		$scope.TransformationEventOutputQuantityURI	=	[];
+		$scope.TransformationEventILMDList			=	[];
+		$scope.TransformationEventILMDID			=	0;
+		
+		//Association Event variables
+		$scope.AssociationEventParentURI			=	[];
+		$scope.AssociationEventChildEPCsURI			=	[];
+		$scope.AssociationEventChildQuantitiesURI	=	[];
+		
+		//Error Declaration Variables
+		$scope.ErrorCorrectiveIds					=	[];
+		$scope.ErrorExtensionList					=	[];
+		$scope.ErrorCorrectiveElementID				=	0;
+		$scope.ErrorExtensionID 					=	0;
+		
+		//Sensor information variables
+		$scope.TotalSensorElementsArray				=	[];
+		$scope.SensorElementsArray					=	[];
+		$scope.SensorElementCount					=	0;
+		$scope.ToalSensorElementCount				=	0;
+		
+		//Find the nodeID
+		var diagram 								= 	angular.element("#diagram").ejDiagram("instance"); 
+		var node 									= 	diagram.selectionList[0];
+		$scope.NodeEventId							=	node.name;
+		angular.element('#EventModalForm').modal('show');
+	}
 	
-	//Transaction Event
-	$scope.TransactionEventParentIDURI			=	[];
-	$scope.TransactionEventEPCsURI				=	[];
-	$scope.TransactionEventQuantitiesURI		=	[];
-	
-	//Transformation Event
-	$scope.TransformationEventInputEPCsURI		=	[];
-	$scope.TransformationEventInputQuantityURI	=	[];
-	$scope.TransformationEventOutputEPCSURI		=	[];
-	$scope.TransformationEventOutputQuantityURI	=	[];
-	$scope.TransformationEventILMDList			=	[];
-	$scope.TransformationEventILMDID			=	0;
-	
-	//Association Event variables
-	$scope.AssociationEventParentURI			=	[];
-	$scope.AssociationEventChildEPCsURI			=	[];
-	$scope.AssociationEventChildQuantitiesURI	=	[];
-	
-	//Error Declaration Variables
-	$scope.ErrorCorrectiveIds					=	[];
-	$scope.ErrorExtensionList					=	[];
-	$scope.ErrorCorrectiveElementID				=	0;
-	$scope.ErrorExtensionID 					=	0;
-	
+	//Based on Event type selection create fields for the WHAT dimention
+	$scope.EventTypeChange = function() {
+		if($scope.formdata.eventtype1 == 'ObjectEvent' || $scope.formdata.eventtype1 == 'AggregationEvent' || $scope.formdata.eventtype1 == 'TransactionEvent')
+		{
+			$scope.EventTypeRowSpan 	= 	5;
+		}
+		else
+		{
+			$scope.EventTypeRowSpan 	= 	4;
+		}
+		
+		//Add Number of rows to tabled based on Event Selection
+		if($scope.formdata.eventtype1 == 'ObjectEvent')
+		{
+			$scope.rowspanWHAT 						= 	2;
+			$scope.rowspanWHY						=	7;
+			$rootScope.ObjectEventEpcsURI			=	[];
+			$rootScope.AggregationEventParentURI	=	[];			
+			$rootScope.ObjectEventEPCSbutton		= 	true;
+			$rootScope.OEAddQuantitiesButton		=	true;
+		}
+		else if($scope.formdata.eventtype1 == 'AggregationEvent')
+		{
+			$scope.rowspanWHAT 	= 	3;
+			$scope.rowspanWHY	=	6;
+		}
+		else if($scope.formdata.eventtype1 == 'TransactionEvent')
+		{
+			$scope.rowspanWHAT 	= 	3;
+			$scope.rowspanWHY	=	6;
+		}
+		else if($scope.formdata.eventtype1 == 'TransformationEvent')
+		{
+			$scope.rowspanWHAT 	= 	5;
+			$scope.rowspanWHY	=	5;	
+		}
+		else if($scope.formdata.eventtype1 == 'AssociationEvent')
+		{
+			$scope.rowspanWHAT 	= 	3;
+			$scope.rowspanWHY	=	6;
+		}
+	}
 	
 	//Based on Event type selection create fields for the WHAT dimention
 	$scope.EventTypeChange = function() {
@@ -115,10 +176,37 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		}
 	}
 	
+		
+	//Call the init function to get the values for various fields
+	$scope.init 	=	function () {
+		$scope.outputElements 	= false;
+		$scope.inputElements 	= true;
+		$http({
+		url: "/populateFields",
+		method: "GET"
+		}).success(function(response) {
+			$scope.businessSteps 		=	response.businessStep;
+			$scope.eventType			=	response.eventType;	
+			$scope.dispositions			=	response.dispositions;
+			$scope.BusinessTransactions	=	response.BusinessTransactions;
+			$scope.companyPrefixs		=	response.companyPrefixs;
+			$scope.ObjectEventEpcsTypes	=	response.ObjectEventEpcsTypes;
+			$scope.ObjectEventQuantities=	response.ObjectEventQuantities;
+			$scope.UOMs					=	response.UOMs;
+			$scope.SensorElements		=	response.SensorElements;
+			$scope.AllUOMs				=	response.Temperatures;
+			$scope.SensorUOMs			=	response.SensorUOMs;
+			$scope.SensorValueTypes		=	response.SensorValueTypes;
+		}).error(function(error) {
+		console.log(error);
+		});
+	}
+	
 	/* OBJECT EVENT EPC AND QUANTITIES STARTS */
 	
 	//Show Modal for adding the Object Event EPCs
 	$scope.ObjectEventEPCsAdd	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ParentTypeModal').modal('show');
 		$scope.ObjectEventAddEPCsFlag	=	true;
 		$scope.CommonForm				=	{AggregationEventParentID: ''}
@@ -132,6 +220,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Object Event Quantities
 	$scope.ObjectEventQuantitiesClick	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ChildTypeModal').modal('show');
 		$scope.OEQuantitiesFlag			=	true;	
 		$scope.CommonFormQuantity		=	{ObjectEventquantities: ''}
@@ -149,6 +238,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Show Modal for Aggregation Event Parent
 	$scope.AggregationEventParent	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ParentTypeModal').modal('show');
 		$scope.AEParentEPCsFlag		=	true;
 		$scope.CommonForm			=	{AggregationEventParentID: ''}
@@ -162,6 +252,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Aggregation Event Child EPCS
 	$scope.AggregationEventChildEPCs	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ParentTypeModal').modal('show');
 		$scope.AEChildEPCSFlage		=	true;
 		$scope.CommonForm			=	{AggregationEventParentID: ''}
@@ -175,6 +266,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Aggregation Event Child Quantities
 	$scope.AggregationEventChildQuantities	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ChildTypeModal').modal('show');
 		$scope.AEChildQuantitiesFlag		=	true;
 		$scope.CommonFormQuantity			=	{ObjectEventquantities: ''}
@@ -190,6 +282,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	/* TRANSACTION EVENT PARENT ID EPCS AND QUANTITIES STARTS */
 	$scope.TransactionEventParentId		=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ParentTypeModal').modal('show');
 		$scope.TransactionEventParentIDFlag	=	true;
 		$scope.CommonForm			=	{AggregationEventParentID: ''}
@@ -210,6 +303,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Add the Transaction Event Child EPCS
 	$scope.TransactionEventEPCS	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ParentTypeModal').modal('show');
 		$scope.TransactionEventChildEPCS	=	true;
 		$scope.CommonForm			=	{AggregationEventParentID: ''}
@@ -223,8 +317,8 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	}
 	
 	//Show Transaction Event Quantities Modal
-	$scope.TransactionEventQuantities	=	function()
-	{
+	$scope.TransactionEventQuantities	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ChildTypeModal').modal('show');
 		$scope.TransactionEventQuantitiesFlag	=	true;
 		$scope.CommonFormQuantity				=	{ObjectEventquantities: ''}
@@ -243,6 +337,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//TRANSFORMATION EVENT Show modal for adding the INPUT EPCS
 	$scope.TransformationEventInputEPCs	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ParentTypeModal').modal('show');
 		$scope.TransformationEventInputEPCsFlag	=	true;
 		$scope.CommonForm			=	{AggregationEventParentID: ''}
@@ -257,6 +352,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//TransformationEvent Show the modal for adding the Input QUANTITIES
 	$scope.TransformationEventInputQuantities	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ChildTypeModal').modal('show');
 		$scope.TransformationEventInputQuantitiesFlag	=	true;
 		$scope.CommonFormQuantity						=	{ObjectEventquantities: ''}
@@ -271,6 +367,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Transformation Event show modal for adding Output EPCS
 	$scope.TransformationEventOutputEPCs	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ParentTypeModal').modal('show');
 		$scope.TransformationEventOutputEPCsFlag	=	true;
 		$scope.CommonForm			=	{AggregationEventParentID: ''}
@@ -283,7 +380,8 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	}
 	
 	//Show modal for adding Transformtion Event Output Quantities
-	$scope.TransformationEventOutputQuantities	=	function(){		
+	$scope.TransformationEventOutputQuantities	=	function(){	
+		angular.element('#EventModalForm').modal('hide');	
 		angular.element('#ChildTypeModal').modal('show');
 		$scope.TransformationEventOutputQuantitiesFlag	=	true;
 		$scope.CommonFormQuantity						=	{ObjectEventquantities: ''}
@@ -300,6 +398,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Show Modal for ASSOCIATION Event Parent
 	$scope.AssociationEventParent	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ParentTypeModal').modal('show');
 		$scope.AssociationEventParentFlag	=	true;
 		$scope.CommonForm					=	{AggregationEventParentID: ''}
@@ -313,6 +412,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Association EVENT Child EPCS
 	$scope.AssociationEventChildEPCS	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ParentTypeModal').modal('show');
 		$scope.AssociationEventChildEPCSFlag		=	true;
 		$scope.CommonForm			=	{AggregationEventParentID: ''}
@@ -326,6 +426,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Association Event Child Quantities Add
 	$scope.AssociationEventChildQuantities	=	function(){
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#ChildTypeModal').modal('show');
 		$scope.CommonFormQuantity					=	{ObjectEventquantities: ''}
 		$scope.AssociationEventChildQuantitiesFlag	=	true;
@@ -345,6 +446,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		//Call the function to create the URI and Display it
 		var data 				=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues});
 		angular.element('#ParentTypeModal').modal('hide');
+		angular.element('#EventModalForm').modal('show');
 		$http({
 		url: "/CreateAggregationEventURI",
 		method: "POST",
@@ -434,6 +536,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		
 		var data 				=	JSON.stringify({input:$scope.CommonFormQuantity});			
 		angular.element('#ChildTypeModal').modal('hide');
+		angular.element('#EventModalForm').modal('show');
 		$http({
 		url: "/CreateObjectEventQuantities",
 		method: "POST",
@@ -500,14 +603,15 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	//Show Modal for adding Extensions on Click of button
 	$scope.AddExtensionsModalShow	=	function()
 	{
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddExtensionsFlag		=	true;
 	}
 	
 	//On submission of the Modal Add Extensions or ILMD OR ERROR Declaration
-	$scope.AddNewExtension	=	function(){
-		
+	$scope.AddNewExtension	=	function(){		
 		angular.element('#AddExtensionModal').modal('hide');
+		angular.element('#EventModalForm').modal('show');
 		
 		//Set the Extensions List
 		if($scope.AddExtensionsFlag)
@@ -616,6 +720,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 													EditExtensionDataType		:	$scope.CommonExtensionsList[ex].DataType,
 													EditInsertId				:	Edit_Id													
 												};												
+				angular.element('#EventModalForm').modal('hide');
 				angular.element('#EditExtensionModal').modal('show');
 				$scope.EditExtensionFlag	=	true;
 				break;
@@ -639,6 +744,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 					$scope.CommonExtensionsList[ex].ID						=	$scope.EditExtensionForm.EditInsertId
 					$scope.CommonExtensionsList[ex].DataType				=	$scope.EditExtensionForm.EditExtensionDataType;
 					angular.element('#EditExtensionModal').modal('hide');
+					angular.element('#EventModalForm').modal('show');
 					$scope.EditExtensionFlag								=	false;
 					break;
 				}	
@@ -660,6 +766,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 						$scope.ObjectEventILMDList[ex].ID						=	$scope.EditExtensionForm.EditInsertId
 						$scope.ObjectEventILMDList[ex].DataType					=	$scope.EditExtensionForm.EditExtensionDataType;
 						angular.element('#EditExtensionModal').modal('hide');
+						angular.element('#EventModalForm').modal('show');
 						$scope.ObjectEventEditILMDFLag							=	false;
 						break;
 					}	
@@ -682,6 +789,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 						$scope.TransformationEventILMDList[ex].ID						=	$scope.EditExtensionForm.EditInsertId
 						$scope.TransformationEventILMDList[ex].DataType					=	$scope.EditExtensionForm.EditExtensionDataType;
 						angular.element('#EditExtensionModal').modal('hide');
+						angular.element('#EventModalForm').modal('show');
 						$scope.TransformationEventEditILMDFlag							=	false;
 						break;
 					}	
@@ -702,6 +810,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 					$scope.ErrorExtensionList[ex].ID						=	$scope.EditExtensionForm.EditInsertId
 					$scope.ErrorExtensionList[ex].DataType					=	$scope.EditExtensionForm.EditExtensionDataType;
 					angular.element('#EditExtensionModal').modal('hide');
+					angular.element('#EventModalForm').modal('show');
 					$scope.EditErrorExtensionFlag							=	false;
 					break;
 				}	
@@ -716,6 +825,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	//Show Modal for adding ILMD on Click of ADD ILMD button
 	$scope.AddILMDModalShow	=	function()
 	{
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddILMDFlag		=	true;
 	}
@@ -748,6 +858,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 													EditExtensionDataType		:	$scope.ObjectEventILMDList[ex].DataType,
 													EditInsertId				:	Edit_ILMD_ID
 												};												
+				angular.element('#EventModalForm').modal('hide');
 				angular.element('#EditExtensionModal').modal('show');
 				//Set the Flag edit submit ILMD
 				$scope.EditExtensionFlag				=	false;
@@ -798,6 +909,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 													EditExtensionDataType		:	$scope.TransformationEventILMDList[ex].DataType,
 													EditInsertId				:	Edit_ILMD_ID										
 												};												
+				angular.element('#EventModalForm').modal('hide');
 				angular.element('#EditExtensionModal').modal('show');
 				//Set the Flag edit submit ILMD
 				$scope.EditExtensionFlag				=	false;
@@ -862,6 +974,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	//Show the Modal for Error Declaration Add
 	$scope.ErrorExtensionAddModal	=	function()
 	{
+		angular.element('#EventModalForm').modal('hide');
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddErrorExtensionFlag		=	true;
 	}
@@ -903,7 +1016,8 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 													EditExtensionLocalName		:	$scope.ErrorExtensionList[ex].LocalName,
 													EditExtensionDataType		:	$scope.ErrorExtensionList[ex].DataType,
 													EditInsertId				:	Edit_Extension_ID										
-												};												
+												};					
+				angular.element('#EventModalForm').modal('hide');
 				angular.element('#EditExtensionModal').modal('show');
 				//Set the Flag edit submit Error Extension
 				$scope.EditExtensionFlag				=	false;
@@ -965,17 +1079,83 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	/* SENSOR INFORMATION STARTS */
 	
+	//Show the Sensor Data Modal on click of the button
+	$scope.AddSensorData	=	function(){
+		$scope.SensorForm	=	{};
+		angular.element('#EventModalForm').modal('hide');
+		angular.element('#SensorInformation').modal('show');
+	}
+	
+	//Show fields for adding new sensor Element
+	$scope.AddSensorElement		=	function(e){
+		e.preventDefault();
+		item 					= 	{};
+		item["ID"]				=	$scope.SensorElementCount;
+		item["SensorFields"]	=	{};
+		$scope.SensorElementsArray.push(item);
+		$scope.SensorElementCount++;
+	}
+	
+	//Close the modal for Sensor data as information is already saved
+	$scope.SensorInformationSubmit	=	function(){
+		angular.element('#SensorInformation').modal('hide');
+		angular.element('#EventModalForm').modal('show');		
+		var TemporaryArray				=	[];
+		var MetaDataItem				=	{};
+		MetaDataItem["CheckBox"]		=	$scope.SensorForm.MetaDataCheck
+		MetaDataItem["Time"]			=	$scope.SensorForm.MetaDataDateTime;
+		MetaDataItem["StartTime"]		=	$scope.SensorForm.MetaDataStartTime;
+		MetaDataItem["EndTime"]			=	$scope.SensorForm.MetaDataEndTime;
+		MetaDataItem["SENSORELEMENTS"]	=	$scope.SensorElementsArray;
+		TemporaryArray.push(MetaDataItem);
+		$scope.TotalSensorElementsArray.push(TemporaryArray)
+		$scope.ToalSensorElementCount++;
+		$scope.SensorElementsArray	=	[];
+		$scope.SensorElementCount	=	0;
+	}
+	
+	//For Every Sensor Element addition populate the corresponding Array
+	$scope.SensorElementPopulator	=	function(SensorElementID){
+		
+		for(var s=0;s<$scope.SensorElementsArray.length;s++)
+		{
+			if($scope.SensorElementsArray[s].ID ==	SensorElementID)
+			{
+				$scope.SensorElementsArray[s].SensorFields["Type"]		=	$scope.SensorForm.SensorElementType[SensorElementID];
+				$scope.SensorElementsArray[s].SensorFields["Value"]		=	$scope.SensorForm.SensorElementValue[SensorElementID];
+				$scope.SensorElementsArray[s].SensorFields["UOM"]		=	$scope.SensorForm.SensorElementUOM[SensorElementID];
+				$scope.SensorElementsArray[s].SensorFields["DateTime"]	=	$scope.SensorForm.SensorElementTime[SensorElementID];				
+				break;
+			}
+		}	
+	}
+	
+	//Remove the sensor element on click
+	$scope.RemoveSensorElement	=	function(Delete_ID,e){
+		e.preventDefault();
+		for(var d=0; d<$scope.SensorElementsArray.length; d++)
+		{
+			if($scope.SensorElementsArray[d].ID ==	Delete_ID)
+			{
+				$scope.SensorElementsArray.splice(d, 1);		
+				break;	
+			}
+		}
+	}
+	
+	//Remove the Element from TOTALSENSORELEMENTARRAY displayed on INDEX.html
+	$scope.DeleteTotalSensorElement	=	function(Delete_Sensor_Id){
+		$scope.TotalSensorElementsArray.splice(Delete_Sensor_Id, 1);
+	}
 	
 	/* SENSOR INFORMATION ENDS */
 	
 	//On load of the page populate the drop-downs
 	$scope.init = function () {
 		//call the MODALS.html file
-		$scope.outputElements 		=	false;
-		$scope.inputElements 		= 	true;
-		$scope.isDisabled 			= 	false;
-		$scope.ResetButtonDisplay	=	true;
-		
+		$scope.outputElements 	= false;
+		$scope.inputElements 	= true;
+		$scope.isDisabled 		= false;
 		$http({
 			url: "/populateFields",
 			method: "GET"
@@ -992,117 +1172,106 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			$scope.AllUOMs				=	response.Temperatures;
 			$scope.SensorUOMs			=	response.SensorUOMs;
 			$scope.SensorValueTypes		=	response.SensorValueTypes;
-			$scope.SensorMetaDatas		=	response.SensorMetaDatas;
-			$scope.SensorReportDatas	=	response.SensorReportDatas;
 		}).error(function(error) {
 			console.log(error);
 		});
 	};
 	
 	//If submit button is clicked then send data to Nodejs for XML and JSON creation
-	$scope.createEvents	= 	function(){
-		//params: 	{input:$scope.formdata,Extension:$scope.ExtensionList}	
-		//headers: 	{'Content-Type': 'application/x-www-form-urlencoded'},
-		//Based on the Selected Event Send the respective values
+	$scope.EventInformation	= 	function(){
 		console.log("SENSOR ELEMENTS: ");
-		console.log($rootScope.TotalSensorElementsArray);
+		console.log($scope.TotalSensorElementsArray);
 		
 		if($scope.formdata.eventtype1 == 'ObjectEvent')
 		{
-			var data 	=	JSON.stringify({	
-												input			:	$scope.formdata,
-												EPCs			:	$scope.ObjectEventEpcsURI,
-												Quantities		:	$scope.ObjectEventQuantitiesURI,
-												ILMD			:	$scope.ObjectEventILMDList,
-												Extension		:	$scope.CommonExtensionsList,
-												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
-												ErrorExtension	:	$scope.ErrorExtensionList,
-												BTT				:	$scope.BusinessTransactionList,
-												SensorForm		:	$rootScope.TotalSensorElementsArray,
-												File			:	'ObjectEvent'
-											});
+			var obj				=	new Object();
+			obj.input			=	$scope.formdata;
+			obj.EPCs			=	$scope.ObjectEventEpcsURI;
+			obj.Quantities		=	$scope.ObjectEventQuantitiesURI;
+			obj.ILMD			=	$scope.ObjectEventILMDList;
+			obj.Extension		=	$scope.CommonExtensionsList;
+			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
+			obj.ErrorExtension	=	$scope.ErrorExtensionList;
+			obj.BTT				=	$scope.BusinessTransactionList;
+			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.File			=	'ObjectEvent';
+			obj.NodeID			=	$scope.NodeEventId;
+			$rootScope.AllEventsArray.push(obj);
 		}
 		else if($scope.formdata.eventtype1 == 'AggregationEvent')
 		{
-			var data 	=	JSON.stringify({
-												input			:	$scope.formdata,
-												Extension		:	$scope.CommonExtensionsList,
-												ParentID		:	$scope.AggregationEventParentURI,		
-												ChildEPCS 		:	$scope.AggregationEventChildEPCsURI,			
-												ChildQuantities :	$scope.AggregationEventChildQuantitiesURI,
-												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
-												ErrorExtension	:	$scope.ErrorExtensionList,
-												BTT				:	$scope.BusinessTransactionList,
-												SensorForm		:	$rootScope.TotalSensorElementsArray,
-												File			:	'AggregationEvent'
-											});
+			var obj				=	new Object();
+			obj.input			=	$scope.formdata;
+			obj.Extension		=	$scope.CommonExtensionsList;
+			obj.ParentID		=	$scope.AggregationEventParentURI;		
+			obj.ChildEPCS 		=	$scope.AggregationEventChildEPCsURI;			
+			obj.ChildQuantities =	$scope.AggregationEventChildQuantitiesURI;
+			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
+			obj.ErrorExtension	=	$scope.ErrorExtensionList;
+			obj.BTT				=	$scope.BusinessTransactionList;
+			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.File			=	'AggregationEvent';
+			obj.NodeID			=	$scope.NodeEventId;
+			$rootScope.AllEventsArray.push(obj);
 		}
 		else if($scope.formdata.eventtype1 == 'TransactionEvent')
 		{
-			var data	=	JSON.stringify({
-												input			:	$scope.formdata,
-												Extension		:	$scope.CommonExtensionsList,
-												Parent 			:	$scope.TransactionEventParentIDURI,
-												EPCs 			:	$scope.TransactionEventEPCsURI,
-												Quantities		:	$scope.TransactionEventQuantitiesURI,
-												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
-												ErrorExtension	:	$scope.ErrorExtensionList,
-												BTT				:	$scope.BusinessTransactionList,
-												SensorForm		:	$rootScope.TotalSensorElementsArray,
-												File			:	'TransactionEvent'
-											});
+			var obj				=	new Object();
+			obj.input			=	$scope.formdata;
+			obj.Extension		=	$scope.CommonExtensionsList;
+			obj.Parent 			=	$scope.TransactionEventParentIDURI;
+			obj.EPCs 			=	$scope.TransactionEventEPCsURI;
+			obj.Quantities		=	$scope.TransactionEventQuantitiesURI;
+			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
+			obj.ErrorExtension	=	$scope.ErrorExtensionList;
+			obj.BTT				=	$scope.BusinessTransactionList;
+			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.File			=	'TransactionEvent';
+			obj.NodeID			=	$scope.NodeEventId;
+			$rootScope.AllEventsArray.push(obj);
 		}
 		else if($scope.formdata.eventtype1 == 'TransformationEvent')
 		{
-			var data	=	JSON.stringify({
-												input			:	$scope.formdata,
-												InputEPCs		:	$scope.TransformationEventInputEPCsURI,
-												InputQuantities	:	$scope.TransformationEventInputQuantityURI,
-												OutputEPCs		:	$scope.TransformationEventOutputEPCSURI,
-												OutputQuantities:	$scope.TransformationEventOutputQuantityURI,
-												ILMD			:	$scope.TransformationEventILMDList,
-												Extension		:	$scope.CommonExtensionsList,
-												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
-												ErrorExtension	:	$scope.ErrorExtensionList,
-												BTT				:	$scope.BusinessTransactionList,
-												SensorForm		:	$rootScope.TotalSensorElementsArray,
-												File			:	'TransformationEvent'
-											});
+			var obj				=	new Object();
+			obj.input			=	$scope.formdata;
+			obj.InputEPCs		=	$scope.TransformationEventInputEPCsURI;
+			obj.InputQuantities	=	$scope.TransformationEventInputQuantityURI;
+			obj.OutputEPCs		=	$scope.TransformationEventOutputEPCSURI;
+			obj.OutputQuantities=	$scope.TransformationEventOutputQuantityURI;
+			obj.ILMD			=	$scope.TransformationEventILMDList;
+			obj.Extension		=	$scope.CommonExtensionsList;
+			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
+			obj.ErrorExtension	=	$scope.ErrorExtensionList;
+			obj.BTT				=	$scope.BusinessTransactionList;
+			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.File			=	'TransformationEvent';			
+			obj.NodeID			=	$scope.NodeEventId;
+			$rootScope.AllEventsArray.push(obj);
 		}
 		else if($scope.formdata.eventtype1 == 'AssociationEvent')
 		{
-			var data 	=	JSON.stringify({
-												input			:	$scope.formdata,
-												Extension		:	$scope.CommonExtensionsList,
-												ParentID		:	$scope.AssociationEventParentURI,		
-												ChildEPCS 		:	$scope.AssociationEventChildEPCsURI,			
-												ChildQuantities :	$scope.AssociationEventChildQuantitiesURI,
-												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
-												ErrorExtension	:	$scope.ErrorExtensionList,
-												BTT				:	$scope.BusinessTransactionList,
-												SensorForm		:	$rootScope.TotalSensorElementsArray,
-												File			:	'AssociationEvent'
-											});
-		}
+			var obj				=	new Object();
+			obj.input			=	$scope.formdata;
+			obj.Extension		=	$scope.CommonExtensionsList;
+			obj.ParentID		=	$scope.AssociationEventParentURI;		
+			obj.ChildEPCS 		=	$scope.AssociationEventChildEPCsURI;			
+			obj.ChildQuantities =	$scope.AssociationEventChildQuantitiesURI;
+			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
+			obj.ErrorExtension	=	$scope.ErrorExtensionList;
+			obj.BTT				=	$scope.BusinessTransactionList;
+			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.File			=	'AssociationEvent';
+			obj.NodeID			=	$scope.NodeEventId;			
+			$rootScope.AllEventsArray.push(obj);
+		}		
+		console.log($rootScope.AllEventsArray);
+		angular.element('#EventModalForm').modal('hide');
 		
-		$http({
-			url: "/createEvents",
-			method: "POST",
-			headers: {'Content-Type': 'application/json'},
-			data: data
-		}).success(function(response) {
-			$location.hash('mainBody');
-			$anchorScroll();
-			$scope.xmldata 	=	response[0].XML;
-			$scope.jsondata	=	JSON.stringify(JSON.parse(response[1].JSON), undefined, 4);	
-			//Hide Table and Show the XML and JSON field
-			$scope.outputElements 		= 	true;
-			$scope.inputElements 		= 	false;
-			$scope.isDisabled 			= 	true;
-			$scope.ResetButtonDisplay	=	false;
-		}).error(function(error) {
-			console.log(error)
-		});
+		//var diagram 				= 	angular.element("#diagram").ejDiagram("instance"); 
+		//console.log($rootScope.IDValue)
+		//document.getElementById($rootScope.IDValue).innerHTML = 'Information Added'+$rootScope.IDValue; 
+		//$scope.appTitle 			=	"<b>Information Added</b>";
+		//$scope.trustedAppTitle  	=	$sce.trustAsHtml($scope.appTitle);
 	}
 	
 	//Go BACK and display the input fields again
@@ -1112,7 +1281,6 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		$scope.outputElements 		= 	false;
 		$scope.inputElements 		= 	true;
 		$scope.isDisabled 			= 	false;
-		$scope.ResetButtonDisplay	=	true;
 	}
 	
 	//Aggregation Event PARENT ID Change
@@ -1304,5 +1472,6 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired =	$scope.MultiValues = $scope.NoneValuesShow = false;
 			$scope.OEQuantityCompanyPrefixDisplay = $scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityITIPDisplay	 = $scope.OEQuantityUPUIDisplay = false;
 		}
-	}	
+	}
+	
 });

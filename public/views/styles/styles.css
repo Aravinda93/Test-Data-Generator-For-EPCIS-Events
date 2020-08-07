@@ -1,4 +1,9 @@
+.table-nonfluid {
+   width: auto !important;
+}
 
+.modal { overflow: visible; }
+.modal-body { overflow-y: visible !important; }
 
 .navbar-brand
 {

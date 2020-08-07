@@ -795,27 +795,32 @@ exports.createJSONData	=	function(Query,callback){
 					var SensorElements		=	SensorForm[sf][t].SENSORELEMENTS;
 					
 					//Loop through Each Sensor Report Data
-					for(var e=0;e<SensorElements.length;e++){
-						
-						var SensorReportObj	=	new Object();
-						
-						var SensorType		=	SensorElements[e].SensorFields.Type;
-						var SensorValue		=	SensorElements[e].SensorFields.Value;
-						var SensorUOM		=	SensorElements[e].SensorFields.UOM;
-						
-						if(SensorType != '' && SensorType != null && SensorType != undefined){							
-							SensorReportObj.type 	= 	'gs1:'+SensorType;
-						}
-						
-						if(SensorValue != '' && SensorValue != null && SensorValue != undefined){
-							SensorReportObj.value	=	'gs1:'+SensorValue;
-						}
+					if(SensorElements != undefined)
+					{
+						for(var e=0;e<SensorElements.length;e++)
+						{
 							
-						if(SensorUOM != '' && SensorUOM != null && SensorUOM != undefined){
-							SensorReportObj.uom	=	'gs1:'+SensorUOM;
+							var SensorReportObj	=	new Object();
+							
+							var SensorType		=	SensorElements[e].SensorFields.Type;
+							var SensorValue		=	SensorElements[e].SensorFields.Value;
+							var SensorUOM		=	SensorElements[e].SensorFields.UOM;
+							
+							if(SensorType != '' && SensorType != null && SensorType != undefined){							
+								SensorReportObj.type 	= 	'gs1:'+SensorType;
+							}
+							
+							if(SensorValue != '' && SensorValue != null && SensorValue != undefined){
+								SensorReportObj.value	=	'gs1:'+SensorValue;
+							}
+								
+							if(SensorUOM != '' && SensorUOM != null && SensorUOM != undefined){
+								SensorReportObj.uom	=	'gs1:'+SensorUOM;
+							}
+							SensorReportArray.push(SensorReportObj);
 						}
-						SensorReportArray.push(SensorReportObj);
-					}	
+					}
+						
 					if(SensorReportArray.length > 0)
 					{
 						SensorElementObj.sensorElement.sensorReport	= SensorReportArray;

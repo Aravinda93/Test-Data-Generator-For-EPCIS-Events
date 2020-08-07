@@ -17,6 +17,7 @@ const 	ReadExcelFile				=	require("./controller/ReadExcelFile");
 
 const 	createXML					=	require("./controller/createXML");
 const 	createJSON					=	require("./controller/createJSON");
+const 	CreateConfiguredXML			=	require("./controller/CreateConfiguredXML");
 
 //Create an XML and JSON document based on the user inputs
 
@@ -92,6 +93,16 @@ app.get('/UploadFIle',function(req,res){
 app.post('/DrawFieldsData',function(req,res){
 	var data = [];
 	ReadExcelFile.DrawDataXML(req.body,function(XMLdata){
+		var xml = {'XML':XMLdata};
+		data.push(xml);
+		res.send(data);
+	});
+});
+
+//Create XML data for the drag and drop field
+app.post('/CreateConfiguredXML',function(req,res){
+	var data = [];
+	CreateConfiguredXML.createXML(req.body,function(XMLdata){
 		var xml = {'XML':XMLdata};
 		data.push(xml);
 		res.send(data);

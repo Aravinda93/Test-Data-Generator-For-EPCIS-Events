@@ -1,6 +1,6 @@
 <!-- MODAL FOR SENSOR INFORMATION -->
 <div class="modal fade" id="SensorInformation" style="overflow-y: auto;">
-	<div class="modal-dialog" style="max-height:90%; max-width:85%;  margin-top: 5%; margin-bottom:5%;">
+	<div class="modal-dialog" style="max-height:90%; max-width:90%;">
 		<div class="modal-content">
 			<div class="modal-header">
 				<h4 class="modal-title">Sensor Information</h4>
@@ -9,62 +9,223 @@
 			<form method="post" id="SensorInformationForm" ng-submit="SensorInformationSubmit()">
 				<div class="modal-body">
 					<div class="form-group form-check form-check-inline">
-						<label class="form-check-label" for="MetaDataCheck">Sensor Metadata</label>&nbsp;&nbsp;
-						<input type="checkbox" ng-model="SensorForm.MetaDataCheck" id="MetaDataCheck" class="form-check-input">
+						<label class="form-check-label" for="SelectReqMetaData">Required Sensor Metadata Elements</label>&nbsp;&nbsp;
+						<select ng-model="SensorForm.SelectReqMetaData" ng-change="ShowMetaDatafields();" class="selectpicker" multiple data-live-search="true" id="SelectReqMetaData">
+							<option value="" disabled selected>Required Metadata</option>
+							<option ng-repeat="SensorMetaData in SensorMetaDatas" value="{{SensorMetaData.value}}">{{SensorMetaData.text}}</option>
+						</select>
+						&nbsp;&nbsp;&nbsp;&nbsp;
+						<label  class="form-check-label" for="SelectReqReport">Required Sensor Report Elements</label>&nbsp;&nbsp;
+						<select ng-model="SensorForm.SelectReqReport" class="selectpicker" multiple data-live-search="true" id="SelectReqReport">
+							<option class="dropdown-item" value="" disabled selected>Required Report Data</option>
+							<option class="dropdown-item" ng-repeat="SensorReportData in SensorReportDatas" value="{{SensorReportData.value}}">{{SensorReportData.text}}</option>
+						</select>
+						<!--<input type="checkbox" ng-model="SensorForm.MetaDataCheck" id="MetaDataCheck" class="form-check-input">-->
 					</div>
+					
 					<div class="pull-right">
-						<button class="btn btn-info" ng-click="AddSensorElement($event);">Add</button>
+						<button class="btn btn-info" ng-click="AddSensorElement($event);">Add Sensor Report</button>
 					</div>
 					
 					<!--Show the Information for MetaData-->
-					<div class="form-group" ng-show="SensorForm.MetaDataCheck">
+					<div class="form-group">
+						<span ng-show="SensorForm.SelectReqMetaData.length > 0"> <b>Sensor Metadata Elements: </b></span>
+						
 						<span class="form-group form-inline">
-							<label class="form-label" for="MetaDataDateTime">Datetime: </label>&nbsp;&nbsp;
-							<input type="datetime-local" ng-model="SensorForm.MetaDataDateTime" class="form-control" id="MetaDataDateTime"/>
-							&nbsp;&nbsp;
-							<label class="form-label" for="MetaDataStartTime">Start Time:</label>&nbsp;&nbsp;
-							<input type="datetime-local" ng-model="SensorForm.MetaDataStartTime" class="form-control" id="MetaDataStartTime"/>
-							&nbsp;&nbsp;
-							<label class="form-label" for="MetaDataEndTime">End Time:</label>&nbsp;&nbsp;
-							<input type="datetime-local" ng-model="SensorForm.MetaDataEndTime" class="form-control" id="MetaDataEndTime"/>
+							
+							<span ng-show="SensorForm.SelectReqMetaData.indexOf('Time') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="MetaDataDateTime">Datetime</label>&nbsp;&nbsp;
+								<input type="datetime-local" ng-model="SensorForm.MetaDataDateTime" class="form-control" id="MetaDataDateTime"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqMetaData.indexOf('Start Time') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="MetaDataStartTime">Start Time</label>&nbsp;&nbsp;
+								<input type="datetime-local" ng-model="SensorForm.MetaDataStartTime" class="form-control" id="MetaDataStartTime"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqMetaData.indexOf('End Time') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="MetaDataEndTime">End Time</label>&nbsp;&nbsp;
+								<input type="datetime-local" ng-model="SensorForm.MetaDataEndTime" class="form-control" id="MetaDataEndTime"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqMetaData.indexOf('Device ID') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="MetaDataDeviceID">Device ID</label>&nbsp;&nbsp;
+								<input type="text" ng-model="SensorForm.MetaDataDeviceID" class="form-control" id="MetaDataDeviceID"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqMetaData.indexOf('Device Metadata') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="MetaDataDeviceMetadata">Device MetaData</label>&nbsp;&nbsp;
+								<input type="text" ng-model="SensorForm.MetaDataDeviceMetadata" class="form-control" id="MetaDataDeviceMetadata"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqMetaData.indexOf('Raw Data') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="MetaDataRawData">Raw Data</label>&nbsp;&nbsp;
+								<input type="text" ng-model="SensorForm.MetaDataRawData" class="form-control" id="MetaDataRawData"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqMetaData.indexOf('Data Processing Method') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="MetaDataDataProcessingMethod">Data Processing Method</label>&nbsp;&nbsp;
+								<input type="text" ng-model="SensorForm.MetaDataDataProcessingMethod" class="form-control" id="MetaDataDataProcessingMethod"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqMetaData.indexOf('Business Rules') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="MetaDataBusinessRules">Business Rules</label>&nbsp;&nbsp;
+								<input type="text" ng-model="SensorForm.MetaDataBusinessRules" class="form-control" id="MetaDataBusinessRules"/>
+							</span>
 						</span>
 					</div>
-				
+					
+					<span ng-show="SensorForm.SelectReqReport.length > 0"> <b>Sensor Report Elements: </b></span>
+					
 					<!-- Show the Sensor Element on click of the button -->
 					<div class="form-group" ng-repeat="SensorElementCount in SensorElementsArray">
-						<div class="form-inline">
-							<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementType[SensorElementCount.ID]" style="width:15%">
-								<option class="dropdown-item" value='' selected> Report Type </option>
-								<option class="dropdown-item" ng-repeat="SensorElement in SensorElements" value="{{SensorElement.value}}"> {{ SensorElement.text }} </option>
-							</select>
+						<span class="form-group form-inline">
+							<span ng-show="SensorForm.SelectReqReport.length > 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportType">Sensor Report Type</label>&nbsp;&nbsp;
+								<select ng-model="SensorForm.SensorReportType[SensorElementCount.ID]" id="SensorReportType" class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID,'Type')">
+									<option class="dropdown-item" value='' disabled selected> Report Type </option>
+									<option class="dropdown-item" ng-repeat="SensorElement in SensorElements" value="{{SensorElement.value}}"> {{ SensorElement.text }} </option>
+								</select>
+							</span>
 							
-							<!--Type of Values for Sensor Elements-->
-							&nbsp;&nbsp;
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Device ID') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="ReportDeviceID">Device ID</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Device ID')" ng-model="SensorForm.SensorReportDeviceID[SensorElementCount.ID]" class="form-control" id="ReportDeviceID"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Device MetaData') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportDeviceMetadata">Device MetaData</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Device MetaData')" ng-model="SensorForm.SensorReportDeviceMetadata[SensorElementCount.ID]" class="form-control" id="SensorReportDeviceMetadata"/>
+							</span>	
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Raw Data') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportRawData">Raw Data</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Raw Data')" ng-model="SensorForm.SensorReportRawData[SensorElementCount.ID]" class="form-control" id="SensorReportRawData"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Data Processing Method') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportDataProcessingMethod">Data Processing Method</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Data Processing Method')" ng-model="SensorForm.SensorReportDataProcessingMethod[SensorElementCount.ID]" class="form-control" id="SensorReportDataProcessingMethod"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Time') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportDataTime">Time</label>&nbsp;&nbsp;
+								<input type="datetime-local" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Time')" ng-model="SensorForm.SensorReportDataTime[SensorElementCount.ID]" class="form-control" id="SensorReportDataTime"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Microorganism') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportMicroorganism">Microorganism</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Microorganism')" ng-model="SensorForm.SensorReportMicroorganism[SensorElementCount.ID]" class="form-control" id="SensorReportMicroorganism"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Chemical Substance') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportChemicalSubstance">Chemical Substance</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Chemical Substance')" ng-model="SensorForm.SensorReportChemicalSubstance[SensorElementCount.ID]" class="form-control" id="SensorReportChemicalSubstance"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Value') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportValue">Value</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Value')" ng-model="SensorForm.SensorReportValue[SensorElementCount.ID]" class="form-control" id="SensorReportValue"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Component') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportComponent">Component</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Component')" ng-model="SensorForm.SensorReportComponent[SensorElementCount.ID]" class="form-control" id="SensorReportComponent"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('String Value') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportStringValue">String Value</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'String Value')" ng-model="SensorForm.SensorReportStringValue[SensorElementCount.ID]" class="form-control" id="SensorReportStringValue"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Boolean Value') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportBooleanValue">Boolean Value</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Boolean Value')" ng-model="SensorForm.SensorReportBooleanValue[SensorElementCount.ID]" class="form-control" id="SensorReportBooleanValue"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Hex Binary Value') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportHexBinaryValue">Hex Binary Value</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Hex Binary Value')" ng-model="SensorForm.SensorReportHexBinaryValue[SensorElementCount.ID]" class="form-control" id="SensorReportHexBinaryValue"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('URI Value') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportURIValue">URI Value</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'URI Value')" ng-model="SensorForm.SensorReportURIValue[SensorElementCount.ID]" class="form-control" id="SensorReportURIValue"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Max Value') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportMaxValue">Max Value</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Max Value')" ng-model="SensorForm.SensorReportMaxValue[SensorElementCount.ID]" class="form-control" id="SensorReportMaxValue"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Min Value') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportMinValue">Min Value</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Min Value')" ng-model="SensorForm.SensorReportMinValue[SensorElementCount.ID]" class="form-control" id="SensorReportMinValue"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Mean Value') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportMeanValue">Mean Value</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Mean Value')" ng-model="SensorForm.SensorReportMeanValue[SensorElementCount.ID]" class="form-control" id="SensorReportMeanValue"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Standard Deviation') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportStandardDeviation">Standard Deviation</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Standard Deviation')" ng-model="SensorForm.SensorReportStandardDeviation[SensorElementCount.ID]" class="form-control" id="SensorReportStandardDeviation"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Perc Rank') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportPercRank">Perc Rank</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Perc Rank')" ng-model="SensorForm.SensorReportPercRank[SensorElementCount.ID]" class="form-control" id="SensorReportPercRank"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.indexOf('Perc Value') >= 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportPercValue">Perc Value</label>&nbsp;&nbsp;
+								<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID,'Perc Value')" ng-model="SensorForm.SensorReportPercValue[SensorElementCount.ID]" class="form-control" id="SensorReportPercValue"/>
+							</span>
+							
+							<span ng-show="SensorForm.SelectReqReport.length > 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportPercValue">UOM</label>&nbsp;&nbsp;
+								<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID, 'UOM')" ng-model="SensorForm.SensorElementUOM[SensorElementCount.ID]">
+									<option class="dropdown-item" value='' selected> Choose UOM </option>
+									<option class="dropdown-item" ng-repeat="SensorUOM in SensorUOMs |filter:{UOMtype:SensorForm.SensorReportType[SensorElementCount.ID]}" value="{{ SensorUOM.value  }}" ng-class="SensorUOM.class" ng-disabled="SensorUOM.disabled"> {{ SensorUOM.text }} </option>							
+								</select>
+							</span>
+							
+							<!-- Add Delete button for each row -->
+							<span ng-show="SensorForm.SelectReqReport.length > 0">&nbsp;&nbsp;
+								<label class="form-label" for="SensorReportRemove"></label>&nbsp;&nbsp;
+								<button id="SensorReportRemove" ng-click="RemoveSensorElement(SensorElementCount.ID,$event)" class="btn btn-danger"><span><i class="fa fa-trash" aria-hidden="true"></i></span></button>
+							</span>
+						</span>
+						<br/>
+						
+						
+						<!--
+						<div class="form-inline">
+							
+							
+							
 							<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementCountType[SensorElementCount.ID]" style="width:10%">
 								<option class="dropdown-item" value='' selected> No. Of Elements </option>
 								<option class="dropdown-item" value='single'> Single </option>
 								<option class="dropdown-item" value='multiple'> Multiple </option>
 							</select>&nbsp;&nbsp;							
 							
-							<!--If single value is selected -->
 							<span ng-show="SensorForm.SensorElementCountType[SensorElementCount.ID] == 'single' ">
 							
-								<!--Type of values required for Sensor Elements-->
 								<span  style="width:10%">
 									<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementValueType[SensorElementCount.ID]">
 										<option class="dropdown-item" value='' selected> Value Type </option>
 										<option class="dropdown-item" ng-repeat="SensorValueType in SensorValueTypes" value="{{SensorValueType.value}}"> {{ SensorValueType.text }} </option>
 									</select>&nbsp;
 								</span>
-							
-								<!-- Show the Fields for Single Value -->								
+														
 								<span ng-show="SensorForm.SensorElementValueType[SensorElementCount.ID] == 'Discrete' ">									
 									<span style="width:10%">
 										<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementValue[SensorElementCount.ID]" class="form-control" placeholder="Discrete Value Eg: 26.0"/>
 									</span>	
 								</span>
 								
-								<!--Show the Fields for Range MAX VALUE MIN VALUE-->
 								<span ng-show="SensorForm.SensorElementValueType[SensorElementCount.ID] == 'Range' ">
 									<span style="width:10%">
 										<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementMinValue[SensorElementCount.ID]" class="form-control" placeholder="Min Value Eg: 10.0"/>&nbsp;
@@ -74,7 +235,6 @@
 									</span>
 								</span>	
 
-								<!-- If Boolean is selected for Value Type-->
 								<span ng-show="SensorForm.SensorElementValueType[SensorElementCount.ID] == 'Boolean' " style="width:10%">
 									<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementCountBoolean[SensorElementCount.ID]">
 										<option class="dropdown-item" value='true' ng-selected="true"> True </option>
@@ -82,7 +242,6 @@
 									</select>&nbsp;&nbsp;
 								</span>
 								
-								<!-- If Boolean is selected for Value Type-->
 								<span ng-show="SensorForm.SensorElementValueType[SensorElementCount.ID] == 'User_Defined' " style="width:10%">
 									<input type="text" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementUserDefinedValue[SensorElementCount.ID]" class="form-control" placeholder="URI"/>&nbsp;
 								</span>
@@ -90,28 +249,25 @@
 							</span>
 							
 							
-							<!--If Multiple value is selected -->
 							<span ng-show="SensorForm.SensorElementCountType[SensorElementCount.ID] == 'multiple' ">
-								<!--FROM Value TO value-->								
+															
 								<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorMultipleFrom[SensorElementCount.ID]" class="form-control" placeholder="From Eg: 20.0" />&nbsp;
 								<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorMultipleTo[SensorElementCount.ID]" class="form-control" placeholder="To Eg: 40.0" />&nbsp;
 								<input type="number" ng-blur="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorMultipleNumber[SensorElementCount.ID]" class="form-control" placeholder="Count Eg: 10" />&nbsp;
 							</span>&nbsp;
-							
-							<!-- Show the UOM -->							
+												
 							<select class="form-control" ng-change="SensorElementPopulator(SensorElementCount.ID)" ng-model="SensorForm.SensorElementUOM[SensorElementCount.ID]" style="width:15%">
 								<option class="dropdown-item" value='' selected> Report UOM </option>
 								<option class="dropdown-item" ng-repeat="SensorUOM in SensorUOMs |filter:{UOMtype:SensorForm.SensorElementType[SensorElementCount.ID]}" value="{{ SensorUOM.value  }}" ng-class="SensorUOM.class" ng-disabled="SensorUOM.disabled"> {{ SensorUOM.text }} </option>							
 							</select>&nbsp;
 							
-							<!-- Show the Time -->
 							<input type="datetime-local" ng-model="SensorForm.SensorElementTime[SensorElementCount.ID]" class="form-control"/>&nbsp;&nbsp;
 							
 							
-							<!-- Add Delete button for each row -->
-							<button ng-click="RemoveSensorElement(SensorElementCount.ID,$event)" class="btn btn-danger"><span><i class="fa fa-trash" aria-hidden="true"></i></span></button>
 							
-						</div>											
+						</div>	
+						-->
+						
 					</div>
 					
 				</div>
@@ -289,7 +445,7 @@
 						</span>		
 						
 						<span ng-show="OEQuantityCompanyPrefixDisplay">
-							 &ensp;<span> Company Prefix: </span>&nbsp;
+							 &ensp;<span> GS1 Company Prefix Length</span>&nbsp;
 							<select ng-model="CommonFormQuantity.OEQuantityCompanyPrefix" id="OEQuantityCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs" ng-required="OEQuantityCompanyPrefixDisplay">
 								<option value="" selected> Choose </option>
 								<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
@@ -413,7 +569,7 @@
 								</div>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" ng-required="AEPSSCCDisp" ng-model="CommonForm.SSCCType" class="custom-control-input" value="userCustomized" id="SSCCType2" name="SSCCType">
-									<label class="custom-control-label" for="SSCCType2">User Customized</label>
+									<label class="custom-control-label" for="SSCCType2">Range</label>
 								</div>
 							</span>							
 							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">
@@ -575,7 +731,7 @@
 						
 						<!-- Aggregation Event Parent Id Company Prefix -->
 						<span ng-show="AEPCompanyDisp">
-							<span> Company Prefix: </span> &ensp;
+							<span> GS1 Company Prefix Length</span> &ensp;
 							<select ng-required="AEPCompanyDisp" ng-model="CommonForm.AEPCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs">
 								<option value="" selected> Choose </option>
 								<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>

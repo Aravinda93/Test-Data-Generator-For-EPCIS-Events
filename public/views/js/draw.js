@@ -194,17 +194,20 @@ syncApp.controller('diagramCtrl', function ($scope,$http) {
 	
 	//Export the diagram
 	$scope.ExportDiagram	=	function(){
+		console.log("WITHIN EXPORT FUNCTION")
 		var diagram 	= 	angular.element("#diagram").ejDiagram("instance");
 		var options 	= 	{
-								fileName:	"Test Data Generator",
-								margin	: 	{
-												left: 30,
-												right: 30,
-												top: 30,
-												bottom: 30
-											},
-								mode	: 	ej.datavisualization.Diagram.ExportModes.Download,
-								format	: 	ej.datavisualization.Diagram.FileFormats.SVG,
+								fileName	:	"Test Data Generator",
+								margin		: 	{
+													left: 30,
+													right: 30,
+													top: 30,
+													bottom: 30
+												},
+								mode		: 	ej.datavisualization.Diagram.ExportModes.Download,
+								format		: 	ej.datavisualization.Diagram.FileFormats.SVG,
+								stretch		: 	"fill",
+								multiplePage: 	false
 							}
 		diagram.exportDiagram(options);
 	}
