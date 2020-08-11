@@ -60,7 +60,6 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 	
 	//Create the event on click of the submit button 
 	$scope.submitEvents			=	function(){
-		console.log(connectorArray);	
 		AllEventFinalArray		=	[];
 		$scope.outputElements 	= 	true;
 		$scope.inputElements 	= 	false;
@@ -79,18 +78,21 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 						var NodeObj				=	new Object();
 						NodeObj.NodeName		=	$rootScope.AllEventsArray[e].NodeID;
 						NodeObj.Type			=	"Source";
+						NodeObj.Count			=	connectorArray[con].Count;
 						NodeObj.Childrens		=	[];
 						NodeObj.FormData		=	$rootScope.AllEventsArray[e];
 						
 						for(var e2=0; e2<$rootScope.AllEventsArray.length; e2++)
-						{
+						{							
 							if($rootScope.AllEventsArray[e2].NodeID == ConnectorTarget)
-							{
+							{									
 								var NodeChildren			=	new Object();
 								NodeChildren.ChildNodeName	=	$rootScope.AllEventsArray[e2].NodeID;
-								NodeChildren.ChildType		=	"Target";
+								NodeChildren.Count			=	connectorArray[con].Count;
 								NodeChildren.FormData		=	$rootScope.AllEventsArray[e2];
+								NodeChildren.ChildType		=	"Target";
 								NodeObj.Childrens.push(NodeChildren);
+															
 							}
 						}
 						AllEventFinalArray.push(NodeObj);
@@ -108,6 +110,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 									var NodeChildren				=	new Object();
 									NodeChildren.ChildNodeName		=	$rootScope.AllEventsArray[e3].NodeID;
 									NodeChildren.FormData			=	$rootScope.AllEventsArray[e3];
+									NodeChildren.Count				=	connectorArray[con].Count;
 									NodeChildren.ChildType			=	"Target";
 									AllEventFinalArray[index].Childrens.push(NodeChildren);
 								}

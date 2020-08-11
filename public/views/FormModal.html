@@ -19,6 +19,19 @@
 								</td>
 							</tr>
 							<tr>
+								<td>Syntax Type</td>
+								<td>
+									<div class="custom-control custom-radio custom-control-inline">
+										<input type="radio" ng-model="formdata.syntaxType" class="custom-control-input" value="urn" id="syntaxType1" name="syntaxType">
+										<label class="custom-control-label" for="syntaxType1">URN</label>
+									</div>
+									<div class="custom-control custom-radio custom-control-inline">
+										<input type="radio" ng-model="formdata.syntaxType" class="custom-control-input" value="webURI" id="syntaxType2" name="syntaxType">
+										<label class="custom-control-label" for="syntaxType2">Web URI</label>
+									</div>
+								</td>
+							</tr>
+							<tr>
 								<td rowspan="2" class="column2"> Event Type </td>
 								<td>
 									<select id="eventtype1" ng-model="formdata.eventtype1" class="form-control" ng-change="EventTypeChange()" ng-options='eventtype1.value as eventtype1.text  for eventtype1 in eventType' required>
@@ -204,7 +217,7 @@
 								<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'AggregationEvent' "> Parent ID </td>
 
 								<td ng-cloak  ng-show="formdata.eventtype1 == 'AggregationEvent'">
-									<button ng-show="ParentButton" ng-click="AggregationEventParent()" type="button" class="btn-btn-info" >Add Parent</button>
+									<button ng-show="ParentButton" ng-click="AggregationEventParent()" type="button" class="btn-btn-info" >Add Parent ID</button>
 									<span ng-repeat="(key, value) in AggregationEventParentURI">
 										<span>
 												<button title="Delete Parent" type="button" ng-click="Delete_AggregateParent()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
@@ -216,7 +229,7 @@
 								<!-- When TRANSACTION EVENT has been Selected show PARENT ID -->
 								<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransactionEvent' "> Parent ID </td>
 								<td ng-show="formdata.eventtype1 == 'TransactionEvent' ">
-									<button ng-show="TransactionEventParent" ng-click="TransactionEventParentId()" type="button" class="btn-btn-info" >Add Event</button>
+									<button ng-show="TransactionEventParent" ng-click="TransactionEventParentId()" type="button" class="btn-btn-info" >Add Parent ID</button>
 									<span ng-repeat="(key,value) in TransactionEventParentIDURI">
 										<span>
 											<button title="Delete Parent ID" type="button" ng-click="Delete_TransactionParent(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
@@ -234,7 +247,7 @@
 								<!-- When ASSOCIATION EVENT has been selected -->
 								<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'AssociationEvent' "> Parent ID </td>
 								<td ng-cloak  ng-show="formdata.eventtype1 == 'AssociationEvent'">
-									<button ng-show="AssociationEventParentButton" ng-click="AssociationEventParent()" type="button" class="btn-btn-info" >Add Parent</button>
+									<button ng-show="AssociationEventParentButton" ng-click="AssociationEventParent()" type="button" class="btn-btn-info" >Add Parent ID</button>
 									<span ng-repeat="(key, value) in AssociationEventParentURI">
 										<span>
 												<button title="Delete Parent" type="button" ng-click="AssociationEventParentDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
@@ -316,7 +329,7 @@
 								<!-- TRANSACTION EVENT Quantities -->
 								<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransactionEvent' " class="column2"> Quantities </td>
 								<td ng-show="formdata.eventtype1 == 'TransactionEvent' ">
-									<button ng-show="TransactionEventQuantitiesButton" ng-click="TransactionEventQuantities()" type="button" class="btn-btn-info" >Add Quantities</button>
+									<button ng-show="TransactionEventQuantitiesButton" ng-click="TransactionEventQuantities()" type="button" class="btn-btn-info" >Add Child Quantities</button>
 									<span ng-hide="TransactionEventQuantitiesButton">
 										<span>
 											<button title="Delete Quantites" type="button" ng-click="TransactionEventQuantitiesDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>

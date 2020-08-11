@@ -2,13 +2,13 @@ var app = angular.module('myApp', ['CopyToClipboard'], function() {});
 
 app.controller('AppController', function($scope,$http,$location,$anchorScroll,$copyToClipboard,$rootScope){
 	//Common
-	$scope.formdata								=	{eventtype1:''};
+	$scope.formdata								=	{eventtype1:'', syntaxType:'urn'};
 	$scope.SensorForm							=	{Temperature:''};
 	$scope.AddExtensionForm						=	{};
 	$scope.EditExtensionForm					=	{};
-	$scope.EventTypeRowSpan						= 	4;
+	$scope.EventTypeRowSpan						= 	5;
 	$scope.rowspanWHAT							=	1;
-	$scope.rowspanWHY							=	4;
+	$scope.rowspanWHY							=	5;
 	$scope.OEQuantities							=	1;
 	$scope.CommonExtensionsList					=	[];
 	$scope.CommonExtensionsID					=	0;
@@ -56,18 +56,18 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	$scope.EventTypeChange = function() {
 		if($scope.formdata.eventtype1 == 'ObjectEvent' || $scope.formdata.eventtype1 == 'AggregationEvent' || $scope.formdata.eventtype1 == 'TransactionEvent')
 		{
-			$scope.EventTypeRowSpan 		= 	5;
+			$scope.EventTypeRowSpan 		= 	6;
 		}
 		else
 		{
-			$scope.EventTypeRowSpan 		= 	4;
+			$scope.EventTypeRowSpan 		= 	5;
 		}
 		
 		//Add Number of rows to tabled based on Event Selection
 		if($scope.formdata.eventtype1 == 'ObjectEvent')
 		{
 			$scope.rowspanWHAT 					= 	2;
-			$scope.rowspanWHY					=	7;
+			$scope.rowspanWHY					=	8;
 			
 			$scope.ObjectEventEpcsURI			=	[];
 			$scope.AggregationEventParentURI	=	[];			
@@ -77,7 +77,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		else if($scope.formdata.eventtype1 == 'AggregationEvent')
 		{
 			$scope.rowspanWHAT 	= 	3;
-			$scope.rowspanWHY	=	6;
+			$scope.rowspanWHY	=	7;
 			
 			$scope.ObjectEventEpcsURI			=	[];
 			$scope.AggregationEventParentURI	=	[];	
@@ -88,7 +88,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		else if($scope.formdata.eventtype1 == 'TransactionEvent')
 		{
 			$scope.rowspanWHAT 						= 	3;
-			$scope.rowspanWHY						=	6;
+			$scope.rowspanWHY						=	7;
 			
 			$scope.TransactionEventParent			=	true;
 			$scope.TransactionEventEPCSbutton		=	true;
@@ -97,7 +97,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		else if($scope.formdata.eventtype1 == 'TransformationEvent')
 		{
 			$scope.rowspanWHAT 									= 	5;
-			$scope.rowspanWHY									=	5;
+			$scope.rowspanWHY									=	6;
 			
 			$scope.TransformInputEPCsButton						=	true;
 			$scope.TransformOutputEPCsButton					=	true;
@@ -107,7 +107,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		else if($scope.formdata.eventtype1 == 'AssociationEvent')
 		{
 			$scope.rowspanWHAT 			= 	3;
-			$scope.rowspanWHY			=	6;
+			$scope.rowspanWHY			=	7;
 			
 			$scope.AssociationEventParentButton				=	true;
 			$scope.AssociationEventChildEPCSButton			=	true;
@@ -343,7 +343,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	//Aggregation Event Parent Creation
 	$scope.CommonEventFormat	=	function(){
 		//Call the function to create the URI and Display it
-		var data 				=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues});
+		var data 				=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues, formdata:$scope.formdata});
 		angular.element('#ParentTypeModal').modal('hide');
 		$http({
 		url: "/CreateAggregationEventURI",
@@ -1124,11 +1124,13 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		if($scope.ObjectEventAddEPCsFlag || $scope.AEChildEPCSFlage || $scope.TransactionEventChildEPCS || $scope.TransformationEventInputEPCsFlag || $scope.TransformationEventOutputEPCsFlag || $scope.AssociationEventChildEPCSFlag)
 		{
 			$scope.AutoGenerate	= $scope.AutoGenerateRequired =	$scope.MultiValues = true;
+			$scope.RequiredValues	=	true;
 		}
 		
 		if($scope.AEParentEPCsFlag || $scope.TransactionEventParentIDFlag || $scope.AssociationEventParentFlag)
 		{
 			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
+			$scope.RequiredValues	=	false;
 		}
 			
 		if($scope.CommonForm.AggregationEventParentID == 'SGTIN (Al 01 + Al 21)')
@@ -1142,7 +1144,13 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			$scope.AEPSSCCDisp		= 	true;
 			$scope.AEPCompanyDisp	=	false;
 			$scope.NoneValuesShow	=	false;
-			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;			
+		}
+		else if($scope.CommonForm.AggregationEventParentID == 'SGLN (Al 414 + Al 254)')
+		{
+			$scope.AEPSSGLNDisp		=	true;
+			$scope.AEPCompanyDisp	=	true;
+			$scope.NoneValuesShow	=	true;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GRAI (Al 8003)')
 		{

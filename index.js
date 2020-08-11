@@ -74,7 +74,6 @@ app.post('/createEvents', function(req,res){
 
 //Read the Excel File Data
 app.post('/UploadFIle',function(req,res){
-	console.log(req.body);
 	ReadExcelFile.ReadExcelFileContent(function(data){
 		
 	});

@@ -549,18 +549,29 @@
 						<select class="form-control" ng-change="AggregationEventParentChange()" ng-model="CommonForm.AggregationEventParentID">
 							<option class="dropdown-item" value='' selected> Choose </option>
 							<option class="dropdown-item" ng-repeat="ObjectEventEpcsType in ObjectEventEpcsTypes" value="{{ ObjectEventEpcsType.value  }}" ng-class="ObjectEventEpcsType.class" ng-disabled="ObjectEventEpcsType.disabled"> {{ ObjectEventEpcsType.text }} </option>
+							<option class="dropdown-item" value="SGLN (Al 414 + Al 254)" ng-if="formdata.eventtype1 == 'AssociationEvent'">SGLN (Al 414 + Al 254)</option>
 						</select>
 					</div>
 					<div class="form-inline" ng-show="CommonForm.AggregationEventParentID">		
 						<!-- Aggregation Event Parent Id is SGTIN -->
 						<span  ng-show="AEPSGTINDisp">
 							<span>(01)</span>&nbsp;
-							<input type="text" ng-required="AEPSGTINDisp" ng-model="CommonForm.AEPSGTIN1" maxlength="14" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GTIN must be 14 digits')"  title="14 characters length required" placeholder="Enter 14 Digit Code" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPSGTINDisp" ng-model="CommonForm.AEPSGTIN1" maxlength="14" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GTIN must be 14 digits')"  title="14 characters length required" placeholder="Enter 14-digit GTIN" class="form-control" style="width: 200px;" >&nbsp;
 							<span>(21)</span>&nbsp;
 							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPSGTIN2" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" class="form-control" style="width: 200px;">&nbsp;
 						</span>
 						
+						
+						<!--If Association Event and SGLN is selected -->
+						<span ng-show="AEPSSGLNDisp">
+							<span> (414) </span>&ensp;
+							<input ng-model="CommonForm.SingleSGLNValue1" ng-required="AEPSSGLNDisp" type="text" class="form-control" pattern="[0-9]{13,13}" maxlength="13" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" title="GLN must be 13 digits" placeholder="13 Digits GLN" oninvalid="this.setCustomValidity('GLN must be 13 digit')"></input>&ensp;
+							<span> (254) </span>&ensp;
+							<input ng-model="CommonForm.SingleSGLNValue2" ng-hide="AutoGenerate" type="text" class="form-control" maxlength="13" oninput="setCustomValidity('');" title="GLN Extension" placeholder="GLN Extension" oninvalid="this.setCustomValidity('GLN Extension is required')"></input>&ensp;
+						</span>
+						
 						<!-- Aggregation Event Parent ID is SSCC (Al 00) -->
+						
 						<span ng-show="AEPSSCCDisp">
 							<span>
 								<div class="custom-control custom-radio custom-control-inline">
@@ -579,7 +590,7 @@
 								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
 									<input type="text" ng-model="CommonForm.AEPSSCCStartValue"  ng-required="CommonForm.SSCCType == 'userCustomized'" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Start Value required')"  title="SSCC Start value" placeholder="SSCC Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
 								</span>
-								<input type="text" ng-model="CommonForm.AEPSSCCCount" 		ng-required="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random'" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Count required')" title="SSCC Count" placeholder="SSCC Count" class="form-control" style="width: 200px;">&nbsp;
+								<input type="text" ng-show="MultiValues" ng-model="CommonForm.AEPSSCCCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Count required')" title="SSCC Count" placeholder="SSCC Count" class="form-control" style="width: 200px;">&nbsp;
 							</span>
 							<!--
 							<span ng-show="CommonForm.SSCCType == 'random' ">
@@ -593,6 +604,7 @@
 							</span>
 							-->
 						</span>
+						
 						
 						<!-- Aggregation Event Parent ID is GRAI (Al 8003) -->
 						<span ng-show="AEPGRAIDisp">
@@ -717,8 +729,8 @@
 						
 						<!-- Options for Random Number !-->
 						<span ng-show="CommonForm.sgtintype == 'range' ">
-							<input type="number" id="sgtnGTINFrom" 	ng-model="CommonForm.sgtnGTINFrom"  placeholder="From" title="Enter the Range From" class="form-control" ng-required="CommonForm.sgtintype == 'range'" style="width:120px;"></input>&nbsp;
-							<input type="number" id="sgtnGTINTo" 	ng-model="CommonForm.sgtnGTINTo" 	  placeholder="To" title="Enter the Range To" class="form-control" ng-required="CommonForm.sgtintype == 'range'" style="width:120px;"></input>&nbsp;
+							<input type="number" id="sgtnGTINFrom" 	min=1 ng-model="CommonForm.sgtnGTINFrom"  placeholder="From" title="Enter the Range From" class="form-control" ng-required="CommonForm.sgtintype == 'range'" style="width:120px;"></input>&nbsp;
+							<input type="number" id="sgtnGTINTo" 	min=1 ng-model="CommonForm.sgtnGTINTo" 	  placeholder="To" title="Enter the Range To" class="form-control" ng-required="CommonForm.sgtintype == 'range'" style="width:120px;"></input>&nbsp;
 						</span>
 						
 						<span ng-show="CommonForm.sgtintype == 'random' ">
@@ -726,14 +738,13 @@
 						</span>
 						
 						<span ng-show="CommonForm.sgtintype == 'none' && NoneValuesShow">
-							<input type="text" ng-required="CommonForm.sgtintype == 'none' && NoneValuesShow" id="singleObjectId" ng-model="CommonForm.singleObjectId" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Missing Serial')" maxwidth="17" class="form-control" placeholder="Enter Object Id" title="Enter the Object Id"></input>&nbsp;
+							<input type="text" ng-required="CommonForm.sgtintype == 'none' && NoneValuesShow" id="singleObjectId" ng-model="CommonForm.singleObjectId" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Missing Serial')" maxwidth="17" class="form-control" placeholder="Enter serial number" title="Enter serial number"></input>&nbsp;
 						</span>	
 						
 						<!-- Aggregation Event Parent Id Company Prefix -->
 						<span ng-show="AEPCompanyDisp">
-							<span> GS1 Company Prefix Length</span> &ensp;
 							<select ng-required="AEPCompanyDisp" ng-model="CommonForm.AEPCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs">
-								<option value="" selected> Choose </option>
+								<option value="" selected> GS1 Company Prefix Length </option>
 								<option value="{{ companyPrefix.value }}"> {{ companyPrefix.text }} </option>
 							</select>
 						</span>
@@ -788,7 +799,9 @@
 						</div>
 					</div>
 				</div>
+				<br/>
 				<div class="modal-footer">
+					<br/>
 					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 					<button type="submit" class="btn btn-success">Add</button>
 				</div>

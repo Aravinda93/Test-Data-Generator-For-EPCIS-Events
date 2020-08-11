@@ -4,11 +4,13 @@ var moment 				= 	require('moment');
 var xml_json_functions	=	require('./XML_JSON_Functions');
 
 exports.createXML	=	function(AllData,callback){
+	
 	var currentTime 	=	moment().format();
 	var File 			=	'XML';
 	var RecordTimeArray	=	[];
 	var EventTimeArray	=	[];
 	var ErrorTimeArray	=	[];
+	var GlobalCount		=	0;
 	var xml;
 	var root 			= 	builder.create('epcis:EPCISDocument')
 								root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
@@ -23,6 +25,18 @@ exports.createXML	=	function(AllData,callback){
 		var EventCount	=	AllData.AllEventFinalArray[event].FormData.input.eventcount;
 		var Query		=	AllData.AllEventFinalArray[event].FormData;
 		var input		=	AllData.AllEventFinalArray[event].FormData.input;
+		
+		//Configure the split events
+		/*if(event > 0)
+		{
+			var CountNumber		=	parseInt(AllData.AllEventFinalArray[event-1].Count, 10);
+			CountNumber			=	GlobalCount	+ parseInt(AllData.AllEventFinalArray[event-1].Count);
+			var previousEvent	=	event-1;
+			Query.EPCs			=	AllData.AllEventFinalArray[previousEvent].FormData.EPCs;
+			//console.log(Count)
+			Query.EPCs			=	Query.EPCs.slice(0,Count+1);
+			console.log(Query.EPCs)
+		}*/
 		
 		//Loop based on the number of events within each Node/Events
 		for(var count=0; count<EventCount; count++)
@@ -190,7 +204,7 @@ exports.createXML	=	function(AllData,callback){
 					}
 				}
 				
-			}
+			}			
 			
 			//IF the event type is Object event
 			if(input.eventtype1 == 'ObjectEvent')
@@ -659,59 +673,6 @@ exports.createXML	=	function(AllData,callback){
 				}
 			}
 			
-			
-			//Sensor Information
-			console.log(Query);
-			if(Query.SensorForm.length > 0)
-			{				
-				var SensorForm			=	Query.SensorForm;
-				var sensorElementList	=	extension.ele('sensorElementList')
-				
-				//Loop through the SensorForm and find the number of elements
-				for(var sf=0; sf<SensorForm.length; sf++)
-				{
-					var sensorElement		=	sensorElementList.ele('sensorElement')	
-					
-					//Loop through Each sensor Element
-					for(var t=0; t<SensorForm[sf].length; t++)
-					{
-						//Add the Sensor Metadata information
-						if(SensorForm[sf][t].CheckBox)
-						{
-							var sensorMetaData		=	sensorElement.ele('sensorMetaData')
-							sensorMetaData.att('time',moment(SensorForm[sf][t].Time).format())
-							sensorMetaData.att('startTime',moment(SensorForm[sf][t].StartTime).format())
-							sensorMetaData.att('endTime',moment(SensorForm[sf][t].EndTime).format())
-						}
-						
-						var SensorElements		=	SensorForm[sf][t].SENSORELEMENTS;
-						//Loop through Each Sensor Report Data
-						for(var e=0;e<SensorElements.length;e++)
-						{
-							var sensorReport	=	sensorElement.ele('sensorReport')
-							var SensorType		=	SensorElements[e].SensorFields.Type;
-							var SensorValue		=	SensorElements[e].SensorFields.Value;
-							var SensorUOM		=	SensorElements[e].SensorFields.UOM
-							
-							if(SensorType != '' && SensorType != null && SensorType != undefined)
-							{							
-								sensorReport.att('type','gs1:'+SensorType)
-							}
-							
-							if(SensorValue != '' && SensorValue != null && SensorValue != undefined)
-							{
-								sensorReport.att('value',SensorValue)
-							}
-								
-							if(SensorUOM != '' && SensorUOM != null && SensorUOM != undefined)
-							{
-								sensorReport.att('uom',SensorUOM)
-							}
-							
-						}
-					}
-				}			
-			}
 			
 			//Check if the ILMD has been added then add them
 			if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "TransformationEvent")

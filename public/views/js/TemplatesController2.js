@@ -1,17 +1,17 @@
 //Create the controller for Drag and Drop features
 syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
-	
-	$scope.formdata				=	{eventtype1:''};
+
 	$rootScope.AllEventsArray	=	[];
+	$scope.formdata				=	{eventtype1:''};
 	
 	//Onclick of the button show the Modal for formdata
 	$scope.ShowFormDataModal	=	function(event){
 		//Common
-		$scope.formdata								=	{eventtype1:''};
+		$scope.formdata								=	{eventtype1:'', syntaxType:'urn'};
 		$scope.SensorForm							=	{Temperature:''};
 		$scope.AddExtensionForm						=	{};
 		$scope.EditExtensionForm					=	{};
-		$scope.EventTypeRowSpan						= 	4;
+		$scope.EventTypeRowSpan						= 	5;
 		$scope.rowspanWHAT							=	1;
 		$scope.rowspanWHY							=	4;
 		$scope.OEQuantities							=	1;
@@ -74,11 +74,11 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	$scope.EventTypeChange = function() {
 		if($scope.formdata.eventtype1 == 'ObjectEvent' || $scope.formdata.eventtype1 == 'AggregationEvent' || $scope.formdata.eventtype1 == 'TransactionEvent')
 		{
-			$scope.EventTypeRowSpan 	= 	5;
+			$scope.EventTypeRowSpan 	= 	6;
 		}
 		else
 		{
-			$scope.EventTypeRowSpan 	= 	4;
+			$scope.EventTypeRowSpan 	= 	5;
 		}
 		
 		//Add Number of rows to tabled based on Event Selection
@@ -117,11 +117,11 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	$scope.EventTypeChange = function() {
 		if($scope.formdata.eventtype1 == 'ObjectEvent' || $scope.formdata.eventtype1 == 'AggregationEvent' || $scope.formdata.eventtype1 == 'TransactionEvent')
 		{
-			$scope.EventTypeRowSpan 		= 	5;
+			$scope.EventTypeRowSpan 		= 	6;
 		}
 		else
 		{
-			$scope.EventTypeRowSpan 		= 	4;
+			$scope.EventTypeRowSpan 		= 	5;
 		}
 		
 		//Add Number of rows to tabled based on Event Selection
@@ -444,7 +444,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	//Aggregation Event Parent Creation
 	$scope.CommonEventFormat	=	function(){
 		//Call the function to create the URI and Display it
-		var data 				=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues});
+		var data 				=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues, formdata:$scope.formdata});
 		angular.element('#ParentTypeModal').modal('hide');
 		angular.element('#EventModalForm').modal('show');
 		$http({
@@ -534,7 +534,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	//Object Event Quantities Submit call the URI function
 	$scope.CommonEventQuantities	=	function(){
 		
-		var data 				=	JSON.stringify({input:$scope.CommonFormQuantity});			
+		var data 				=	JSON.stringify({input:$scope.CommonFormQuantity, formdata:$scope.formdata});			
 		angular.element('#ChildTypeModal').modal('hide');
 		angular.element('#EventModalForm').modal('show');
 		$http({
@@ -1042,7 +1042,6 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		BTTObj['BTT']	=	{};
 		$scope.BusinessTransactionList.push(BTTObj);
 		$scope.BusinessTransactionCount++;
-		console.log($scope.BusinessTransactionList);
 	}
 	
 	//Add the information into the BTT Array
@@ -1056,12 +1055,10 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				break;
 			}
 		}
-		console.log($scope.BusinessTransactionList);
 	}
 	
 	//Remove the element from the BTT array
 	$scope.DeleteBTT	=	function(Delete_BTT_ID){
-		console.log(Delete_BTT_ID);
 		for(var b=0; b<$scope.BusinessTransactionList.length; b++)
 		{
 			if($scope.BusinessTransactionList[b].ID == Delete_BTT_ID)
@@ -1070,7 +1067,6 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				break;
 			}
 		}
-		console.log($scope.BusinessTransactionList);
 	}
 	
 	
@@ -1179,8 +1175,6 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	
 	//If submit button is clicked then send data to Nodejs for XML and JSON creation
 	$scope.EventInformation	= 	function(){
-		console.log("SENSOR ELEMENTS: ");
-		console.log($scope.TotalSensorElementsArray);
 		
 		if($scope.formdata.eventtype1 == 'ObjectEvent')
 		{
@@ -1264,7 +1258,6 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.NodeID			=	$scope.NodeEventId;			
 			$rootScope.AllEventsArray.push(obj);
 		}		
-		console.log($rootScope.AllEventsArray);
 		angular.element('#EventModalForm').modal('hide');
 		
 		//var diagram 				= 	angular.element("#diagram").ejDiagram("instance"); 

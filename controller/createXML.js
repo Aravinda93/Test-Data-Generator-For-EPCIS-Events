@@ -428,6 +428,21 @@ exports.createXMLData	=	function(Query,callback){
 			}
 		}
 		
+		//Check for the PERSISTENT DISPOSITION
+		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
+		{
+			var persistentDisposition	=	ObjectEvent.ele('persistentDisposition')
+			
+			if(input.PersistentDisposition == 'DispositionEnter')
+			{
+				persistentDisposition.ele(input.PersistentDispositionType,input.EnterPersistentDispositionText)
+			}
+			else
+			{
+				persistentDisposition.ele(input.PersistentDispositionType,'urn:epcglobal:cbv:disp:'+input.PersistentDisposition)
+			}
+		}
+		
 		//Check for ReadPoint and based on that set the Readpoint 
 		if(input.readpointselector != '' && input.readpointselector != null && typeof input.readpointselector != undefined)
 		{
@@ -678,17 +693,16 @@ exports.createXMLData	=	function(Query,callback){
 					//sensorMetaData.att('time',moment(SensorForm[sf][t].Time).format())
 					
 					//Add the Sensor Metadata information if its populated
-					SensorMetaDataChecker(SensorForm[sf][t].Time,'time',sensorMetaData)
-					SensorMetaDataChecker(SensorForm[sf][t].StartTime,'startTime',sensorMetaData)
-					SensorMetaDataChecker(SensorForm[sf][t].EndTime,'endTime',sensorMetaData)
-					SensorMetaDataChecker(SensorForm[sf][t].DeviceID,'deviceID',sensorMetaData)
-					SensorMetaDataChecker(SensorForm[sf][t].DeviceMetadata,'deviceMetaData',sensorMetaData)
-					SensorMetaDataChecker(SensorForm[sf][t].RawData,'rawData',sensorMetaData)
-					SensorMetaDataChecker(SensorForm[sf][t].DataProcessingMethod,'dataProcessingMethod',sensorMetaData)
-					SensorMetaDataChecker(SensorForm[sf][t].BusinessRules,'bizRules',sensorMetaData)					
+					SensorChecker(SensorForm[sf][t].Time,'time',sensorMetaData)
+					SensorChecker(SensorForm[sf][t].StartTime,'startTime',sensorMetaData)
+					SensorChecker(SensorForm[sf][t].EndTime,'endTime',sensorMetaData)
+					SensorChecker(SensorForm[sf][t].DeviceID,'deviceID',sensorMetaData)
+					SensorChecker(SensorForm[sf][t].DeviceMetadata,'deviceMetaData',sensorMetaData)
+					SensorChecker(SensorForm[sf][t].RawData,'rawData',sensorMetaData)
+					SensorChecker(SensorForm[sf][t].DataProcessingMethod,'dataProcessingMethod',sensorMetaData)
+					SensorChecker(SensorForm[sf][t].BusinessRules,'bizRules',sensorMetaData)					
 					
 					var SensorElements		=	SensorForm[sf][t].SensorElements;
-					console.log(SensorForm[sf][t]);
 					//Loop through Each Sensor Report Data
 					if(SensorElements != undefined)
 					{						
@@ -699,21 +713,33 @@ exports.createXMLData	=	function(Query,callback){
 							
 							var SensorType		=	SensorElements[e].SensorFields.Type;
 							
-							SensorMetaDataChecker(SensorElements[e].SensorFields.Time,'time',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.Time,'time',sensorReport)
 							
 							if(SensorType != '' && SensorType != null && SensorType != undefined){
 								sensorReport.att('type','gs1:'+SensorType)
 							}
 							
-							SensorMetaDataChecker(SensorElements[e].SensorFields.Value,'value',sensorReport)
-							SensorMetaDataChecker(SensorElements[e].SensorFields.MinValue,'minValue',sensorReport)
-							SensorMetaDataChecker(SensorElements[e].SensorFields.MaxValue,'maxValue',sensorReport)
-							SensorMetaDataChecker(SensorElements[e].SensorFields.MeanValue,'meanValue',sensorReport)
-							SensorMetaDataChecker(SensorElements[e].SensorFields.DeviceID,'deviceID',sensorReport)
-							SensorMetaDataChecker(SensorElements[e].SensorFields.DeviceMetaData,'deviceMetaData',sensorReport)
-							SensorMetaDataChecker(SensorElements[e].SensorFields.StandardDeviation,'sDev',sensorReport)							
-							SensorMetaDataChecker(SensorElements[e].SensorFields.ChemicalSubstance,'chemicalSubstance',sensorReport)
-							SensorMetaDataChecker(SensorElements[e].SensorFields.UOM,'uom',sensorReport)
+							//Check if the field is populated and add it to the sensor element list
+							SensorChecker(SensorElements[e].SensorFields.DeviceID,'deviceID',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.DeviceMetaData,'deviceMetaData',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.RawData,'rawData',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.DataProcessingMethod,'dataProcessingMethod',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.Time,'time',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.Microorganism,'microorganism',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.ChemicalSubstance,'chemicalSubstance',sensorReport)							
+							SensorChecker(SensorElements[e].SensorFields.Value,'value',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.Component,'component',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.StringValue,'stringValue',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.BooleanValue,'booleanValue',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.HexBinaryValue,'hexBinaryValue',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.URIValue,'uriValue',sensorReport)		
+							SensorChecker(SensorElements[e].SensorFields.MaxValue,'maxValue',sensorReport)							
+							SensorChecker(SensorElements[e].SensorFields.MinValue,'minValue',sensorReport)							
+							SensorChecker(SensorElements[e].SensorFields.MeanValue,'meanValue',sensorReport)						
+							SensorChecker(SensorElements[e].SensorFields.StandardDeviation,'sDev',sensorReport)	
+							SensorChecker(SensorElements[e].SensorFields.PercRank,'percRank',sensorReport)	
+							SensorChecker(SensorElements[e].SensorFields.PercValue,'percValue',sensorReport)								
+							SensorChecker(SensorElements[e].SensorFields.UOM,'uom',sensorReport)
 							
 						}
 					}
@@ -721,7 +747,8 @@ exports.createXMLData	=	function(Query,callback){
 			}			
 		}
 		
-		function SensorMetaDataChecker(field, attValue, sensorMetaData){
+		//Function to check if the field is populated for sensor elements
+		function SensorChecker(field, attValue, sensorMetaData){
 			if(field != '' && field != null && field != undefined)
 			{
 				sensorMetaData.att(attValue,field)
