@@ -4,12 +4,12 @@ var moment 				= 	require('moment');
 var xml_json_functions	=	require('./XML_JSON_Functions');
 
 exports.createXML	=	function(AllData,callback){
-	
 	var currentTime 	=	moment().format();
 	var File 			=	'XML';
 	var RecordTimeArray	=	[];
 	var EventTimeArray	=	[];
 	var ErrorTimeArray	=	[];
+	var AddedEvents		=	[];
 	var GlobalCount		=	0;
 	var xml;
 	var root 			= 	builder.create('epcis:EPCISDocument')
@@ -19,192 +19,201 @@ exports.createXML	=	function(AllData,callback){
 								root.att('creationDate', currentTime)
 								root.ele('EPCISBody')
 								root.ele('EventList')
+	
+	var AllEventsArray	=	AllData.AllEventFinalArray;
+	
 	//Main loop based on the number of events/nodes in drag and drop
-	for(var event=0; event<AllData.AllEventFinalArray.length; event++)
+	for(var parent=0; parent<AllEventsArray.length; parent++)
 	{
-		var EventCount	=	AllData.AllEventFinalArray[event].FormData.input.eventcount;
-		var Query		=	AllData.AllEventFinalArray[event].FormData;
-		var input		=	AllData.AllEventFinalArray[event].FormData.input;
+		var LastCounter		=	0;
+		var Temparray		=	[];
+		var ParentData		=	AllEventsArray[parent];
+		var OuterParentName	=	ParentData.NodeName;
+		var ParentEventType	=	AllEventsArray[parent].FormData.input.eventtype1;
 		
-		//Configure the split events
-		/*if(event > 0)
+		for(var child=0; child<AllEventsArray[parent].Childrens.length; child++)
 		{
-			var CountNumber		=	parseInt(AllData.AllEventFinalArray[event-1].Count, 10);
-			CountNumber			=	GlobalCount	+ parseInt(AllData.AllEventFinalArray[event-1].Count);
-			var previousEvent	=	event-1;
-			Query.EPCs			=	AllData.AllEventFinalArray[previousEvent].FormData.EPCs;
-			//console.log(Count)
-			Query.EPCs			=	Query.EPCs.slice(0,Count+1);
-			console.log(Query.EPCs)
-		}*/
-		
-		//Loop based on the number of events within each Node/Events
-		for(var count=0; count<EventCount; count++)
-		{
-			if(input.eventtype1 == "AssociationEvent")
-			{
-				var AEMainExtension = 	root.ele('extension')
-				var AESubExtension	=	AEMainExtension.ele('extension')
-				var ObjectEvent		= 	AESubExtension.ele(input.eventtype1)
-			}
-			else
-			{
-				var ObjectEvent = root.ele(input.eventtype1)
-			}
+			var ChildData		=	AllEventsArray[parent].Childrens[child];
+			var ChildNodeName	=	ChildData.ChildNodeName;
+			var EndCount		=	parseInt(AllEventsArray[parent].Childrens[child].Count);
+			var ChildEventType	=	AllEventsArray[parent].Childrens[child].FormData.input.eventtype1;
 			
-			//Check what type of EVENT TIME is required and fill the values accordingly
-			if(input.EventTimeSelector != "" && input.EventTimeSelector != null && typeof input.EventTimeSelector != undefined)
+			if(ChildEventType == 'ObjectEvent')
 			{
-				//If Specific Event time has been selected
-				if(input.EventTimeSelector == 'SpecificTime')
-				{
-					input.eventtimeSpecific 	= 	new Date(input.eventtimeSpecific);
-					input.eventtimeSpecific		= 	moment(input.eventtimeSpecific).format();
-					var offset					=	moment(input.eventtimeSpecific).tz('Europe/Berlin', true).format('Z')
+				if(ChildData.FormData.EPCs.length == 0)
+				{											
+					var Temparray		=	PreceedingEventFinder(ParentEventType,ParentData,LastCounter,EndCount);
+					ChildData.FormData.EPCs.push(Temparray)
+					LastCounter			=	LastCounter + EndCount;				
 					
-					ObjectEvent.ele('eventTime', input.eventtimeSpecific).up()
-					ObjectEvent.ele('eventTimeZoneOffset', offset).up()
-				}
-				else if(input.EventTimeSelector == 'TimeRange')
-				{	
-					var From			=	input.EventTimeFrom;
-					var To				=	input.EventTimeTo;
-					var EventCount		=	input.eventcount;
-					
-					if(count == 0)
+					//Write the respective children data into the parent of same node
+					for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
 					{
-						EventTimeArray	=	[];
-						xml_json_functions.RandomEventTimeGenerator(From,To,EventCount,File,function(ReturnEventTime){
-							EventTimeArray	= ReturnEventTime;
-						});	
-					}
-					
-					var offset			=	moment(EventTimeArray[count]).tz('Europe/Berlin', true).format('Z')
-					ObjectEvent.ele('eventTime', EventTimeArray[count]).up()
-					ObjectEvent.ele('eventTimeZoneOffset', offset).up()
-				}
-
-			}
-
-			//Check what type of RECORD TIME is required and fill the values accordingly
-			if(input.RecordTimeOption != "" && input.RecordTimeOption != null && typeof input.RecordTimeOption != undefined)
-			{
-				//Check if the Record Time Option is YES
-				if(input.RecordTimeOption == 'yes')
-				{
-					//Check if Record Time Option is Same as Event TIME
-					if(input.RecordTimeOptionType	== 'RecordTimeSameAsEventTime')
-					{
-						if(input.EventTimeSelector == 'TimeRange')
-						{
-							ObjectEvent.ele('recordTime', EventTimeArray[count]).up()
-						}
-						else if(input.EventTimeSelector == 'SpecificTime')
-						{
-							ObjectEvent.ele('recordTime', input.eventtimeSpecific).up()
-						}					
-					}
-					else if(input.RecordTimeOptionType	== 'RecordTimeCurrentTime')
-					{
-						//If the current time is choosen
-						var currentTime = moment().format()
-						ObjectEvent.ele('recordTime',currentTime).up()
-					}
-				}
-			}
-			
-			//If error declaration has been set then add the below tags
-			if(input.eventtype2 == 'errordeclaration' || input.EventId != "")
-			{
-				//Add the error declaration if its populated
-				if(input.EventId != "" && input.EventId != null && typeof input.EventId != undefined)
-				{
-					var baseExtension		=	ObjectEvent.ele('baseExtension')
-					baseExtension.ele('eventID',input.EventId)
-				}	
-				
-				//Add the error declaration if its populated
-				if(input.eventtype2 == 'errordeclaration')
-				{
-					var baseExtension		=	ObjectEvent.ele('baseExtension')
-					var errorDeclaration	=	baseExtension.ele('errorDeclaration')
-					
-					//Check what type of error declaration has been choosen
-					if(input.ErrorDeclarationTimeSelector != '')
-					{
-						if(input.ErrorDeclarationTimeSelector == 'SpecificTime')
-						{
-							//Add Error Declaration Time
-							input.ErrorDeclarationTime	=	moment(input.ErrorDeclarationTime).format();
-							errorDeclaration.ele('declarationTime',input.ErrorDeclarationTime)
-						}
-						else if(input.ErrorDeclarationTimeSelector == 'TimeRange')
-						{
-							var From			=	input.ErrorDeclarationTimeFrom;
-							var To				=	input.ErrorDeclarationTimeTo;
-							var EventCount		=	input.eventcount;
-							
-							//Call the random function to generate the random date
-							if(count == 0)
-							{
-								ErrorTimeArray	=	[];
-								xml_json_functions.RandomEventTimeGenerator(From,To,EventCount,File,function(RandomErrorTime){
-									ErrorTimeArray	= RandomErrorTime;
-								});	
-							}
-							
-							errorDeclaration.ele('declarationTime',ErrorTimeArray[count])	
-						}
-					}
-					
-					//Add Error Reason type if its populated
-					if(input.ErrorReasonType != "" && input.ErrorReasonType != null && typeof input.ErrorReasonType != undefined)
-					{
-						if(input.ErrorReasonType == 'Other')
-						{
-							errorDeclaration.ele('reason',input.ErrorReasonOther)
-						}
-						else
-						{
-							errorDeclaration.ele('reason','urn:epcglobal:cbv:er:'+input.ErrorReasonType)
-						}
-					}
-					
-					//Loop and add the Corrective Event Ids
-					if(Query.ErrorCorrection.length > 0)
-					{
-						var correctiveEventIDs	=	errorDeclaration.ele('correctiveEventIDs')
-						for(var e=0; e<Query.ErrorCorrection.length; e++)
-						{
-							correctiveEventIDs.ele('correctiveEventID',Query.ErrorCorrection[e].CorrectiveText)
-						}				
-					}			
-					
-					//Loop and add the Extension for Error
-					if(Query.ErrorExtension.length > 0)
-					{
-						var ErrorExtension	=	Query.ErrorExtension;
+						var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
 						
-						for(var i=0; i<ErrorExtension.length; i++)
+						if(ChildNodeName	==	ParentNodeName)
 						{
-							var NameSpace 	=	ErrorExtension[i].NameSpace;
-							var LocalName 	=	ErrorExtension[i].LocalName;
-							
-							if(NameSpace.includes("http://") || NameSpace.includes("https://"))
+							if(AllEventsArray[ParentNode].FormData.EPCs.length == 0)
 							{
-								NameSpace = NameSpace.split("/").slice(2);
-								NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf(".")); 
-								errorDeclaration.ele(NameSpace+':'+LocalName,ErrorExtension[i].FreeText)
+								AllEventsArray[ParentNode].FormData.EPCs.push(Temparray);
 							}
 							else
 							{
-								errorDeclaration.ele(NameSpace+':'+LocalName,ErrorExtension[i].FreeText)
-							}
-						}
+								AllEventsArray[ParentNode].FormData.EPCs[0].push.apply(AllEventsArray[ParentNode].FormData.EPCs[0],Temparray);
+							}							
+						}					
 					}
+				}	
+			}
+			else if(ChildEventType == 'AggregationEvent')
+			{
+				var Temparray		=	PreceedingEventFinder(ParentEventType,ParentData,LastCounter,EndCount);
+				ChildData.FormData.ChildEPCS.push(Temparray)
+				LastCounter			=	LastCounter + EndCount;
+					
+				//Write the respective children data into the parent of same node
+				for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
+				{
+					var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
+					
+					if(ChildNodeName	==	ParentNodeName)
+					{
+						if(AllEventsArray[ParentNode].FormData.ChildEPCS.length == 0)
+						{
+							AllEventsArray[ParentNode].FormData.ChildEPCS.push(Temparray);
+						}
+						else
+						{
+							AllEventsArray[ParentNode].FormData.ChildEPCS[0].push.apply(AllEventsArray[ParentNode].FormData.ChildEPCS[0],Temparray);
+						}						
+					}					
 				}
+			}
+			else if(ChildEventType == 'TransactionEvent')
+			{
+				var Temparray		=	PreceedingEventFinder(ParentEventType,ParentData,LastCounter,EndCount);
+				ChildData.FormData.EPCs.push(Temparray);
+				LastCounter			=	LastCounter + EndCount;
 				
+				//Write the respective children data into the parent of same node
+				for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
+				{
+					var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
+					
+					if(ChildNodeName	==	ParentNodeName)
+					{
+						if(AllEventsArray[ParentNode].FormData.EPCs.length == 0)
+						{
+							AllEventsArray[ParentNode].FormData.EPCs.push(Temparray);
+						}
+						else
+						{
+							AllEventsArray[ParentNode].FormData.EPCs[0].push.apply(AllEventsArray[ParentNode].FormData.EPCs[0],Temparray);
+						}						
+					}					
+				}
+			}
+		}
+	}
+	
+	//Function to check the preceeding event and populate the data into temparray
+	function PreceedingEventFinder(ParentEventType,ParentData,LastCounter,EndCount)
+	{
+		var temparray	=	[];
+		
+		if(ParentEventType == 'ObjectEvent' || ParentEventType == 'TransactionEvent')
+		{
+			temparray	=	ParentData.FormData.EPCs[0].slice(LastCounter,LastCounter+EndCount);
+		}
+		else if(ParentEventType == 'AggregationEvent')
+		{
+			temparray	=	ParentData.FormData.ChildEPCS[0].slice(LastCounter,LastCounter+EndCount);
+		}
+		
+		return temparray;
+	}
+	
+	//Loop through the the created array and create the XML
+	for(var parent=0; parent<AllEventsArray.length; parent++)
+	{
+		XMLCreator(AllData, parent, 'Parent');
+	
+		//Loop through children for(var child=0; child<)
+		for(child=0; child<AllData.AllEventFinalArray[parent].Childrens.length; child++)
+		{
+			XMLCreator(AllData, child, 'Child', parent);
+		}
+	}
+	
+	function XMLCreator(AllData, loopcounter, type,parentCount)
+	{
+		var NodeName, EventCount, Query, input;		
+		
+		//Get the values of parent
+		if(type == 'Parent')
+		{
+			NodeName	=	AllData.AllEventFinalArray[loopcounter].NodeName;
+			EventCount	=	AllData.AllEventFinalArray[loopcounter].FormData.input.eventcount;
+			Query		=	AllData.AllEventFinalArray[loopcounter].FormData;
+			input		=	AllData.AllEventFinalArray[loopcounter].FormData.input;
+		}
+		else if(type == 'Child')
+		{
+			NodeName	=	AllData.AllEventFinalArray[parentCount].Childrens[loopcounter].ChildNodeName;
+			EventCount	=	AllData.AllEventFinalArray[parentCount].Childrens[loopcounter].FormData.input.eventcount;
+			input		=	AllData.AllEventFinalArray[parentCount].Childrens[loopcounter].FormData.input;
+			//var Query		=	AllData.AllEventFinalArray[parentCount].Childrens[loopcounter].FormData;
+			
+			for(var ParentFinder=0; ParentFinder<AllData.AllEventFinalArray.length; ParentFinder++)
+			{
+				if(AllData.AllEventFinalArray[ParentFinder].NodeName == NodeName)
+				{
+					Query	=	AllData.AllEventFinalArray[ParentFinder].FormData;
+					console.log(NodeName);
+					console.log(Query)
+					break;
+				}
+			}
+		}
+		
+		//Check if the Node is already added to XML
+		if(AddedEvents.includes(NodeName))
+			return;
+		
+		//If not then add to Array and create XML
+		AddedEvents.push(NodeName);
+		
+		/*
+		//Split the EPCS for the child based on parent
+		if(type == 'Child')
+		{			
+			if(Query.EPCs.length == 0)
+			{				
+				var TempArray	=	[];
+				var SplitCount	=	parseInt(AllData.AllEventFinalArray[parentCount].Childrens[loopcounter].Count,10);
+				var ParentEPCs	=	AllData.AllEventFinalArray[parentCount].FormData.EPCs;
+				if(ParentEPCs.length > 0)
+				{
+					TempArray		=	ParentEPCs[0].slice(GlobalCount,GlobalCount+SplitCount+1);
+					console.log(TempArray)
+					AllData.AllEventFinalArray[parentCount].Childrens[loopcounter].FormData.EPCs.push(TempArray);
+					GlobalCount		=	GlobalCount + SplitCount+1;					
+				}
+				/*	else
+				{
+					var ParentEPCs	=	AllData.AllEventFinalArray[parentCount-1].FormData.EPCs;
+					TempArray		=	ParentEPCs[0].slice(0,SplitCount+1);
+					Query.EPCs.push(TempArray)
+					GlobalCount		=	SplitCount+1;
+				}
 			}			
+		}
+		*/
+		
+		//Loop based on the number of events within each Node/Events
+		for(var count=0; count<EventCount; count++)
+		{		
+			var ObjectEvent = root.ele(input.eventtype1)
 			
 			//IF the event type is Object event
 			if(input.eventtype1 == 'ObjectEvent')
@@ -268,213 +277,7 @@ exports.createXML	=	function(AllData,callback){
 					}					
 				}
 			}
-			else if(input.eventtype1 == "TransformationEvent")
-			{		
-				//Add the Input EPCs
-				if(Query.InputEPCs.length > 0)
-				{
-					var InputList	=	ObjectEvent.ele('inputEPCList')
-					
-					for(var o=0; o<Query.InputEPCs.length; o++)
-					{
-						for(var i=0; i<Query.InputEPCs[o].length; i++)
-						{					
-							InputList.ele('epc',Query.InputEPCs[o][i]).up()
-						}
-					}				
-				}
-				
-				//Add the Input Quantities			
-				if(Query.InputQuantities.length > 0)
-				{
-					var inputQuantityList	=	ObjectEvent.ele('inputQuantityList')				
-					
-					for(var i=0; i<Query.InputQuantities.length; i++)
-					{
-						var InputQuantities		=	Query.InputQuantities[i];
-						
-						for(var q=0; q<InputQuantities.length; q++)
-						{	
-							var quantityElement		=	inputQuantityList.ele('quantityElement').up()						
-							
-							if(InputQuantities[q].QuantityType == 'Fixed Measure Quantity')
-							{
-								quantityElement.ele('epcClass',InputQuantities[q].URI)
-								quantityElement.ele('quantity',InputQuantities[q].Quantity)
-							}
-							else if(InputQuantities[q].QuantityType == 'Variable Measure Quantity')
-							{
-								quantityElement.ele('epcClass',InputQuantities[q].URI)
-								quantityElement.ele('quantity',InputQuantities[q].Quantity)
-								quantityElement.ele('uom',InputQuantities[q].QuantityUOM)
-							}
-						}
-					}
-					
-				}
-				
-				//Add the Output EPC List			
-				//Add the Output EPCs
-				if(Query.OutputEPCs.length > 0)
-				{
-					var outputEPCList	=	ObjectEvent.ele('outputEPCList')
-					
-					for(var o=0; o<Query.OutputEPCs.length; o++)
-					{
-						for(var i=0; i<Query.OutputEPCs[o].length; i++)
-						{					
-							outputEPCList.ele('epc',Query.OutputEPCs[o][i]).up()
-						}
-					}				
-				}
-				
-				//Add the Output Quantities			
-				if(Query.OutputQuantities.length > 0)
-				{
-					var outputQuantityList	=	ObjectEvent.ele('outputQuantityList')
-					var quantityElement		=	outputQuantityList.ele('quantityElement')
-					
-					
-					for(var o=0; o<Query.OutputQuantities.length; o++)
-					{
-						var OutputQuantities	=	Query.OutputQuantities[o];
-						
-						for(var q=0; q<OutputQuantities.length; q++)
-						{	
-							quantityElement.ele('epcClass',OutputQuantities[q].URI).up()
-							
-							if(OutputQuantities[q].QuantityType == 'Fixed Measure Quantity')
-							{
-								quantityElement.ele('quantity',OutputQuantities[q].Quantity).up()
-							}
-							else if(OutputQuantities[q].QuantityType == 'Variable Measure Quantity')
-							{
-								quantityElement.ele('quantity',OutputQuantities[q].Quantity).up()
-								quantityElement.ele('uom',OutputQuantities[q].QuantityUOM).up()
-							}
-						}	
-					}				
-				}
-			}
-			else if(input.eventtype1 == "AssociationEvent")
-			{
-				//Add the Parent for Association Event
-				if(Query.ParentID != null)
-				{
-					ObjectEvent.ele('parentID',Query.ParentID[0]).up()
-				}
-				
-				//Add the CHILD EPCS of AssociationEvent
-				if(Query.ChildEPCS != null)
-				{
-					var ChildEPCSURI	=	Query.ChildEPCS;
-					var childEPCs		=	ObjectEvent.ele('childEPCs')
-					
-					for(var o=0; o<ChildEPCSURI.length; o++)
-					{
-						for(var c=0; c<ChildEPCSURI[o].length; c++)
-						{
-							childEPCs.ele('epc',ChildEPCSURI[o][c]).up()
-						}
-					}				
-				}
-				
-				//Add the Child Quan of Association Event
-				if(Query.ChildQuantities.length > 0)
-				{
-					var quantityList	= 	ObjectEvent.ele('quantityList')
-					
-					
-					for(var o=0; o<Query.ChildQuantities.length; o++)
-					{
-						var ChildQuantitiesURI	=	Query.ChildQuantities[o];
-						
-						for(c=0; c<ChildQuantitiesURI.length;c++)
-						{
-							var quantityElement	=	quantityList.ele('quantityElement')
-							quantityElement.ele('epcClass',ChildQuantitiesURI[c].URI).up()
-							
-							if(ChildQuantitiesURI[c].QuantityType == 'Fixed Measure Quantity')
-							{
-								quantityElement.ele('quantity',ChildQuantitiesURI[c].Quantity).up()
-							}
-							else if(ChildQuantitiesURI[c].QuantityType == 'Variable Measure Quantity')
-							{
-								quantityElement.ele('quantity',ChildQuantitiesURI[c].Quantity).up()
-								quantityElement.ele('uom',ChildQuantitiesURI[c].QuantityUOM).up()
-							}
-						}	
-					}				
-				}
-			}
-				
 			
-			//If the OBJECT EVENT and EPCS is 	
-			if(input.action != "" && input.action != null && typeof input.action != undefined)
-			{
-				ObjectEvent.ele('action', input.action)
-			}
-			
-			//Check for BUSINESS STEP
-			if(input.businessStep != '' && input.businessStep != null && typeof input.businessStep != undefined)
-			{
-				if(input.businessStep == 'BusinessStepEnter')
-				{
-					ObjectEvent.ele('bizStep',input.EnterBusinessStepText)
-				}
-				else
-				{
-					ObjectEvent.ele('bizStep','urn:epcglobal:cbv:bizstep:'+input.businessStep)
-				}
-			}
-			
-			//Check for DISPOSITION
-			if(input.disposition != '' && input.disposition != null && typeof input.disposition != undefined)
-			{
-				if(input.disposition == 'DispositionEnter')
-				{
-					ObjectEvent.ele('disposition',input.EnterDispositionText)
-				}
-				else
-				{
-					ObjectEvent.ele('disposition','urn:epcglobal:cbv:disp:'+input.disposition)
-				}
-			}
-			
-			//Check for ReadPoint and based on that set the Readpoint 
-			if(input.readpointselector != '' && input.readpointselector != null && typeof input.readpointselector != undefined)
-			{
-				if(input.readpointselector == 'manually')
-				{
-					var readPoint = ObjectEvent.ele('readPoint')
-					readPoint.ele('id', input.readpoint).up()
-				}
-				else if(input.readpointselector == 'sgln')
-				{
-					xml_json_functions.ReadPointFormatter(input,File,function(data){
-						var readPoint = ObjectEvent.ele('readPoint')
-						//readPoint.ele('id', 'urn:epc:id:sgln:'+input.readpointsgln1+input.readpointsgln2).up()
-						readPoint.ele('id', 'urn:epc:id:sgln:'+data).up()
-					});				
-				}
-			}
-			
-			//Check for the Business Location and set the Business Location
-			if(input.businesslocationselector != '' && input.businesslocationselector != null && typeof input.businesslocationselector != undefined)
-			{
-				if(input.businesslocationselector == 'manually')
-				{
-					var businesslocation = ObjectEvent.ele('bizLocation')
-					businesslocation.ele('id', input.businesslocation).up()
-				}
-				else if(input.businesslocationselector == 'sgln')
-				{
-					xml_json_functions.BusinessLocationFormatter(input,File,function(data){
-						var businesslocation = ObjectEvent.ele('bizLocation')
-						businesslocation.ele('id', 'urn:epc:id:sgln:'+data).up()
-					});					
-				}
-			}
 			
 			var OuterExtension		=	ObjectEvent.ele('extension')
 			var extension			= 	OuterExtension.ele('extension')		
@@ -537,193 +340,34 @@ exports.createXML	=	function(AllData,callback){
 					}				
 				}
 			}
-			else if(input.eventtype1 == "TransactionEvent")
-			{			
-				if(Query.Quantities.length >0)
+			
+			//Check for BUSINESS STEP
+			if(input.businessStep != '' && input.businessStep != null && typeof input.businessStep != undefined)
+			{
+				if(input.businessStep == 'BusinessStepEnter')
 				{
-					var quantityList	= 	extension.ele('quantityList')
-					
-					for(var o=0; o<Query.Quantities.length; o++)
-					{
-						var Quantities 		=	Query.Quantities[o];
-					
-						for(q=0; q<Quantities.length; q++)
-						{
-							var quantityElement	=	quantityList.ele('quantityElement')
-							quantityElement.ele('epcClass',Quantities[q].URI).up()
-							
-							if(Quantities[q].QuantityType == 'Fixed Measure Quantity')
-							{
-								quantityElement.ele('quantity',Quantities[q].Quantity).up()
-							}
-							else if(Quantities[q].QuantityType == 'Variable Measure Quantity')
-							{
-								quantityElement.ele('quantity',Quantities[q].Quantity).up()
-								quantityElement.ele('uom',Quantities[q].QuantityUOM).up()
-							}
-						}
-					}
+					ObjectEvent.ele('bizStep',input.EnterBusinessStepText)
+				}
+				else
+				{
+					ObjectEvent.ele('bizStep','urn:epcglobal:cbv:bizstep:'+input.businessStep)
 				}
 			}
 			
-			//Populate The Business Transacation List
-			if(Query.BTT.length > 0)
+			//Check for DISPOSITION
+			if(input.disposition != '' && input.disposition != null && typeof input.disposition != undefined)
 			{
-				var bizTransactionList	=	extension.ele('bizTransactionList')
-				
-				for(var b=0; b<Query.BTT.length; b++)
+				if(input.disposition == 'DispositionEnter')
 				{
-					var BTT 			=	Query.BTT[b]
-					var bizTransaction 	=	bizTransactionList.ele('bizTransaction',BTT.BTT.Value)
-					bizTransaction.att('type','urn:epcglobal:cbv:btt:'+BTT.BTT.Type)
-				}			
-			}
-			
-			//Check for the Source and Source type
-			if(input.sourcesType != '' && input.sourcesType != null && input.sourcesType != undefined)
-			{
-				var sourceList 	= extension.ele('sourceList')			
-				
-				if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party' || input.sourcesType == 'location')
-				{
-					var SourceGLN			=	input.SourceGLN;
-					var SourceCompanyPrefix	=	input.SourcesCompanyPrefix;
-					var FormattedData;
-					
-					xml_json_functions.SourceDestinationFormatter(SourceGLN,SourceCompanyPrefix,function(data)
-					{	
-						FormattedData	=	data;
-					});
-
-					if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party')
-					{
-						//If PGLN then directly append
-						if(input.SourceLNType == 'pgln')
-						{
-							var sources 	= 	sourceList.ele('source',FormattedData)
-							sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)						
-						}
-						else if(input.SourceLNType == 'sgln')
-						{
-							FormattedData	=	FormattedData + '.' + input.SourceGLNExtension;
-							var sources 	= 	sourceList.ele('source',FormattedData)
-							sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)	
-						}
-					}
-					
-					if(input.sourcesType == 'location')
-					{
-						FormattedData	=	FormattedData + '.' + input.SourceGLNExtension;
-						var sources 	= 	sourceList.ele('source',FormattedData)
-						sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)	
-					}
-					
-					
+					ObjectEvent.ele('disposition',input.EnterDispositionText)
 				}
-				else if(input.sourcesType == 'other')
+				else
 				{
-					var sources 	= sourceList.ele('source',input.OtherSourceURI2)
-					sources.att('type',input.OtherSourceURI1)
-				}
-			}
-			
-			//Check for the Destination and Destination type
-			if(input.destinationsType != '' && input.destinationsType != null && input.destinationsType != undefined)
-			{
-				var destinationList 	= 	extension.ele('destinationList')
-				
-				if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party' || input.destinationsType == 'location')
-				{
-					var destinationGLN				=	input.DestinationGLN;
-					var destinationCompanyPrefix	=	input.DestinationCompanyPrefix;
-					var FormattedData;
-					
-					xml_json_functions.SourceDestinationFormatter(destinationGLN,destinationCompanyPrefix,function(data)
-					{	
-						FormattedData	=	data;
-					});
-					
-					if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party')
-					{
-						//If PGLN then directly append
-						if(input.DestinationLNType == 'pgln')
-						{
-							var destinations 	=	destinationList.ele('destination', FormattedData)
-							destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)						
-						}
-						else if(input.DestinationLNType == 'sgln')
-						{
-							FormattedData		=	FormattedData + '.' + input.DestinationGLNExtension;
-							var destinations 	= 	destinationList.ele('destination',FormattedData)
-							destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)	
-						}
-					}
-					
-					if(input.destinationsType == 'location')
-					{
-						FormattedData		=	FormattedData + '.' + input.DestinationGLNExtension;
-						var destinations 	= 	destinationList.ele('destination',FormattedData)
-						destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
-					}
-				}
-				else if(input.destinationsType == 'other')
-				{
-					var destinations 		=	destinationList.ele('destination', input.OtherDestinationURI2)
-					destinations.att('type',input.OtherDestinationURI1)
-				}
-			}
-			
-			
-			//Check if the ILMD has been added then add them
-			if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "TransformationEvent")
-			{
-				if(Query.ILMD.length > 0)
-				{
-					var ilmd 		= 	extension.ele('ilmd')
-					var ilmdList	=	Query.ILMD;
-					
-					for(var i=0; i<Query.ILMD.length; i++)
-					{
-						var NameSpace 	=	ilmdList[i].NameSpace;
-						var LocalName 	=	ilmdList[i].LocalName;
-						
-						if(NameSpace.includes("http://") || NameSpace.includes("https://"))
-						{
-							NameSpace = NameSpace.split("/").slice(2);
-							NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf(".")); 
-							ilmd.ele(NameSpace+':'+LocalName,ilmdList[i].FreeText)
-						}
-						else
-						{
-							ilmd.ele(NameSpace+':'+LocalName,ilmdList[i].FreeText)
-						}
-					}
-				}
-			}
-			
-			//Check if the extension field is filled and add the XML tags
-			var Extension			=	Query.Extension;
-			if(Extension.length > 0)
-			{
-				for(var ex=0; ex<Extension.length; ex++)
-				{
-					var NameSpace 	=	Extension[ex].NameSpace; 
-					var LocalName 	=	Extension[ex].LocalName;
-						
-					if(Extension[ex].NameSpace.includes("http://") || Extension[ex].NameSpace.includes("https://"))
-					{			
-						NameSpace = NameSpace.split("/").slice(2);
-						NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
-						ObjectEvent.ele(NameSpace+':'+LocalName,Extension[ex].FreeText).up()
-					}
-					else
-					{
-						ObjectEvent.ele(Extension[ex].NameSpace+':'+Extension[ex].LocalName,Extension[ex].FreeText).up()
-					}
+					ObjectEvent.ele('disposition','urn:epcglobal:cbv:disp:'+input.disposition)
 				}
 			}
 		}
-	}	
+	}
 	xml = root.end({ pretty: true});
 	callback(xml);
 }

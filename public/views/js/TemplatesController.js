@@ -39,6 +39,23 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 		$scope.nodeCounter++;
 	}
 	
+	//Delete the Event info from Array if node is removed from diagram
+	$scope.nodeCollectionChange			=	function(args){
+		if(args.state == "changed" && args.changeType == "remove")
+		{
+			var removedNode		=	args.element.name;
+			for(var r=0; r<$rootScope.AllEventsArray.length; r++)
+			{
+				var ArrayNodeId	=	$rootScope.AllEventsArray[r].NodeID;
+				if(ArrayNodeId	==	removedNode)
+				{
+					$rootScope.AllEventsArray.splice(r,1);
+					break;
+				}
+			}
+		}
+	}
+	
 	//Add connector to diagram on click
 	$scope.ConnectorAdd			=	function(){
 		var diagram 			= 	angular.element("#diagram").ejDiagram("instance");
@@ -60,21 +77,23 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 	
 	//Create the event on click of the submit button 
 	$scope.submitEvents			=	function(){
-		AllEventFinalArray		=	[];
+		AllEventFinalArray		=	[];		
 		$scope.outputElements 	= 	true;
 		$scope.inputElements 	= 	false;
+		var LastCounter			=	0;
+		var ParentEPCsArray		=	[];		
 		
 		for(var con=0; con<connectorArray.length; con++)
 		{
 			var ConnectorSource		=	connectorArray[con].SourceNode;
-			var ConnectorTarget		=	connectorArray[con].TargetNode;
-				
+			var ConnectorTarget		=	connectorArray[con].TargetNode;			
+			
 			for(var e=0; e<$rootScope.AllEventsArray.length; e++)
-			{
+			{				
 				if($rootScope.AllEventsArray[e].NodeID == ConnectorSource)
 				{
 					if (!AllEventFinalArray.find(o => o.NodeName == ConnectorSource))
-					{
+					{				
 						var NodeObj				=	new Object();
 						NodeObj.NodeName		=	$rootScope.AllEventsArray[e].NodeID;
 						NodeObj.Type			=	"Source";
@@ -82,20 +101,20 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 						NodeObj.Childrens		=	[];
 						NodeObj.FormData		=	$rootScope.AllEventsArray[e];
 						
+						//Find the child nodes
 						for(var e2=0; e2<$rootScope.AllEventsArray.length; e2++)
 						{							
 							if($rootScope.AllEventsArray[e2].NodeID == ConnectorTarget)
-							{									
+							{	
 								var NodeChildren			=	new Object();
 								NodeChildren.ChildNodeName	=	$rootScope.AllEventsArray[e2].NodeID;
 								NodeChildren.Count			=	connectorArray[con].Count;
+								NodeChildren.ChildType		=	"Target";								
 								NodeChildren.FormData		=	$rootScope.AllEventsArray[e2];
-								NodeChildren.ChildType		=	"Target";
-								NodeObj.Childrens.push(NodeChildren);
-															
+								NodeObj.Childrens.push(NodeChildren);			
 							}
-						}
-						AllEventFinalArray.push(NodeObj);
+						}						
+						AllEventFinalArray.push(NodeObj);						
 					}
 					else
 					{
@@ -108,20 +127,41 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 								if (!AllEventFinalArray[index].Childrens.find(o => o.ChildNodeName == ConnectorSource))
 								{
 									var NodeChildren				=	new Object();
-									NodeChildren.ChildNodeName		=	$rootScope.AllEventsArray[e3].NodeID;
-									NodeChildren.FormData			=	$rootScope.AllEventsArray[e3];
+									NodeChildren.ChildNodeName		=	$rootScope.AllEventsArray[e3].NodeID;									
 									NodeChildren.Count				=	connectorArray[con].Count;
 									NodeChildren.ChildType			=	"Target";
+									NodeChildren.FormData			=	$rootScope.AllEventsArray[e3];
 									AllEventFinalArray[index].Childrens.push(NodeChildren);
 								}
 							}
 						}
 					}						
 				}
-			}		
+			}
+
+			//Find the last event that does not have any connector source
+			if(con == connectorArray.length-1)
+			{
+				for (var l = 0; l<$rootScope.AllEventsArray.length;l++)
+				{
+					var NodeName 	=	$rootScope.AllEventsArray[l].NodeID;
+					
+					if (!AllEventFinalArray.find(o => o.NodeName == NodeName))
+					{						
+						var NodeObj				=	new Object();
+						NodeObj.NodeName		=	$rootScope.AllEventsArray[l].NodeID;
+						NodeObj.FormData		=	$rootScope.AllEventsArray[l];
+						NodeObj.Count			=	connectorArray[con].Count;
+						NodeObj.Type			=	"Source";
+						NodeObj.Childrens		=	[];
+						AllEventFinalArray.push(NodeObj);
+					}
+					
+				}
+			}
 		}
 		
-		//Find the last event that does not have any connector source
+		/*//Find the last event that does not have any connector source
 		for (var l = 0; l<$rootScope.AllEventsArray.length;l++)
 		{
 			var NodeName 	=	$rootScope.AllEventsArray[l].NodeID;
@@ -136,11 +176,10 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 				AllEventFinalArray.push(NodeObj);
 			}
 			
-		}	
+		}*/	
 		
 		AllEventFinalArray.sort((a, b) => (a.NodeName > b.NodeName) ? 1 : -1);		
 		console.log(AllEventFinalArray);
-		
 		var data	=	JSON.stringify({AllEventFinalArray:AllEventFinalArray});
 		$http({
 			url		:	"/CreateConfiguredXML",
@@ -151,7 +190,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 			$scope.xmldata 	=	response[0].XML;
 		}).error(function(error) {
 			console.log(error);
-		});	
+		});
 	}
 	
 	//On click of Back button show the input data with EJ Diagram

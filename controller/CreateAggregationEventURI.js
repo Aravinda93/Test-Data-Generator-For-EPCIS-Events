@@ -1,14 +1,15 @@
-var randomArray = [];
+var randomArray = 	[];
+var EpcLists 	= 	[];
 
 //Based on the Selected Aggregation Event format the URI
 exports.CreateAggregationEventURI	= function(Query,callback){
-	console.log(Query)
 	//var Query		=	JSON.parse(Query);
 	//CHANGE THIS AFTER ALL
 	//var input		=	Query.input;
 	var input		=	Query.input;
 	var syntaxType	=	Query.formdata.syntaxType;
-	var EpcLists 	= 	[];
+		EpcLists 	= 	[];
+	console.log(input)
 	var Domain		=	'https://id.gs1.org'
 
 	//Execute this if Multiple values needs to be created
@@ -257,66 +258,123 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		}
 		else if(input.AggregationEventParentID == 'GRAI (Al 8003)')
 		{
-			var companyPrefixInput	=	input.AEPGRAI.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-			
-				companyPrefixInput	=	companyPrefixNormal(companyPrefixInput,companyPrefixPoint);
-			
-			if(input.sgtintype == 'none')
+			if(syntaxType 	== 'urn')
 			{
-				var epcID	=	'urn:epc:id:grai:'+companyPrefixInput;
-				EpcLists.push(epcID);
-				callback(EpcLists);
-			}
-			else if(input.sgtintype == 'range')
-			{
-				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+				var companyPrefixInput		=	input.AEPGRAI.toString();
+				var companyPrefixPoint		=	input.AEPCompanyPrefix;			
+					companyPrefixInput		=	companyPrefixNormal(companyPrefixInput,companyPrefixPoint);
+					companyPrefixInput		=	companyPrefixInput.substring(0, 13)+'.'+companyPrefixInput.substring(14);
+					
+				if(input.sgtintype == 'none')
 				{
-					var appendValue	=	companyPrefixInput+"."+id;
-						appendValue	=	appendValue.substring(0,30)
-					var epcID		=	'urn:epc:id:grai:'+appendValue;
+					var epcID	=	'urn:epc:id:grai:'+companyPrefixInput+input.singleObjectId;
 					EpcLists.push(epcID);
+					callback(EpcLists);
 				}
-				callback(EpcLists);
+				else if(input.sgtintype == 'range')
+				{
+					for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+					{
+						var appendValue	=	companyPrefixInput+id;
+							appendValue	=	appendValue.substring(0,30)
+						var epcID		=	'urn:epc:id:grai:'+appendValue;
+						EpcLists.push(epcID);
+					}
+					callback(EpcLists);
+				}
+				else if(input.sgtintype == 'random')
+				{
+					var min_Length	=	parseInt(input.radomMinLength, 10);
+					var max_Length	=	parseInt(input.randomMaxLength, 10);
+					var randomType	=	input.randomType;
+					var randomCount	=	parseInt(input.randomCount, 10);
+					//Call the function to generate the Random numbers then create XML elements
+					var data 				= RandomGenerator(min_Length,max_Length,randomType,randomCount);
+					
+					for(var arrCount=0; arrCount<data.length; arrCount++)
+					{		
+						var appendValue	=	companyPrefixInput+data[arrCount];
+							appendValue	=	appendValue.substring(0,30)
+						var epcID		=	'urn:epc:id:grai:'+appendValue;
+						EpcLists.push(epcID);	
+					}
+					callback(EpcLists);
+				}
 			}
-			else if(input.sgtintype == 'random')
+			else if(syntaxType == 'webURI')
 			{
-				var min_Length	=	parseInt(input.radomMinLength, 10);
-				var max_Length	=	parseInt(input.randomMaxLength, 10);
-				var randomType	=	input.randomType;
-				var randomCount	=	parseInt(input.randomCount, 10);
-				//Call the function to generate the Random numbers then create XML elements
-				var data 				= RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				var companyPrefixInput		=	input.AEPGRAI.toString();
 				
-				for(var arrCount=0; arrCount<data.length; arrCount++)
-				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-						appendValue	=	appendValue.substring(0,30)
-					var epcID		=	'urn:epc:id:grai:'+appendValue;
-					EpcLists.push(epcID);	
+				if(input.sgtintype == 'none')
+				{
+					var epcID	=	Domain+'/grai/'+companyPrefixInput+input.singleObjectId;
+					EpcLists.push(epcID);
+					callback(EpcLists);
 				}
-				callback(EpcLists);
+				else if(input.sgtintype == 'range')
+				{
+					for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+					{
+						var appendValue	=	companyPrefixInput+id;
+							appendValue	=	appendValue.substring(0,30)
+						var epcID		=	Domain+'/grai/'+appendValue;
+						EpcLists.push(epcID);
+					}
+					callback(EpcLists);
+				}
+				else if(input.sgtintype == 'random')
+				{
+					var min_Length	=	parseInt(input.radomMinLength, 10);
+					var max_Length	=	parseInt(input.randomMaxLength, 10);
+					var randomType	=	input.randomType;
+					var randomCount	=	parseInt(input.randomCount, 10);
+					//Call the function to generate the Random numbers then create XML elements
+					var data 				= RandomGenerator(min_Length,max_Length,randomType,randomCount);
+					
+					for(var arrCount=0; arrCount<data.length; arrCount++)
+					{		
+						var appendValue	=	companyPrefixInput+data[arrCount];
+							appendValue	=	appendValue.substring(0,30)
+						var epcID		=	Domain+'/grai/'+appendValue;
+						EpcLists.push(epcID);	
+					}
+					callback(EpcLists);
+				}
 			}
 		}
 		else if(input.AggregationEventParentID === 'GIAI (Al 8004)')
 		{
 			var companyPrefixInput	=	input.AEPGIAI.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput	=	companyPrefixNormal(companyPrefixInput,companyPrefixPoint);
-				
+			
 			if(input.sgtintype == 'none')
 			{
-				var epcID	=	'urn:epc:id:giai:'+companyPrefixInput;
+				if(syntaxType 	== 'urn')
+				{
+					var epcID	=	'urn:epc:id:giai:'+companyPrefixInput+'.'+input.singleObjectId;
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var epcID	=	Domain+'/giai/'+companyPrefixInput+input.singleObjectId;
+				}			
+				
 				EpcLists.push(epcID);
-				callback(EpcLists);
+				callback(EpcLists);	
 			}
 			else if(input.sgtintype == 'range')
 			{
 				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
 				{
-					var appendValue	=	companyPrefixInput+"."+id;
+					var appendValue	=	companyPrefixInput+'.'+id;
 						appendValue	=	appendValue.substring(0,30)
-					var epcID		=	'urn:epc:id:giai:'+appendValue;
+						
+					if(syntaxType 	== 'urn')
+					{
+						var epcID	=	'urn:epc:id:giai:'+appendValue;
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID	=	Domain+'/giai/'+appendValue;
+					}					
 					EpcLists.push(epcID);
 				}
 				callback(EpcLists);
@@ -327,14 +385,21 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				var max_Length	=	parseInt(input.randomMaxLength, 10);
 				var randomType	=	input.randomType;
 				var randomCount	=	parseInt(input.randomCount, 10);
-				//Call the function to generate the Random numbers then create XML elements
-				var data 				= RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 				
 				for(var arrCount=0; arrCount<data.length; arrCount++)
 				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
+					var appendValue	=	companyPrefixInput+'.'+data[arrCount];
 						appendValue	=	appendValue.substring(0,30)
-					var epcID		=	'urn:epc:id:giai:'+appendValue;
+					
+					if(syntaxType 	== 'urn')
+					{
+						var epcID		=	'urn:epc:id:giai:'+appendValue;
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID	=	Domain+'/giai/'+appendValue;
+					}					
 					EpcLists.push(epcID);	
 				}
 				callback(EpcLists);
@@ -342,108 +407,165 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		}
 		else if(input.AggregationEventParentID == 'GSRN (Al 8018)')
 		{
-			var companyPrefixInput	=	input.AEPGSRN.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+			var companyPrefixInput	=	input.AEPGSRNCompanyPrefix.toString();
+			var Count				=	parseInt(input.AEPGSRNSCount, 10);
 				
-			if(input.sgtintype == 'none')
+			if(input.SSCCType == 'random')
 			{
-				var epcID	=	'urn:epc:id:gsrn:'+companyPrefixInput;
-				EpcLists.push(epcID);
-				callback(EpcLists);
-			}
-			else if(input.sgtintype == 'range')
-			{
-				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+				var RequiredLen		=	18-companyPrefixInput.length;
+				var min_Length		=	RequiredLen;
+				var max_Length		=	RequiredLen;
+				var randomType		=	'numeric';
+				var randomCount		=	parseInt(Count, 10);
+				var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				for(var r=0; r<data.length; r++)
 				{
-					var appendValue	=	companyPrefixInput+"."+id;
-						appendValue	=	appendValue.substring(0,18)
-					var epcID		=	'urn:epc:id:gsrn:'+appendValue;
+					if(syntaxType == 'urn')
+					{
+						var Final	=	companyPrefixInput+'.'+data[r];
+						Final		=	Final.substring(0,18)
+						var epcID 	=	'urn:epc:id:gsrn:'+Final;						
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID 	=	Domain+'/gsrn/'+companyPrefixInput+data[r];
+					}
 					EpcLists.push(epcID);
 				}
-				callback(EpcLists);
+				callback(EpcLists);			
 			}
-			else if(input.sgtintype == 'random')
+			else if(input.SSCCType == 'userCustomized')
 			{
-				var min_Length	=	parseInt(input.radomMinLength, 10);
-				var max_Length	=	parseInt(input.randomMaxLength, 10);
-				var randomType	=	input.randomType;
-				var randomCount	=	parseInt(input.randomCount, 10);
-				//Call the function to generate the Random numbers then create XML elements
-				var data 				= RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				var Start	=	parseInt(input.AEPGSRNStartValue,10);
 				
-				for(var arrCount=0; arrCount<data.length; arrCount++)
-				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-						appendValue	=	appendValue.substring(0,18)
-					var epcID		=	'urn:epc:id:gsrn:'+appendValue;
-					EpcLists.push(epcID);	
+				for(var i=0; i<=Count; i++)
+				{
+					var EPCValue	=	companyPrefixInput + Start;
+					var EPCValueLen	=	EPCValue.length;
+					var StartLen	=	String(Start).length;
+					
+					if(syntaxType == 'urn')
+					{
+						var AppendLen	=	17-EPCValueLen+StartLen;
+						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
+						var FinalVal	=	companyPrefixInput + AppendVal;					
+						var epcID 		=	'urn:epc:id:gsrn:'+companyPrefixInput+'.'+AppendVal;	
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var AppendLen	=	18-EPCValueLen+StartLen;
+						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
+						var FinalVal	=	companyPrefixInput + AppendVal;	
+						var epcID		=	Domain+'/gsrn/'+FinalVal;
+					}					
+					EpcLists.push(epcID);
+					Start++;
 				}
 				callback(EpcLists);
 			}
 		}
 		else if(input.AggregationEventParentID === 'GSRNP (Al 8017)')
 		{
-			var companyPrefixInput	=	input.AEPGSRNP.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+			var companyPrefixInput	=	input.AEPGSRNPCompanyPrefix.toString();
+			var Count				=	parseInt(input.AEPGSRNPCount, 10);
 				
-			if(input.sgtintype == 'none')
+			if(input.SSCCType == 'random')
 			{
-				var epcID	=	'urn:epc:id:gsrnp:'+companyPrefixInput;
-				EpcLists.push(epcID);
-				callback(EpcLists);
-			}
-			else if(input.sgtintype == 'range')
-			{
-				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+				var RequiredLen		=	18-companyPrefixInput.length;
+				var min_Length		=	RequiredLen;
+				var max_Length		=	RequiredLen;
+				var randomType		=	'numeric';
+				var randomCount		=	parseInt(Count, 10);
+				var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				for(var r=0; r<data.length; r++)
 				{
-					var appendValue			=	companyPrefixInput+"."+id;
-						appendValue			=	appendValue.substring(0,18)
-					var epcID				=	'urn:epc:id:gsrnp:'+appendValue;
+					if(syntaxType == 'urn')
+					{
+						var Final	=	companyPrefixInput+'.'+data[r];
+						Final		=	Final.substring(0,18)
+						var epcID 	=	'urn:epc:id:gsrnp:'+Final;						
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID 	=	Domain+'/gsrnp/'+companyPrefixInput+data[r];
+					}
 					EpcLists.push(epcID);
 				}
-				callback(EpcLists);
+				callback(EpcLists);			
 			}
-			else if(input.sgtintype == 'random')
+			else if(input.SSCCType == 'userCustomized')
 			{
-				var min_Length	=	parseInt(input.radomMinLength, 10);
-				var max_Length	=	parseInt(input.randomMaxLength, 10);
-				var randomType	=	input.randomType;
-				var randomCount	=	parseInt(input.randomCount, 10);
-				//Call the function to generate the Random numbers then create XML elements
-				var data 				= RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				var Start	=	parseInt(input.AEPGSRNPStartValue,10);
 				
-				for(var arrCount=0; arrCount<data.length; arrCount++)
-				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-						appendValue	=	appendValue.substring(0,18)
-					var epcID		=	'urn:epc:id:gsrnp:'+appendValue;
-					EpcLists.push(epcID);	
+				for(var i=0; i<=Count; i++)
+				{
+					var EPCValue	=	companyPrefixInput + Start;
+					var EPCValueLen	=	EPCValue.length;
+					var StartLen	=	String(Start).length;
+					
+					if(syntaxType == 'urn')
+					{
+						var AppendLen	=	17-EPCValueLen+StartLen;
+						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
+						var FinalVal	=	companyPrefixInput + AppendVal;					
+						var epcID 		=	'urn:epc:id:gsrnp:'+companyPrefixInput+'.'+AppendVal;	
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var AppendLen	=	18-EPCValueLen+StartLen;
+						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
+						var FinalVal	=	companyPrefixInput + AppendVal;	
+						var epcID		=	Domain+'/gsrnp/'+FinalVal;
+					}					
+					EpcLists.push(epcID);
+					Start++;
 				}
 				callback(EpcLists);
 			}
 		}
 		else if(input.AggregationEventParentID === 'GDTI (Al 253)')
 		{
-			var companyPrefixInput	=	input.AEPGDTI.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
-			
+			var companyPrefixInput		=	input.AEPGDTI.toString();
+			var companyPrefixPoint		=	input.AEPCompanyPrefix;
+			var companyPrefixInputURN	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+				companyPrefixInputURN	=	companyPrefixInputURN.slice(0,13)+'.'+companyPrefixInputURN.slice(14);			
+				
 			if(input.sgtintype == 'none')
 			{
-				var epcID	=	'urn:epc:id:gdti:'+companyPrefixInput;
-				EpcLists.push(epcID);
-				callback(EpcLists);
+				var Serial				=	"";
+				
+				if(input.singleObjectId != undefined)
+				{
+					Serial		=	input.singleObjectId;
+				}
+				
+				if(syntaxType == 'urn')
+				{
+					var epcID	=	'urn:epc:id:gdti:'+companyPrefixInputURN+Serial;
+					EpcLists.push(epcID);
+					callback(EpcLists);
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var epcID	=	Domain+'/gdti/'+companyPrefixInput+Serial;
+					EpcLists.push(epcID);
+					callback(EpcLists);
+				}					
 			}
 			else if(input.sgtintype == 'range')
-			{
+			{	
 				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
 				{
-					var appendValue			=	companyPrefixInput+"."+id;
-						appendValue			=	appendValue.substring(0,18)
-					var epcID				=	'urn:epc:id:gdti:'+appendValue;
-					EpcLists.push(epcID);
+					if(syntaxType == 'urn')
+					{
+						var epcID	=	'urn:epc:id:gdti:'+companyPrefixInputURN+id;
+						EpcLists.push(epcID);
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID	=	Domain+'/gdti/'+companyPrefixInput+id;
+						EpcLists.push(epcID);
+					}					
 				}
 				callback(EpcLists);
 			}
@@ -457,91 +579,126 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 				
 				for(var arrCount=0; arrCount<data.length; arrCount++)
-				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-						appendValue	=	appendValue.substring(0,18)
-					var epcID		=	'urn:epc:id:gdti:'+appendValue;
-					EpcLists.push(epcID);	
+				{	
+					if(syntaxType == 'urn')
+					{
+						var epcID		=	'urn:epc:id:gdti:'+companyPrefixInputURN+data[arrCount];
+						EpcLists.push(epcID);	
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID	=	Domain+'/gdti/'+companyPrefixInput+data[arrCount];
+						EpcLists.push(epcID);
+					}				
 				}
 				callback(EpcLists);
-			}
+			}			
 		}
 		else if(input.AggregationEventParentID === 'GCN (Al 255)')
 		{
-			var companyPrefixInput	=	input.AEPGSN.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
-			
-			if(input.sgtintype == 'none')
+			var companyPrefixInput		=	input.AEPGSN.toString();
+			var companyPrefixPoint		=	input.AEPCompanyPrefix;
+			var Count					=	parseInt(input.AEPGCNCount, 10);
+			var companyPrefixInputURN	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);			
+				companyPrefixInputURN	=	companyPrefixInputURN.slice(0,13)+'.'+companyPrefixInputURN.slice(14);				
+				
+			if(input.SSCCType == 'random')
 			{
-				var epcID	=	'urn:epc:id:gcn:'+companyPrefixInput;
-				EpcLists.push(epcID);
-				callback(EpcLists);
-			}
-			else if(input.sgtintype == 'range')
-			{
-				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+				var RequiredLen		=	23-companyPrefixInput.length;
+				var min_Length		=	RequiredLen;
+				var max_Length		=	RequiredLen;
+				var randomType		=	'numeric';
+				var randomCount		=	parseInt(Count, 10);
+				var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				
+				for(var r=0; r<data.length; r++)
 				{
-					var appendValue			=	companyPrefixInput+"."+id;
-					var epcID				=	'urn:epc:id:gcn:'+appendValue;
+					if(syntaxType == 'urn')
+					{
+						var Final	=	companyPrefixInputURN+data[r];
+						Final		=	Final.substring(0,25)
+						var epcID 	=	'urn:epc:id:sgcn:'+Final;						
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID 	=	Domain+'/gcn/'+companyPrefixInput+data[r];
+					}
 					EpcLists.push(epcID);
 				}
-				callback(EpcLists);
+				callback(EpcLists);			
 			}
-			else if(input.sgtintype == 'random')
+			else if(input.SSCCType == 'userCustomized')
 			{
-				var min_Length	=	parseInt(input.radomMinLength, 10);
-				var max_Length	=	parseInt(input.randomMaxLength, 10);
-				var randomType	=	input.randomType;
-				var randomCount	=	parseInt(input.randomCount, 10);
-				//Call the function to generate the Random numbers then create XML elements
-				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				var Start	=	parseInt(input.AEPGCNStartValue,10);
 				
-				for(var arrCount=0; arrCount<data.length; arrCount++)
-				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-					var epcID		=	'urn:epc:id:gcn:'+appendValue;
-					EpcLists.push(epcID);	
+				for(var i=0; i<=Count; i++)
+				{					
+					if(syntaxType == 'urn')
+					{
+						var Final		=	companyPrefixInputURN + Start;
+							Final		=	Final.substring(0,25)				
+						var epcID 		=	'urn:epc:id:sgcn:'+Final;	
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var FinalVal	=	companyPrefixInput + Start;
+							FinalVal	=	FinalVal.substring(0,25)	
+						var epcID		=	Domain+'/gcn/'+FinalVal;
+					}					
+					EpcLists.push(epcID);
+					Start++;
 				}
 				callback(EpcLists);
 			}
+			
 		}
 		else if(input.AggregationEventParentID === 'CPI (Al 8010 8011)')
 		{
-			var companyPrefixInput	=	input.AEPCPI1.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+			var companyPrefixInput		=	input.AEPCPI1.toString();
+			var companyPrefixPoint		=	input.AEPCompanyPrefix;
+			var Count					=	input.AEPCPICount;
+			var companyPrefixInputURN	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);	
 			
-			if(input.sgtintype == 'none')
+			if(input.SSCCType == 'random')
 			{
-				var epcID	=	'urn:epc:id:cpi:'+companyPrefixInput+"."+input.singleObjectId;
-				EpcLists.push(epcID);
-				callback(EpcLists);
-			}
-			else if(input.sgtintype == 'range')
-			{
-				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+				var RequiredLen		=	26-companyPrefixInput.length;
+				var min_Length		=	RequiredLen;
+				var max_Length		=	RequiredLen;
+				var randomType		=	'numeric';
+				var randomCount		=	parseInt(Count, 10);
+				var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				for(var r=0; r<data.length; r++)
 				{
-					var appendValue			=	companyPrefixInput+"."+id;
-					var epcID				=	'urn:epc:id:cpi:'+appendValue;
+					if(syntaxType == 'urn')
+					{
+						var Final	=	companyPrefixInputURN+'.'+data[r];
+						Final		=	Final.substring(0,30)
+						var epcID 	=	'urn:epc:id:cpi:'+Final;						
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID 	=	Domain+'/cpid/'+companyPrefixInput+data[r];
+					}
 					EpcLists.push(epcID);
 				}
-				callback(EpcLists);
+				callback(EpcLists);		
 			}
-			else if(input.sgtintype == 'random')
+			else if(input.SSCCType == 'userCustomized')
 			{
-				var min_Length	=	parseInt(input.radomMinLength, 10);
-				var max_Length	=	parseInt(input.randomMaxLength, 10);
-				var randomType	=	input.randomType;
-				var randomCount	=	parseInt(input.randomCount, 10);
-				//Call the function to generate the Random numbers then create XML elements
-				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				var Start	=	parseInt(input.AEPCPIStartValue,10);
 				
-				for(var arrCount=0; arrCount<data.length; arrCount++)
-				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-					var epcID		=	'urn:epc:id:cpi:'+appendValue;
-					EpcLists.push(epcID);	
+				for(var i=0; i<=Count; i++)
+				{					
+					if(syntaxType == 'urn')
+					{				
+						var epcID 		=	'urn:epc:id:cpi:'+companyPrefixInputURN+'.'+Start;	
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID		=	Domain+'/cpid/'+companyPrefixInput+'/'+Start;
+					}					
+					EpcLists.push(epcID);
+					Start++;
 				}
 				callback(EpcLists);
 			}
@@ -549,22 +706,37 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		else if(input.AggregationEventParentID === 'GINC (Al 401)')
 		{
 			var companyPrefixInput	=	input.AECGINC.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
-
+			
 			if(input.sgtintype == 'none')
 			{
-				var epcID	=	'urn:epc:id:ginc:'+companyPrefixInput;
-				EpcLists.push(epcID);
-				callback(EpcLists);
+				if(syntaxType == 'urn')
+				{
+					var epcID			=	'urn:epc:id:ginc:'+companyPrefixInput+'.'+input.singleObjectId;
+					EpcLists.push(epcID);
+					callback(EpcLists);
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var epcID			=	Domain+'/ginc/'+companyPrefixInput+input.singleObjectId;
+					EpcLists.push(epcID);
+					callback(EpcLists);
+				}
 			}
 			else if(input.sgtintype == 'range')
 			{
 				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
 				{
-					var appendValue			=	companyPrefixInput+"."+id;
-					var epcID				=	'urn:epc:id:ginc:'+appendValue;
-					EpcLists.push(epcID);
+					if(syntaxType == 'urn')
+					{
+						var appendValue			=	companyPrefixInput+"."+id;
+						var epcID				=	'urn:epc:id:ginc:'+appendValue;
+						EpcLists.push(epcID);
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID			=	Domain+'/ginc/'+companyPrefixInput+id;
+						EpcLists.push(epcID);
+					}						
 				}
 				callback(EpcLists);
 			}
@@ -578,50 +750,79 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 				
 				for(var arrCount=0; arrCount<data.length; arrCount++)
-				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-					var epcID		=	'urn:epc:id:ginc:'+appendValue;
-					EpcLists.push(epcID);	
+				{	
+					if(syntaxType == 'urn')
+					{
+						var appendValue	=	companyPrefixInput+"."+data[arrCount];
+						var epcID		=	'urn:epc:id:ginc:'+appendValue;
+						EpcLists.push(epcID);		
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID		=	Domain+'/ginc/'+companyPrefixInput+data[arrCount];
+						EpcLists.push(epcID);
+					}					
 				}
 				callback(EpcLists);
 			}
 		}
 		else if(input.AggregationEventParentID === 'GSIN (Al 402)')
 		{
-			var companyPrefixInput	=	input.AEPGSIN.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
-				
-			if(input.sgtintype == 'none')
+			var companyPrefixInput		=	input.AEPGSIN.toString();
+			var Count					=	input.AEPGSINCount;
+			
+			if(input.SSCCType == 'random')
 			{
-				var epcID	=	'urn:epc:id:gsin:'+companyPrefixInput;
-				EpcLists.push(epcID);
-				callback(EpcLists);
-			}
-			else if(input.sgtintype == 'range')
-			{
-				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+				var RequiredLen		=	17-companyPrefixInput.length;
+				var min_Length		=	RequiredLen;
+				var max_Length		=	RequiredLen;
+				var randomType		=	'numeric';
+				var randomCount		=	parseInt(Count, 10);
+				var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				for(var r=0; r<data.length; r++)
 				{
-					var appendValue			=	companyPrefixInput+"."+id;
-					var epcID				=	'urn:epc:id:gsin:'+appendValue;
+					if(syntaxType == 'urn')
+					{
+						var Final	=	companyPrefixInput+'.'+data[r];
+						Final		=	Final.substring(0,17)
+						var epcID 	=	'urn:epc:id:gsin:'+Final;						
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID 	=	Domain+'/gsin/'+companyPrefixInput+data[r];
+					}
 					EpcLists.push(epcID);
 				}
-				callback(EpcLists);
+				callback(EpcLists);		
 			}
-			else if(input.sgtintype == 'random')
+			else if(input.SSCCType == 'userCustomized')
 			{
-				var min_Length	=	parseInt(input.radomMinLength, 10);
-				var max_Length	=	parseInt(input.randomMaxLength, 10);
-				var randomType	=	input.randomType;
-				var randomCount	=	parseInt(input.randomCount, 10);
-				//Call the function to generate the Random numbers then create XML elements
-				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				var Start	=	parseInt(input.AEPGSINStartValue,10);						
 				
-				for(var arrCount=0; arrCount<data.length; arrCount++)
+				for(var i=0; i<=Count; i++)
 				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-					var epcID		=	'urn:epc:id:gsin:'+appendValue;
-					EpcLists.push(epcID);	
+					var EPCValue	=	companyPrefixInput + Start;
+					var EPCValueLen	=	EPCValue.length;
+					var StartLen	=	String(Start).length;
+						
+					if(syntaxType == 'urn')
+					{						
+						var AppendLen	=	16-EPCValueLen+StartLen;
+						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
+						var FinalVal	=	companyPrefixInput + '.' + AppendVal;
+						FinalVal		=	FinalVal.substring(0,17)
+						var epcID 		=	'urn:epc:id:gsin:'+FinalVal;	
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var AppendLen	=	17-EPCValueLen+StartLen;
+						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
+						var FinalVal	=	companyPrefixInput + AppendVal;
+						FinalVal		=	FinalVal.substring(0,17)
+						var epcID		=	Domain+'/gsin/'+FinalVal;
+					}					
+					EpcLists.push(epcID);
+					Start++;
 				}
 				callback(EpcLists);
 			}
@@ -630,61 +831,122 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput	=	input.AEPITIP1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
 			
-			if(input.sgtintype == 'none')
+			if(syntaxType 	== 'urn')
 			{
-				var epcID	=	'urn:epc:id:itip:'+companyPrefixInput+"."+input.singleObjectId;;
-				EpcLists.push(epcID);
-				callback(EpcLists);
-			}
-			else if(input.sgtintype == 'range')
-			{
-				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
-				{
-					var appendValue			=	companyPrefixInput+"."+id;
-					var epcID				=	'urn:epc:id:itip:'+appendValue;
-					EpcLists.push(epcID);
-				}
-				callback(EpcLists);
-			}
-			else if(input.sgtintype == 'random')
-			{
-				var min_Length	=	parseInt(input.radomMinLength, 10);
-				var max_Length	=	parseInt(input.randomMaxLength, 10);
-				var randomType	=	input.randomType;
-				var randomCount	=	parseInt(input.randomCount, 10);
-				//Call the function to generate the Random numbers then create XML elements
-				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				for(var x=6; x<=12;x++)	
+				{	
+					if(x == companyPrefixPoint)
+					{	var FirstChar		=	companyPrefixInput.charAt(0);
+						companyPrefixInput 	= 	[companyPrefixInput.slice(1, x+1), "." , FirstChar , companyPrefixInput.slice(x+1,companyPrefixInput.length)].join('');
+						break;
+					}
+				}				
+				companyPrefixInput	=	companyPrefixInput.slice(0,14)+'.'+companyPrefixInput.slice(15,17)+'.'+companyPrefixInput.slice(17);
 				
-				for(var arrCount=0; arrCount<data.length; arrCount++)
-				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-					var epcID		=	'urn:epc:id:itip:'+appendValue;
-					EpcLists.push(epcID);	
+				if(input.sgtintype == 'none')
+				{
+					var epcID	=	'urn:epc:id:itip:'+companyPrefixInput+"."+input.singleObjectId;
+					EpcLists.push(epcID);
+					callback(EpcLists);
 				}
-				callback(EpcLists);
+				if(input.sgtintype == 'range')
+				{
+					for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+					{				
+						var epcID	=	'urn:epc:id:itip:'+companyPrefixInput+"."+id;
+						EpcLists.push(epcID);
+					}
+					callback(EpcLists);
+				}
+				else if(input.sgtintype == 'random')
+				{
+					var min_Length	=	parseInt(input.radomMinLength, 10);
+					var max_Length	=	parseInt(input.randomMaxLength, 10);
+					var randomType	=	input.randomType;
+					var randomCount	=	parseInt(input.randomCount, 10);
+					//Call the function to generate the Random numbers then create XML elements
+					var data 				= RandomGenerator(min_Length,max_Length,randomType,randomCount);
+					
+					for(var arrCount=0; arrCount<data.length; arrCount++)
+					{			
+						var epcID	=	'urn:epc:id:itip:'+companyPrefixInput+"."+data[arrCount];
+						EpcLists.push(epcID);	
+					}
+					callback(EpcLists);
+				}
+			}
+			else if(syntaxType == 'webURI')
+			{
+				if(input.sgtintype == 'none')
+				{
+					var epcID	=	Domain+'/itip/'+companyPrefixInput+input.singleObjectId;
+					EpcLists.push(epcID);
+					callback(EpcLists);
+				}
+				if(input.sgtintype == 'range')
+				{
+					for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+					{	
+						var epcID	=	Domain+'/itip/'+companyPrefixInput+id;
+						EpcLists.push(epcID);
+					}
+					callback(EpcLists);
+				}
+				else if(input.sgtintype == 'random')
+				{
+					var min_Length	=	parseInt(input.radomMinLength, 10);
+					var max_Length	=	parseInt(input.randomMaxLength, 10);
+					var randomType	=	input.randomType;
+					var randomCount	=	parseInt(input.randomCount, 10);
+					//Call the function to generate the Random numbers then create XML elements
+					var data 				= RandomGenerator(min_Length,max_Length,randomType,randomCount);
+					
+					for(var arrCount=0; arrCount<data.length; arrCount++)
+					{	
+						var epcID	=	Domain+'/itip/'+companyPrefixInput+data[arrCount];
+						EpcLists.push(epcID);	
+					}
+					callback(EpcLists);
+				}
 			}
 		}
 		else if(input.AggregationEventParentID === 'UPI_UI (Al 01 + Al 235)')
 		{
 			var companyPrefixInput	=	input.AEPUPIUI1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
+			var CompanyPrefixURN	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
 			
 			if(input.sgtintype == 'none')
 			{
-				var epcID	=	'urn:epc:id:upiui:'+companyPrefixInput+"."+input.singleObjectId;
-				EpcLists.push(epcID);
-				callback(EpcLists);
+				if(syntaxType == 'urn')
+				{
+					var epcID			=	'urn:epc:id:upui:'+CompanyPrefixURN+'.'+input.singleObjectId;
+					EpcLists.push(epcID);
+					callback(EpcLists);
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var epcID			=	Domain+'/upui/'+companyPrefixInput+input.singleObjectId;
+					EpcLists.push(epcID);
+					callback(EpcLists);
+				}
 			}
 			else if(input.sgtintype == 'range')
 			{
 				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
 				{
-					var appendValue			=	companyPrefixInput+"."+id;
-					var epcID				=	'urn:epc:id:upiui:'+appendValue;
-					EpcLists.push(epcID);
+					if(syntaxType == 'urn')
+					{
+						var appendValue			=	CompanyPrefixURN+"."+id;
+						var epcID				=	'urn:epc:id:upui:'+appendValue;
+						EpcLists.push(epcID);
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID			=	Domain+'/upui/'+companyPrefixInput+id;
+						EpcLists.push(epcID);
+					}						
 				}
 				callback(EpcLists);
 			}
@@ -698,59 +960,186 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 				
 				for(var arrCount=0; arrCount<data.length; arrCount++)
-				{		
-					var appendValue	=	companyPrefixInput+"."+data[arrCount];
-					var epcID		=	'urn:epc:id:upiui:'+appendValue;
-					EpcLists.push(epcID);	
+				{	
+					if(syntaxType == 'urn')
+					{
+						var appendValue	=	CompanyPrefixURN+"."+data[arrCount];
+						var epcID		=	'urn:epc:id:upui:'+appendValue;
+						EpcLists.push(epcID);		
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID		=	Domain+'/upui/'+companyPrefixInput+data[arrCount];
+						EpcLists.push(epcID);
+					}					
 				}
 				callback(EpcLists);
 			}
 		}
 		else if(input.AggregationEventParentID === 'GID')
 		{
-			if(input.sgtintype == 'none')
+			console.log("ONE");
+			var Mgr		=	input.AEPGID1.toString();
+			var Class	=	input.AEPGID2.toString();
+			var Count	=	input.GIDCount;
+			
+			if(input.SSCCType == 'random')
 			{
-				var GIDEPCId	=	'urn:epc:id:gid:'+input.AEPGID1+'.'+input.AEPGID2+'.'+input.singleObjectId;
-				EpcLists.push(GIDEPCId);
-				callback(EpcLists);
-			}
-			else if(input.sgtintype == 'range')
-			{
-				for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
+				var RequiredLen		=	11;
+				var min_Length		=	RequiredLen;
+				var max_Length		=	RequiredLen;
+				var randomType		=	'numeric';
+				var randomCount		=	parseInt(Count, 10);
+				var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				
+				for(var r=0; r<data.length; r++)
 				{
-					var epcID				=	'urn:epc:id:gid:'+input.AEPGID1+'.'+input.AEPGID2+'.'+id;
+					if(syntaxType == 'urn')
+					{
+						var epcID 	=	'urn:epc:id:gid:' + Mgr +'.'+ Class+'.'+ data[r];						
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID 	=	Domain + '/gid/' + Mgr + Class + data[r];
+					}
 					EpcLists.push(epcID);
 				}
-				callback(EpcLists);
+				callback(EpcLists);		
 			}
-			else if(input.sgtintype == 'random')
+			else if(input.SSCCType == 'userCustomized')
 			{
-				var min_Length	=	parseInt(input.radomMinLength, 10);
-				var max_Length	=	parseInt(input.randomMaxLength, 10);
-				var randomType	=	input.randomType;
-				var randomCount	=	parseInt(input.randomCount, 10);
-				//Call the function to generate the Random numbers then create XML elements
-				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				var Start	=	parseInt(input.GIDStartValue,10);						
 				
-				for(var arrCount=0; arrCount<data.length; arrCount++)
+				for(var i=0; i<=Count; i++)
 				{		
-					var epcID		=	'urn:epc:id:gid:'+input.AEPGID1+'.'+input.AEPGID2+'.'+data[arrCount];
-					EpcLists.push(epcID);	
+					var StartLen	=	String(Start).length;
+					var AppendLen	=	11-StartLen;
+					var AppendVal	=	Start.toString().padStart(AppendLen,'9');
+					
+					if(syntaxType == 'urn')
+					{	
+						var epcID 		=	'urn:epc:id:gid:'+Mgr+'.'+Class+'.'+AppendVal;	
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID		=	Domain+'/gid/' + Mgr + Class + AppendVal;
+					}					
+					EpcLists.push(epcID);
+					Start++;
 				}
 				callback(EpcLists);
 			}
+			
 		}
-		else if(input.AggregationEventParentID === 'USDoD')
-		{
-			var USDODEPCId	=	'urn:epc:id:usdod:'+input.AEPDSDOD1+'.'+input.AEPDSDOD2;
-			EpcLists.push(USDODEPCId);
-			callback(EpcLists);
+		else if(input.AggregationEventParentID == 'USDoD')
+		{			
+			var Cage	=	input.AEPDSDOD1.toString();
+			var Count	=	input.USDoDCount;
+			
+			if(input.SSCCType == 'random')
+			{
+				var RequiredLen		=	11;
+				var min_Length		=	RequiredLen;
+				var max_Length		=	RequiredLen;
+				var randomType		=	'numeric';
+				var randomCount		=	parseInt(Count, 10);
+				var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				
+				for(var r=0; r<data.length; r++)
+				{
+					if(syntaxType == 'urn')
+					{
+						var epcID 	=	'urn:epc:id:usdod:' + Cage + '.' + data[r];						
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID 	=	Domain + '/usdod/' + Cage + data[r];
+					}
+					EpcLists.push(epcID);
+				}
+				callback(EpcLists);		
+			}
+			else if(input.SSCCType == 'userCustomized')
+			{
+				var Start	=	parseInt(input.USDoDStartValue,10);						
+				
+				for(var i=0; i<=Count; i++)
+				{		
+					var StartLen	=	String(Start).length;
+					var AppendLen	=	11-StartLen;
+					var AppendVal	=	Start.toString().padStart(AppendLen,'9');
+					
+					if(syntaxType == 'urn')
+					{	
+						var epcID 		=	'urn:epc:id:usdod:' + Cage + '.'+ AppendVal;	
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID		=	Domain+'/usdod/' + Cage + AppendVal;
+					}					
+					EpcLists.push(epcID);
+					Start++;
+				}
+				callback(EpcLists);
+			}			
 		}
 		else if(input.AggregationEventParentID === 'ADI')
 		{
-			var ADIEPCId	=	'urn:epc:id:adi:'+input.AEPADI1+'.'+input.AEPADI2+'.'+input.AEPADI3;
-			EpcLists.push(ADIEPCId);
-			callback(EpcLists);
+			var Cage	=	input.AEPADI1.toString();
+			var Count	=	input.ADICount;
+			var PNO		=	""
+			
+			if(input.AEPADI2 != undefined)
+			{
+				PNO		=	input.AEPADI2.toString();
+			}			
+			
+			if(input.SSCCType == 'random')
+			{
+				var RequiredLen		=	11;
+				var min_Length		=	RequiredLen;
+				var max_Length		=	RequiredLen;
+				var randomType		=	'numeric';
+				var randomCount		=	parseInt(Count, 10);
+				var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				
+				for(var r=0; r<data.length; r++)
+				{
+					if(syntaxType == 'urn')
+					{
+						var epcID 	=	'urn:epc:id:adi:' + Cage + '.' + PNO + '.' + data[r];						
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID 	=	Domain + '/adi/' + Cage + PNO + data[r];	
+					}
+					EpcLists.push(epcID);
+				}
+				callback(EpcLists);		
+			}
+			else if(input.SSCCType == 'userCustomized')
+			{
+				var Start	=	parseInt(input.ADIStartValue,10);						
+				
+				for(var i=0; i<=Count; i++)
+				{		
+					var StartLen	=	String(Start).length;
+					var AppendLen	=	11-StartLen;
+					var AppendVal	=	Start.toString().padStart(AppendLen,'9');
+					
+					if(syntaxType == 'urn')
+					{	
+						var epcID 		=	'urn:epc:id:adi:' + Cage + '.' + PNO + '.' + AppendVal;	
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID		=	Domain+'/adi/' + Cage + PNO + AppendVal;
+					}					
+					EpcLists.push(epcID);
+					Start++;
+				}
+				callback(EpcLists);
+			}	
 		}
 		else if(input.AggregationEventParentID === 'BIC')
 		{
@@ -759,9 +1148,54 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		}
 		else if(input.AggregationEventParentID === 'IMOVN')
 		{
-			var IMOVNEPCId	=	'urn:epc:id:imovn:'+input.AEPIMOVN;
-			EpcLists.push(IMOVNEPCId);
-			callback(EpcLists);
+			var Count	=	input.IMOVCount;
+			
+			if(input.SSCCType == 'random')
+			{
+				var RequiredLen		=	7;
+				var min_Length		=	RequiredLen;
+				var max_Length		=	RequiredLen;
+				var randomType		=	'numeric';
+				var randomCount		=	parseInt(Count, 10);
+				var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				
+				for(var r=0; r<data.length; r++)
+				{
+					if(syntaxType == 'urn')
+					{
+						var epcID 	=	'urn:epc:id:imovn:' + data[r];						
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID 	=	Domain + '/imovn/' + data[r];	
+					}
+					EpcLists.push(epcID);
+				}
+				callback(EpcLists);		
+			}
+			else if(input.SSCCType == 'userCustomized')
+			{
+				var Start	=	parseInt(input.IMOVStartValue,10);						
+				
+				for(var i=0; i<=Count; i++)
+				{		
+					var StartLen	=	String(Start).length;
+					var AppendLen	=	7-StartLen;
+					var AppendVal	=	Start.toString().padStart(StartLen+AppendLen,'9');
+					
+					if(syntaxType == 'urn')
+					{	
+						var epcID 		=	'urn:epc:id:imovn:'+ AppendVal;	
+					}
+					else if(syntaxType == 'webURI')
+					{
+						var epcID		=	Domain+'/imovn/' + AppendVal;
+					}					
+					EpcLists.push(epcID);
+					Start++;
+				}
+				callback(EpcLists);
+			}	
 		}
 		else if(input.ObjectEventEpcsType === 'Enter a URI Manually')
 		{
@@ -794,66 +1228,48 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var GCP			=	String(input.AEPSSCC);
 			var Extension	=	String(input.AEPSSCCExtDigit);
+			var Serial		=	String(input.AEPSSCCSingleSerial);			
 			
 			if(syntaxType 	== 'urn')
 			{
-				GCP			=	GCP +'.'+Extension;
-				
-				if(input.SSCCType == 'userCustomized')
-				{				
-					var Start			=	parseInt(input.AEPSSCCStartValue,10);				
-					var EPCValue		=	GCP + Start;
-					var EPCValueLen		=	EPCValue.length;
-					var StartLen		=	String(Start).length;
-					var AppendLen		=	18-EPCValueLen+StartLen;
-					var AppendVal		=	Start.toString().padStart(AppendLen,'0');
-					var FinalVal		=	GCP + AppendVal;
-					FinalVal			=	FinalVal.substring(0,18)
-					var epcID			=	'urn:epc:id:sscc:'+FinalVal;
-					callback(epcID);
+				var FinalValue	=	GCP + '.' + Extension + Serial;
+				if(FinalValue.length >= 18)
+				{					
+					FinalValue		=	FinalValue.substring(0,18);
+					var epcID		=	'urn:epc:id:sscc:'+FinalValue;
+					callback(epcID);	
 				}
-				else if(input.SSCCType == 'random')
+				else
 				{
-					var GCPLen			=	GCP.length;
-					var RequiredLen		=	18-GCPLen;
-					var min_Length		=	RequiredLen;
-					var max_Length		=	RequiredLen;
-					var randomType		=	'numeric';
-					var randomCount		=	1
-					var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);						
-					var epcID			=	'urn:epc:id:sscc:'+GCP+companyPrefixNormal(data,input.SSCCCompanyPrefix);
+					FinalValueLength	=	FinalValue.length;
+					var appendLength	=	18-FinalValueLength;
+						appendLength	=	appendLength + Serial.length;
+					var AppendVal		=	Serial.toString().padStart(appendLength,'0');
+					FinalValue			=	GCP + '.' + Extension + AppendVal;
+					var epcID		=	'urn:epc:id:sscc:'+FinalValue;
 					callback(epcID);
 				}
 			}
 			else if(syntaxType == 'webURI')
 			{
-				if(input.SSCCType == 'userCustomized')
-				{				
-					var Start			=	parseInt(input.AEPSSCCStartValue,10);				
-					var EPCValue		=	GCP + Start;
-					var EPCValueLen		=	EPCValue.length;
-					var StartLen		=	String(Start).length;
-					var AppendLen		=	18-EPCValueLen+StartLen;
-					var AppendVal		=	Start.toString().padStart(AppendLen,'0');
-					var FinalVal		=	GCP + AppendVal;
-					FinalVal			=	FinalVal.substring(0,18)
-					var epcID			=	Domain+'/sscc/'+FinalVal;
-					callback(epcID);
+				var FinalValue	=	GCP + Extension + Serial;
+				if(FinalValue.length >= 18)
+				{					
+					FinalValue		=	FinalValue.substring(0,18);
+					var epcID		=	Domain+'/sscc/'+FinalValue;
+					callback(epcID);	
 				}
-				else if(input.SSCCType == 'random')
+				else
 				{
-					var GCPLen			=	GCP.length;
-					var RequiredLen		=	18-GCPLen;
-					var min_Length		=	RequiredLen;
-					var max_Length		=	RequiredLen;
-					var randomType		=	'numeric';
-					var randomCount		=	1
-					var data 			= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);						
-					var epcID			=	Domain+'/sscc/'+GCP+companyPrefixNormal(data,input.SSCCCompanyPrefix);
+					FinalValueLength	=	FinalValue.length;
+					var appendLength	=	18-FinalValueLength;
+						appendLength	=	appendLength + Serial.length;
+					var AppendVal		=	Serial.toString().padStart(appendLength,'0');
+					FinalValue			=	GCP + Extension + AppendVal;
+					var epcID			=	Domain+'/sscc/'+FinalValue;
 					callback(epcID);
 				}
-			}
-				
+			}				
 		}
 		else if(input.AggregationEventParentID == 'SGLN (Al 414 + Al 254)')
 		{
@@ -875,116 +1291,347 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		else if(input.AggregationEventParentID === 'GRAI (Al 8003)')
 		{
 			var companyPrefixInput	=	input.AEPGRAI.toString();
+			var Serial				=	input.AEPGRAISerial;
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
 			
-			var epcID				=	'urn:epc:id:grai:'+companyPrefixInput;
-			callback(epcID)
+			if(syntaxType 	== 'urn')
+			{				
+				companyPrefixInput 		=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+				companyPrefixInput		=	companyPrefixInput.substring(0, 13)+'.'+companyPrefixInput.substring(14);				
+				var epcID				=	'urn:epc:id:grai:'+companyPrefixInput+Serial;
+				callback(epcID)
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var epcID				=	Domain+'/grai/'+companyPrefixInput+Serial;
+				callback(epcID)
+			}			
 		}
 		else if(input.AggregationEventParentID === 'GIAI (Al 8004)')
 		{
-			var companyPrefixInput	=	input.AEPGIAI.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
+			var companyPrefixInput	=	input.AEPGIAI.toString();	
 			
-			var epcID				=	'urn:epc:id:giai:'+companyPrefixInput;
-			callback(epcID)
+			if(syntaxType 	== 'urn')
+			{				
+				var epcID			=	'urn:epc:id:giai:'+companyPrefixInput+'.'+input.AEPGIAISERIAL;
+				callback(epcID)
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var epcID			=	Domain+'/giai/'+companyPrefixInput+input.AEPGIAISERIAL;
+				callback(epcID);
+			}				
 		}
 		else if(input.AggregationEventParentID === 'GSRN (Al 8018)')
-		{
-			var companyPrefixInput	=	input.AEPGSRN.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+		{					
+			var companyPrefixInput	=	input.AEPGSRNCompanyPrefix.toString();
+			var Serial				=	input.AEPGSRNSingleSerial.toString();
 			
-			var epcID				=	'urn:epc:id:gsrn:'+companyPrefixInput;
-			callback(epcID)
+			if(syntaxType 	== 'urn')
+			{
+				var FinalValue		=	companyPrefixInput+'.'+Serial;
+				FinalValueLength	=	FinalValue.length;
+				
+				if(FinalValueLength >= 18)
+				{
+					FinalValue		=	FinalValue.substring(0,18);
+					var epcID		=	'urn:epc:id:gsrn:'+FinalValue;
+					callback(epcID)
+				}
+				else
+				{
+					var appendLength=	18-FinalValueLength;
+					appendLength	=	appendLength + Serial.length;
+					var AppendVal	=	Serial.toString().padStart(appendLength,'0');
+					var epcID		=	'urn:epc:id:gsrn:'+companyPrefixInput+'.'+AppendVal;
+					callback(epcID)
+				}				
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var FinalValue		=	companyPrefixInput+Serial;
+				FinalValueLength	=	FinalValue.length;
+				
+				if(FinalValueLength >= 18)
+				{
+					FinalValue		=	FinalValue.substring(0,18);
+					var epcID		=	Domain+'/gsrn/'+FinalValue;
+					callback(epcID);
+				}
+				else
+				{
+					var appendLength=	18-FinalValueLength;
+					appendLength	=	appendLength + Serial.length;
+					var AppendVal	=	Serial.toString().padStart(appendLength,'0');
+					var epcID		=	Domain+'/gsrn/'+companyPrefixInput+AppendVal;
+					callback(epcID);
+				}				
+			}			
 		}	
 		else if(input.AggregationEventParentID === 'GSRNP (Al 8017)')
 		{
-			var companyPrefixInput	=	input.AEPGSRNP.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+			var companyPrefixInput	=	input.AEPGSRNPCompanyPrefix.toString();
+			var Serial				=	input.AEPGSRNPSingleSerial.toString();
 			
-			var epcID				=	'urn:epc:id:gsrnp:'+companyPrefixInput;
-			callback(epcID)
+			if(syntaxType 	== 'urn')
+			{
+				var FinalValue		=	companyPrefixInput+'.'+Serial;
+				FinalValueLength	=	FinalValue.length;
+				
+				if(FinalValueLength >= 18)
+				{
+					FinalValue		=	FinalValue.substring(0,18);
+					var epcID		=	'urn:epc:id:gsrnp:'+FinalValue;
+					callback(epcID)
+				}
+				else
+				{
+					var appendLength=	18-FinalValueLength;
+					appendLength	=	appendLength + Serial.length;
+					var AppendVal	=	Serial.toString().padStart(appendLength,'0');
+					var epcID		=	'urn:epc:id:gsrnp:'+companyPrefixInput+'.'+AppendVal;
+					callback(epcID)
+				}				
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var FinalValue		=	companyPrefixInput+Serial;
+				FinalValueLength	=	FinalValue.length;
+				
+				if(FinalValueLength >= 18)
+				{
+					FinalValue		=	FinalValue.substring(0,18);
+					var epcID		=	Domain+'/gsrnp/'+FinalValue;
+					callback(epcID);
+				}
+				else
+				{
+					var appendLength=	18-FinalValueLength;
+					appendLength	=	appendLength + Serial.length;
+					var AppendVal	=	Serial.toString().padStart(appendLength,'0');
+					var epcID		=	Domain+'/gsrnp/'+companyPrefixInput+AppendVal;
+					callback(epcID);
+				}				
+			}	
 		}
 		else if(input.AggregationEventParentID === 'GDTI (Al 253)')
 		{
 			var companyPrefixInput	=	input.AEPGDTI.toString();
+			var Serial				=	"";
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
 			
-			var epcID				=	'urn:epc:id:gdti:'+companyPrefixInput;
-			callback(epcID)
+			if(input.AEPGDTISerial != undefined)
+			{
+				Serial				=	input.AEPGDTISerial.toString();
+			}
+			
+			if(syntaxType 	== 'urn')
+			{
+				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+				companyPrefixInput	=	companyPrefixInput.slice(0,13)+'.'+companyPrefixInput.slice(14);
+				var epcID		=	'urn:epc:id:gdti:'+companyPrefixInput+Serial;
+				callback(epcID)
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var epcID		=	Domain+'/gdti/'+companyPrefixInput+Serial;
+				callback(epcID);
+			}		
 		}
 		else if(input.AggregationEventParentID === 'GCN (Al 255)')
 		{
 			var companyPrefixInput	=	input.AEPGSN.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+			var Serial				=	"";
 			
-			var epcID				=	'urn:epc:id:gcn:'+companyPrefixInput;
-			callback(epcID)
+			if(input.AEPGCNSerial != undefined)
+			{
+				Serial				=	input.AEPGCNSerial.toString();
+			}
+			
+			if(syntaxType 	== 'urn')
+			{
+				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+				companyPrefixInput	=	companyPrefixInput.slice(0,13)+'.'+companyPrefixInput.slice(14);
+				var epcID			=	'urn:epc:id:sgcn:'+companyPrefixInput+Serial;
+				callback(epcID)
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var epcID			=	Domain+'/gcn/'+companyPrefixInput+Serial;
+				callback(epcID);
+			}	
+			
 		}
 		else if(input.AggregationEventParentID === 'CPI (Al 8010 8011)')
 		{
 			var companyPrefixInput	=	input.AEPCPI1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
+			var Serial				=	input.AEPCPISingleValue;
+				
+			if(syntaxType 	== 'urn')
+			{
 				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
-
-			var epcID				=	'urn:epc:id:cpi:'+companyPrefixInput+"."+input.AEPCPI2;
-			callback(epcID);
+				var epcID			=	'urn:epc:id:cpi:'+companyPrefixInput+'.'+Serial;
+				callback(epcID)				
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var epcID			=	Domain+'/cpid/'+companyPrefixInput+Serial;
+				callback(epcID);
+			}			
 		}
 		else if(input.AggregationEventParentID === 'GINC (Al 401)')
 		{
 			var companyPrefixInput	=	input.AECGINC.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+			var Serial				=	input.AECGINCSingleValue;
 			
-			var epcID				=	'urn:epc:id:ginc:'+companyPrefixInput;
-			callback(epcID);
+			if(syntaxType 	== 'urn')
+			{
+				var epcID			=	'urn:epc:id:ginc:'+companyPrefixInput+'.'+Serial;
+				callback(epcID)				
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var epcID			=	Domain+'/ginc/'+companyPrefixInput+Serial;
+				callback(epcID);
+			}
 		}
 		else if(input.AggregationEventParentID === 'GSIN (Al 402)')
 		{
 			var companyPrefixInput	=	input.AEPGSIN.toString();
-			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+			var Serial				=	input.AEPGSINSingleValue;
 			
-			var epcID				=	'urn:epc:id:gsin:'+companyPrefixInput;
-			callback(epcID);
+			if(syntaxType 	== 'urn')
+			{
+				var FinalValue		=	companyPrefixInput+'.'+Serial;
+				FinalValueLength	=	FinalValue.length;
+				
+				if(FinalValueLength >= 17)
+				{
+					FinalValue		=	FinalValue.substring(0,17);
+					var epcID		=	'urn:epc:id:gsin:'+FinalValue;
+					callback(epcID)
+				}
+				else
+				{
+					var appendLength=	17-FinalValueLength;
+					appendLength	=	appendLength + Serial.length;
+					var AppendVal	=	Serial.toString().padStart(appendLength,'0');
+					var epcID		=	'urn:epc:id:gsin:'+companyPrefixInput+'.'+AppendVal;
+					callback(epcID)
+				}		
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var FinalValue		=	companyPrefixInput+Serial;
+				FinalValueLength	=	FinalValue.length;
+				
+				if(FinalValueLength >= 17)
+				{
+					FinalValue		=	FinalValue.substring(0,17);
+					var epcID		=	Domain+'/gsin/'+FinalValue;
+					callback(epcID);
+				}
+				else
+				{
+					var appendLength=	17-FinalValueLength;
+					appendLength	=	appendLength + Serial.length;
+					var AppendVal	=	Serial.toString().padStart(appendLength,'0');
+					var epcID		=	Domain+'/gsin/'+companyPrefixInput+AppendVal;
+					callback(epcID);
+				}
+			}
 		}
 		else if(input.AggregationEventParentID === 'ITIP (Al 8006 + Al 21)')
 		{
 			var companyPrefixInput	=	input.AEPITIP1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
 			
-			var epcID				=	'urn:epc:id:gsin:'+companyPrefixInput+'.'+input.AEPITIP2;
-			callback(epcID);
+			if(syntaxType 	== 'urn')
+			{
+				for(var x=6; x<=12;x++)	
+				{	
+					if(x == companyPrefixPoint)
+					{	var FirstChar		=	companyPrefixInput.charAt(0);
+						companyPrefixInput 	= 	[companyPrefixInput.slice(1, x+1), "." , FirstChar , companyPrefixInput.slice(x+1,companyPrefixInput.length)].join('');
+						break;
+					}
+				}				
+				companyPrefixInput	=	companyPrefixInput.slice(0,14)+'.'+companyPrefixInput.slice(15,17)+'.'+companyPrefixInput.slice(17);
+				var epcID			=	'urn:epc:id:itip:'+companyPrefixInput+'.'+input.AEPITIP2;
+				callback(epcID)
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var epcID			=	Domain+'/itip/'+companyPrefixInput+input.AEPITIP2;
+				callback(epcID);
+			}
 		}
 		else if(input.AggregationEventParentID === 'UPI_UI (Al 01 + Al 235)')
 		{
 			var companyPrefixInput	=	input.AEPUPIUI1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-				companyPrefixInput 	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
+			var Serial				=	input.AEPUPIUI2.toString();
 			
-			var epcID				=	'urn:epc:id:gsin:'+companyPrefixInput+'.'+input.AEPUPIUI2;
-			callback(epcID);
+			if(syntaxType 	== 'urn')
+			{
+				companyPrefixInput 	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
+				var epcID			=	'urn:epc:id:upui:'+companyPrefixInput+'.'+Serial;
+				callback(epcID)
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var epcID			=	Domain+'/upui/'+companyPrefixInput+Serial;
+				callback(epcID)
+			}
+			
 		}
 		else if(input.AggregationEventParentID === 'GID')
 		{
-			var GIDEPCId	=	'urn:epc:id:gid:'+input.AEPGID1+'.'+input.AEPGID2+'.'+input.AEPGID3;
-			callback(GIDEPCId);
+			if(syntaxType 	== 'urn')
+			{
+				var GIDEPCId	=	'urn:epc:id:gid:'+input.AEPGID1+'.'+input.AEPGID2+'.'+input.AEPGID3;
+				callback(GIDEPCId);
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var GIDEPCId	=	Domain+'/gid/'+input.AEPGID1+input.AEPGID2+input.AEPGID3;
+				callback(GIDEPCId);
+			}			
 		}
 		else if(input.AggregationEventParentID === 'USDoD')
 		{
-			var USDODEPCId	=	'urn:epc:id:usdod:'+input.AEPDSDOD1+'.'+input.AEPDSDOD2;
-			callback(USDODEPCId);
+			if(syntaxType 	== 'urn')
+			{
+				var USDODEPCId	=	'urn:epc:id:usdod:'+input.AEPDSDOD1+'.'+input.AEPDSDOD2;
+				callback(USDODEPCId);
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var USDODEPCId	=	Domain+'/usdod/'+input.AEPDSDOD1+input.AEPDSDOD1;
+				callback(USDODEPCId);
+			}
 		}
 		else if(input.AggregationEventParentID === 'ADI')
 		{
-			var ADIEPCId	=	'urn:epc:id:adi:'+input.AEPADI1+'.'+input.AEPADI2+'.'+input.AEPADI3;
-			callback(ADIEPCId);
+			var PNO		=	""
+			
+			if(input.AEPADI2 != undefined)
+			{
+				PNO		=	input.AEPADI2.toString();
+			}	
+			
+			if(syntaxType 	== 'urn')
+			{
+				var ADIEPCId	=	'urn:epc:id:adi:'+input.AEPADI1+'.'+PNO+'.'+input.AEPADI3;
+				callback(ADIEPCId);
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var ADIEPCId	=	'urn:epc:id:adi:'+input.AEPADI1+PNO+input.AEPADI3;
+				callback(ADIEPCId);
+			}			
 		}
 		else if(input.AggregationEventParentID === 'BIC')
 		{
@@ -992,8 +1639,17 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		}
 		else if(input.AggregationEventParentID === 'IMOVN')
 		{
-			var IMOVNEPCId	=	'urn:epc:id:imovn:'+input.AEPIMOVN;
-			callback(IMOVNEPCId);
+			if(syntaxType 	== 'urn')
+			{
+				var IMOVNEPCId	=	'urn:epc:id:imovn:'+input.AEPIMOVN;
+				callback(IMOVNEPCId);
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var IMOVNEPCId	=	'urn:epc:id:imovn:'+input.AEPIMOVN;
+				callback(IMOVNEPCId);
+			}
+			
 		}
 		else if(input.ObjectEventEpcsType === 'Enter a URI Manually')
 		{
@@ -1036,11 +1692,11 @@ function RandomGenerator(min_Length,max_Length,randomType,randomCount){
 	
 	//If numeric then generate Numeric only Random Data
 	randomArray = [];
-
+	
 	if(randomType	== 'numeric')
 	{	
 		var itemProcessed 	= 0;
-		var charset     	= "0123456789";
+		var charset     	= "123456789";
 		
 		for(var id=1;id<=randomCount;id++)
 		{
@@ -1088,7 +1744,7 @@ function RandomGenerator(min_Length,max_Length,randomType,randomCount){
 	else if(randomType	== 'alphaNumericwithSpecial')
 	{
 		var itemProcessed 	= 0;
-		var charset     	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~()'!*:@,;";
+		var charset     	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
 		
 		for(var id=0;id<randomCount;id++)
 		{
@@ -1108,20 +1764,5 @@ function RandomGenerator(min_Length,max_Length,randomType,randomCount){
 				return randomArray;
 			}
 		}
-	}
-	else if(randomType == 'RandomNumbers')
-	{
-		var charset     	=	"1234567890";
-		
-		for(var id=0;id<randomCount;id++)
-		{
-			var randomId    	=	'';
-			for(var len=1; len<=max_Length; len++)
-			{
-				randomId += charset.charAt(Math.floor(Math.random() * charset.length));
-			}
-			randomArray.push(randomId);
-		}
-		return randomArray;
 	}	
 }

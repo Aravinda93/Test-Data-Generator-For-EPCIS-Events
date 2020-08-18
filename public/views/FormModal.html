@@ -1,4 +1,4 @@
-<!-- MODAL FOR SENSOR INFORMATION -->
+<!-- MODAL FOR EVENT INFORMATION -->
 <div class="modal fade" id="EventModalForm" style="overflow-y: auto;">
 	<div class="modal-dialog" style="max-height:100%; max-width:100%;">
 		<div class="modal-content">
@@ -19,7 +19,15 @@
 								</td>
 							</tr>
 							<tr>
-								<td>Syntax Type</td>
+								<td rowspan="3" class="column2"> Event Type </td>
+								<td>
+									<select id="eventtype1" ng-model="formdata.eventtype1" class="form-control" ng-change="EventTypeChange()" ng-options='eventtype1.value as eventtype1.text  for eventtype1 in eventType' required>
+										<option class="dropdown-item" value="" disabled selected>Select Event Type</option>
+										<option class="dropdown-item" value="{{eventtype1.value}}"> {{ eventtype1.text }} </option>
+									</select>
+								</td>
+							</tr>
+							<tr>
 								<td>
 									<div class="custom-control custom-radio custom-control-inline">
 										<input type="radio" ng-model="formdata.syntaxType" class="custom-control-input" value="urn" id="syntaxType1" name="syntaxType">
@@ -29,15 +37,6 @@
 										<input type="radio" ng-model="formdata.syntaxType" class="custom-control-input" value="webURI" id="syntaxType2" name="syntaxType">
 										<label class="custom-control-label" for="syntaxType2">Web URI</label>
 									</div>
-								</td>
-							</tr>
-							<tr>
-								<td rowspan="2" class="column2"> Event Type </td>
-								<td>
-									<select id="eventtype1" ng-model="formdata.eventtype1" class="form-control" ng-change="EventTypeChange()" ng-options='eventtype1.value as eventtype1.text  for eventtype1 in eventType' required>
-										<option class="dropdown-item" value="" disabled selected>Select Event Type</option>
-										<option class="dropdown-item" value="{{eventtype1.value}}"> {{ eventtype1.text }} </option>
-									</select>
 								</td>
 							</tr>
 							<tr>

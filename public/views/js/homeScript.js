@@ -1118,18 +1118,20 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	//Aggregation Event PARENT ID Change
 	$scope.AggregationEventParentChange		=	function(){
 		
-		$scope.NoneValuesShow = $scope.AEPCompanyDisp = $scope.AEPSGTINDisp	 = $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
+		$scope.RandomRange = $scope.NoneValuesShow = $scope.AEPCompanyDisp = $scope.AEPSGTINDisp	 = $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
 		
 		//Check if Multiple values are required
 		if($scope.ObjectEventAddEPCsFlag || $scope.AEChildEPCSFlage || $scope.TransactionEventChildEPCS || $scope.TransformationEventInputEPCsFlag || $scope.TransformationEventOutputEPCsFlag || $scope.AssociationEventChildEPCSFlag)
 		{
 			$scope.AutoGenerate	= $scope.AutoGenerateRequired =	$scope.MultiValues = true;
 			$scope.RequiredValues	=	true;
+			$scope.SingleValue		=	false;
 		}
 		
 		if($scope.AEParentEPCsFlag || $scope.TransactionEventParentIDFlag || $scope.AssociationEventParentFlag)
 		{
-			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
+			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false;
+			$scope.SingleValue		=	true;
 			$scope.RequiredValues	=	false;
 		}
 			
@@ -1142,6 +1144,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		else if($scope.CommonForm.AggregationEventParentID == 'SSCC (Al 00)')
 		{
 			$scope.AEPSSCCDisp		= 	true;
+			$scope.RandomRange		=	true;
 			$scope.AEPCompanyDisp	=	false;
 			$scope.NoneValuesShow	=	false;
 			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;			
@@ -1156,48 +1159,56 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		{
 			$scope.AEPGRAIDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			$scope.NoneValuesShow	=	false;
+			$scope.NoneValuesShow	=	true;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GIAI (Al 8004)')
 		{
 			$scope.AEPGIAIDisp		=	true;
-			$scope.AEPCompanyDisp	=	true;
+			$scope.NoneValuesShow	=	true;			
+			$scope.AEPCompanyDisp	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GSRN (Al 8018)')
 		{
 			$scope.AEPGSRNDisp		=	true;
-			$scope.AEPCompanyDisp	=	true;
+			$scope.RandomRange		=	true;
+			$scope.NoneValuesShow	=  $scope.AEPCompanyDisp = $scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GSRNP (Al 8017)')
 		{
 			$scope.AEPGSRNPDisp		=	true;
-			$scope.AEPCompanyDisp	=	true;
+			$scope.RandomRange		=	true;
+			$scope.NoneValuesShow	=   $scope.AEPCompanyDisp = $scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GDTI (Al 253)')
 		{
 			$scope.AEPGDTIDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
+			$scope.NoneValuesShow	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GCN (Al 255)')
 		{
 			$scope.AEPGSNDisp		=	true;
+			$scope.RandomRange		=	true;
 			$scope.AEPCompanyDisp	=	true;
+			$scope.NoneValuesShow	=  $scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'CPI (Al 8010 8011)')
 		{
 			$scope.AEPCPIDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			$scope.NoneValuesShow	=	true;
+			$scope.RandomRange		=	true;
+			$scope.NoneValuesShow	=  $scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GINC (Al 401)')
 		{
 			$scope.AECGINCDisp		=	true;
-			$scope.AEPCompanyDisp	=	true;
+			$scope.NoneValuesShow	=  	true;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GSIN (Al 402)')
 		{
 			$scope.AEPGSINDISP		=	true;
-			$scope.AEPCompanyDisp	=	true;
+			$scope.RandomRange		=	true;
+			$scope.NoneValuesShow	=  $scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'ITIP (Al 8006 + Al 21)')
 		{
@@ -1214,27 +1225,31 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		else if($scope.CommonForm.AggregationEventParentID == 'GID')
 		{
 			$scope.AEPGIDDisp		=	true;
-			$scope.NoneValuesShow	=	true;
+			$scope.RandomRange		=	true;
+			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'USDoD')
 		{
 			$scope.AEPDSDODDisp		=	true;
-			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
+			$scope.RandomRange		=	true;
+			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'ADI')
 		{
-			$scope.AEPADIDisp	=	true;
-			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
+			$scope.AEPADIDisp		=	true;
+			$scope.RandomRange		=	true;
+			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'BIC')
 		{
-			$scope.AEPBICDisp	=	true;
-			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
+			$scope.AEPBICDisp		=	true;
+			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'IMOVN')
 		{
-			$scope.AEPIMOVNDisp	=	true; 
-			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
+			$scope.AEPIMOVNDisp		=	true; 
+			$scope.RandomRange		=	true;
+			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'Enter a URI Manually')
 		{

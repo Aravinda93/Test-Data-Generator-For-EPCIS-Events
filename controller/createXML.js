@@ -16,6 +16,8 @@ exports.createXMLData	=	function(Query,callback){
 	var RecordTimeArray	=	[];
 	var EventTimeArray	=	[];
 	var ErrorTimeArray	=	[];
+	var Domain			=	'https://gs1.org/';
+	var SyntaxType		=	input.syntaxType;
 	
 	var xml;	
 	var root 	= 	builder.create('epcis:EPCISDocument')
@@ -154,7 +156,8 @@ exports.createXMLData	=	function(Query,callback){
 					}
 					else
 					{
-						errorDeclaration.ele('reason','urn:epcglobal:cbv:er:'+input.ErrorReasonType)
+						urnWebURIchecker(errorDeclaration,'reason','er',input.ErrorReasonType)
+						//errorDeclaration.ele('reason','urn:epcglobal:cbv:er:'+input.ErrorReasonType)
 					}
 				}
 				
@@ -411,7 +414,8 @@ exports.createXMLData	=	function(Query,callback){
 			}
 			else
 			{
-				ObjectEvent.ele('bizStep','urn:epcglobal:cbv:bizstep:'+input.businessStep)
+				urnWebURIchecker(ObjectEvent,'bizStep','bizstep',input.businessStep)
+				//ObjectEvent.ele('bizStep','urn:epcglobal:cbv:bizstep:'+input.businessStep)
 			}
 		}
 		
@@ -424,7 +428,8 @@ exports.createXMLData	=	function(Query,callback){
 			}
 			else
 			{
-				ObjectEvent.ele('disposition','urn:epcglobal:cbv:disp:'+input.disposition)
+				urnWebURIchecker(ObjectEvent,'disposition','disp',input.disposition)
+				//ObjectEvent.ele('disposition','urn:epcglobal:cbv:disp:'+input.disposition)
 			}
 		}
 		
@@ -439,7 +444,8 @@ exports.createXMLData	=	function(Query,callback){
 			}
 			else
 			{
-				persistentDisposition.ele(input.PersistentDispositionType,'urn:epcglobal:cbv:disp:'+input.PersistentDisposition)
+				urnWebURIchecker(persistentDisposition,input.PersistentDispositionType,'disp',input.PersistentDisposition)
+				//persistentDisposition.ele(input.PersistentDispositionType,'urn:epcglobal:cbv:disp:'+input.PersistentDisposition)
 			}
 		}
 		
@@ -455,8 +461,8 @@ exports.createXMLData	=	function(Query,callback){
 			{
 				xml_json_functions.ReadPointFormatter(input,File,function(data){
 					var readPoint = ObjectEvent.ele('readPoint')
-					//readPoint.ele('id', 'urn:epc:id:sgln:'+input.readpointsgln1+input.readpointsgln2).up()
-					readPoint.ele('id', 'urn:epc:id:sgln:'+data).up()
+					//readPoint.ele('id', 'urn:epc:id:sgln:'+data).up()
+					urnWebURIchecker(readPoint,'id','sgln',data)
 				});				
 			}
 		}
@@ -473,7 +479,8 @@ exports.createXMLData	=	function(Query,callback){
 			{
 				xml_json_functions.BusinessLocationFormatter(input,File,function(data){
 					var businesslocation = ObjectEvent.ele('bizLocation')
-					businesslocation.ele('id', 'urn:epc:id:sgln:'+data).up()
+					//businesslocation.ele('id', 'urn:epc:id:sgln:'+data).up()
+					urnWebURIchecker(businesslocation,'id','sgln',data)
 				});					
 			}
 		}
@@ -577,8 +584,29 @@ exports.createXMLData	=	function(Query,callback){
 			{
 				var BTT 			=	Query.BTT[b]
 				var bizTransaction 	=	bizTransactionList.ele('bizTransaction',BTT.BTT.Value)
-				bizTransaction.att('type','urn:epcglobal:cbv:btt:'+BTT.BTT.Type)
+				
+				if(SyntaxType == 'urn')
+				{
+					bizTransaction.att('type','urn:epcglobal:cbv:btt:'+BTT.BTT.Type)
+				}
+				else if(SyntaxType == 'webURI')
+				{
+					bizTransaction.att('type',Domain+'/btt/'+BTT.BTT.Type)
+				}
 			}			
+		}
+		
+		//Check if URN or WEB URI
+		function urnWebURIchecker(XMLElement,type,param,value)
+		{
+			if(SyntaxType == 'urn')
+			{
+				XMLElement.ele(type,'urn:epcglobal:cbv:'+param+':'+value)
+			}
+			else if(SyntaxType == 'webURI')
+			{
+				XMLElement.ele(type,Domain+param+'/'+value)
+			}
 		}
 		
 		//Check for the Source and Source type

@@ -552,6 +552,7 @@
 							<option class="dropdown-item" value="SGLN (Al 414 + Al 254)" ng-if="formdata.eventtype1 == 'AssociationEvent'">SGLN (Al 414 + Al 254)</option>
 						</select>
 					</div>
+					
 					<div class="form-inline" ng-show="CommonForm.AggregationEventParentID">		
 						<!-- Aggregation Event Parent Id is SGTIN -->
 						<span  ng-show="AEPSGTINDisp">
@@ -561,7 +562,6 @@
 							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPSGTIN2" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" class="form-control" style="width: 200px;">&nbsp;
 						</span>
 						
-						
 						<!--If Association Event and SGLN is selected -->
 						<span ng-show="AEPSSGLNDisp">
 							<span> (414) </span>&ensp;
@@ -570,27 +570,32 @@
 							<input ng-model="CommonForm.SingleSGLNValue2" ng-hide="AutoGenerate" type="text" class="form-control" maxlength="13" oninput="setCustomValidity('');" title="GLN Extension" placeholder="GLN Extension" oninvalid="this.setCustomValidity('GLN Extension is required')"></input>&ensp;
 						</span>
 						
+						<span ng-show="RandomRange && MultiValues">
+							<div class="custom-control custom-radio custom-control-inline">
+								<input type="radio" ng-required="RandomRange && MultiValues" ng-model="CommonForm.SSCCType" class="custom-control-input" value="random" id="SSCCType1" name="SSCCType">
+								<label class="custom-control-label" for="SSCCType1">Random</label>
+							</div>
+							<div class="custom-control custom-radio custom-control-inline">
+								<input type="radio" ng-required="RandomRange && MultiValues" ng-model="CommonForm.SSCCType" class="custom-control-input" value="userCustomized" id="SSCCType2" name="SSCCType">
+								<label class="custom-control-label" for="SSCCType2">Range</label>
+							</div>
+						</span>	
+						
 						<!-- Aggregation Event Parent ID is SSCC (Al 00) -->
 						
-						<span ng-show="AEPSSCCDisp">
-							<span>
-								<div class="custom-control custom-radio custom-control-inline">
-									<input type="radio" ng-required="AEPSSCCDisp" ng-model="CommonForm.SSCCType" class="custom-control-input" value="random" id="SSCCType1" name="SSCCType">
-									<label class="custom-control-label" for="SSCCType1">Random</label>
-								</div>
-								<div class="custom-control custom-radio custom-control-inline">
-									<input type="radio" ng-required="AEPSSCCDisp" ng-model="CommonForm.SSCCType" class="custom-control-input" value="userCustomized" id="SSCCType2" name="SSCCType">
-									<label class="custom-control-label" for="SSCCType2">Range</label>
-								</div>
-							</span>							
+						<span ng-show="AEPSSCCDisp" class="form-inline"><br/>
+							<input type="text" ng-model="CommonForm.AEPSSCC" 			ng-required="(CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random') && AEPSSCCDisp" maxlength="12" pattern="^\d{6,12}$"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC company prefix must be between 6 and 12 digit')"  title="Enter company Prefix Upto between 6 and 12 digits" placeholder="Company Prefix b/w 6 and 12 digits" class="form-control" style="width: 300px;">&nbsp;
+							<input type="text" ng-model="CommonForm.AEPSSCCExtDigit" 	ng-required="(CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random') && AEPSSCCDisp" maxlength="1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Extension Digit must be 1 digit')" title="SSCC Extension Digit must be 1 digit" placeholder="SSCC Extension digit" class="form-control" style="width: 200px;">&nbsp;
+								
 							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">
-								<br/><br/>
-								<input type="text" ng-model="CommonForm.AEPSSCC" 			ng-required="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random'" maxlength="12" pattern="^\d{6,12}$"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC company prefix must be between 6 and 12 digit')"  title="Enter company Prefix Upto between 6 and 12 digits" placeholder="Company Prefix b/w 6 and 12 digits" class="form-control" style="width: 300px;">&nbsp;
-								<input type="text" ng-model="CommonForm.AEPSSCCExtDigit" 	ng-required="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random'" maxlength="1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Extension Digit must be 1 digit')" title="SSCC Extension Digit must be 1 digit" placeholder="SSCC Extension digit" class="form-control" style="width: 200px;">&nbsp;
 								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
-									<input type="text" ng-model="CommonForm.AEPSSCCStartValue"  ng-required="CommonForm.SSCCType == 'userCustomized'" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Start Value required')"  title="SSCC Start value" placeholder="SSCC Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+									<input type="text" ng-model="CommonForm.AEPSSCCStartValue"  ng-required="(CommonForm.SSCCType == 'userCustomized') && AEPSSCCDisp" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Start Value required')"  title="SSCC Start value" placeholder="SSCC Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
 								</span>
-								<input type="text" ng-show="MultiValues" ng-model="CommonForm.AEPSSCCCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Count required')" title="SSCC Count" placeholder="SSCC Count" class="form-control" style="width: 200px;">&nbsp;
+								<input type="text" ng-model="CommonForm.AEPSSCCCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Count required')" title="SSCC Count" placeholder="SSCC Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>
+							
+							<span ng-show="SingleValue">
+								<input type="text" ng-model="CommonForm.AEPSSCCSingleSerial" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Serial required')" title="SSCC Serial" placeholder="SSCC Serial" class="form-control" style="width: 200px;">&nbsp;
 							</span>
 							<!--
 							<span ng-show="CommonForm.SSCCType == 'random' ">
@@ -609,58 +614,123 @@
 						<!-- Aggregation Event Parent ID is GRAI (Al 8003) -->
 						<span ng-show="AEPGRAIDisp">
 							<span>(8003) 0</span>&nbsp;
-							<input type="text" ng-required="AEPGRAIDisp" ng-model="CommonForm.AEPGRAI" maxlength="30" pattern="^\d{14}[a-zA-Z]{0,16}$" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GRAI with Serial must be 14 digits followed by 1 to 16 alphanumeric characters')" placeholder="Enter 14 Digit Code" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPGRAIDisp" ng-model="CommonForm.AEPGRAI" maxlength="14" pattern="^\d{14}" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GRAI with Serial must be 14 digits')" placeholder="Enter 14 Digit Code" class="form-control" style="width: 200px;">&nbsp;
+							<span ng-show="SingleValue">
+								<input type="text" ng-model="CommonForm.AEPGRAISerial" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GRAI Serial required')" title="GRAI Serial" placeholder="GRAI Serial" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Aggregation Event Parent ID is GIAI (Al 8004) -->
 						<span ng-show="AEPGIAIDisp">
-							<span>(8004)</span>&nbsp;
-							<input type="text" ng-required="AEPGIAIDisp" ng-model="CommonForm.AEPGIAI" pattern=".{7,30}" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GIAI must be between 7 and 30 alphanumeric characters'" placeholder="GIAI Code" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPGIAIDisp" ng-model="CommonForm.AEPGIAI" maxlength="12" pattern="^\d{6,12}$" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Company Prefix must be between 6 and 12 digits')" placeholder="Company Prefix b/w 6 and 12 digits" class="form-control" style="width: 200px;">&nbsp;
+							<span ng-show="SingleValue">
+								<input type="text" ng-required="SingleValue && AEPGIAIDisp" ng-model="CommonForm.AEPGIAISERIAL" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GIAI Serial Number is required')" placeholder="GIAI Serial Number	" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Aggregation Event Parent ID is GSRN (Al 8018) -->
 						<span ng-show="AEPGSRNDisp">
 							<span>(8018)</span>&nbsp;
-							<input type="text" ng-required="AEPGSRNDisp" ng-model="CommonForm.AEPGSRN" maxlength="18" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" placeholder="Enter GSRN Company Code" oninvalid="this.setCustomValidity('GSRN must be upto 18 digits')" title="GSRN must be 18 digits" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-model="CommonForm.AEPGSRNCompanyPrefix"	ng-required="(CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random') && AEPGSRNDisp" maxlength="12" pattern="^\d{6,12}$"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GSRN company prefix must be between 6 and 12 digit')"  title="Enter company Prefix Upto between 6 and 12 digits" placeholder="Company Prefix b/w 6 and 12 digits" class="form-control" style="width: 300px;">&nbsp;
+								
+							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">							
+								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
+									<input type="text" ng-model="CommonForm.AEPGSRNStartValue"  ng-required="(CommonForm.SSCCType == 'userCustomized') && AEPGSRNDisp" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Start Value required')"  title="GSRN Start value" placeholder="GSRN Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+								</span>
+								<input type="text" ng-model="CommonForm.AEPGSRNSCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GSRN Count required')" title="GSRN Count" placeholder="GSRN Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>
+							
+							<span ng-show="SingleValue">
+								<input type="text" ng-model="CommonForm.AEPGSRNSingleSerial" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GSRN Serial required')" title="GSRN Serial" placeholder="GSRN Serial" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Aggregation Event Parent ID is GSRNP (Al 8017) -->
 						<span ng-show="AEPGSRNPDisp">
 							<span>(8017)</span>&nbsp;
-							<input type="text" ng-required="AEPGSRNPDisp" ng-model="CommonForm.AEPGSRNP" maxlength="18" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" placeholder="Enter GSRNP Company Code" oninvalid="this.setCustomValidity('GSRNP must be upto 18 digits')" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-model="CommonForm.AEPGSRNPCompanyPrefix"	ng-required="(CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random') && AEPGSRNPDisp" maxlength="12" pattern="^\d{6,12}$"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GSRNP company prefix must be between 6 and 12 digit')"  title="Enter company Prefix Upto between 6 and 12 digits" placeholder="Company Prefix b/w 6 and 12 digits" class="form-control" style="width: 300px;">&nbsp;
+							
+							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">							
+								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
+									<input type="text" ng-model="CommonForm.AEPGSRNPStartValue"  ng-required="(CommonForm.SSCCType == 'userCustomized') && AEPGSRNPDisp" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Start Value required')"  title="GSRNP Start value" placeholder="GSRNP Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+								</span>
+								<input type="text" ng-model="CommonForm.AEPGSRNPCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GSRNP Count required')" title="GSRNP Count" placeholder="GSRNP Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>
+							
+							<span ng-show="SingleValue">
+								<input type="text" ng-model="CommonForm.AEPGSRNPSingleSerial" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GSRNP Serial required')" title="GSRNP Serial" placeholder="GSRNP Serial" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Aggregation Event Parent ID is GDTI (Al 253) -->
 						<span ng-show="AEPGDTIDisp">
 							<span>(253)</span>&nbsp;
-							<input type="text" ng-required="AEPGDTIDisp" ng-model="CommonForm.AEPGDTI" maxlength="30" pattern="^\d{13}[a-zA-Z0-9]{0,17}$" oninput="setCustomValidity('');"  oninvalid="this.setCustomValidity('GDTI with Serial must be 13 digits followed by 1 to 17 alphanumeric characters')" placeholder="Enter GDTI Digit Code" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPGDTIDisp" ng-model="CommonForm.AEPGDTI" maxlength="14" pattern="^\d{14}[a-zA-Z0-9]{0,17}$" oninput="setCustomValidity('');"  oninvalid="this.setCustomValidity('GDTI must be 14 digits')" placeholder="Enter 14 digits GDTI" class="form-control" style="width: 200px;">&nbsp;
+							<span ng-show="SingleValue">
+								<input type="text" ng-model="CommonForm.AEPGDTISerial" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GSTI Serial required')" title="GDTI Serial" placeholder="GDTI Serial" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Aggregation Event Parent ID is GCN (Al 255) -->
 						<span ng-show="AEPGSNDisp">
 							<span>(255)</span>&nbsp;
-							<input type="text" ng-required="AEPGSNDisp" ng-model="CommonForm.AEPGSN" maxlength="25" pattern="^\d{14,25}$" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GCN with Serial must be between 14 and 25 digits')" title="GCN with Serial must be between 14 and 25 digits"  placeholder="Enter GCN Digit code" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPGSNDisp" ng-model="CommonForm.AEPGSN" maxlength="14" pattern="^\d{14}[a-zA-Z0-9]{0,17}$" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('14 Digits GCN')" title="GCN must be 14 digits"  placeholder="Enter 14 digits GCN code" class="form-control" style="width: 200px;">&nbsp;
+							
+							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">							
+								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
+									<input type="text" ng-model="CommonForm.AEPGCNStartValue"  ng-required="(CommonForm.SSCCType == 'userCustomized') && AEPGSNDisp" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Start Value required')"  title="GCN Start value" placeholder="GCN Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+								</span>
+								<input type="text" ng-model="CommonForm.AEPGCNCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GCN Count required')" title="GCN Count" placeholder="GCN Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>
+							
+							<span ng-show="SingleValue">
+								<input type="text" ng-model="CommonForm.AEPGCNSerial" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GCN Serial required')" title="GCN Serial" placeholder="GCN Serial" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Aggregation Event Parent ID is CPI (Al 8010 8011) -->
 						<span ng-show="AEPCPIDisp">
 							<span>(8010)</span>&nbsp;										
 							<input type="text" ng-required="AEPCPIDisp" ng-model="CommonForm.AEPCPI1" pattern="^\d{7,30}$" maxlength="30" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('CPI must be between 7 and 30 digits')" title="CPI must be between 7 and 30 digits" placeholder="Enter CPI code digits" class="form-control" style="width: 200px;">&nbsp;
-							<span>(8011)</span>&nbsp;
-							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPCPI2"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('All characters of the Serial must be digits')" placeholder="Enter CPI code digits" class="form-control" style="width: 200px;">&nbsp;
+							
+							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">							
+								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
+									<input type="text" ng-model="CommonForm.AEPCPIStartValue"  ng-required="(CommonForm.SSCCType == 'userCustomized') && AEPCPIDisp" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Start Value required')"  title="CPI Start value" placeholder="CPI Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+								</span>
+								<input type="text" ng-model="CommonForm.AEPCPICount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('CPI Count required')" title="CPI Count" placeholder="CPI Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>
+							
+							<span ng-show="SingleValue">
+								<span>(8011)</span>&nbsp;
+								<input type="text" ng-model="CommonForm.AEPCPISingleValue"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('CPI Serial must be digits')" placeholder="Enter CPI Serial digits" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Aggregation Event Parent ID is GINC (Al 401) -->
 						<span ng-show="AECGINCDisp">
 							<span>(401)</span>&nbsp;
-							<input type="text" ng-required="AECGINCDisp" ng-model="CommonForm.AECGINC" pattern="^[0-9A-Za-z]{7,30}$" maxlength="30" oninvalid="this.setCustomValidity('GINC must be between 7 and 30 digits')" oninput="setCustomValidity('');" title="GINC must be between 9 and 30 alphanumeric characters" placeholder="Enter GINC code" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AECGINCDisp" ng-model="CommonForm.AECGINC" pattern="^[0-9A-Za-z]{6,12}$" maxlength="12" oninvalid="this.setCustomValidity('GINC Company Prefix must be between 6 and 12 digits')" oninput="setCustomValidity('');" title="GINC Company Prefix between 6 and 12 alphanumeric characters" placeholder="Company Prefix b/w 6 and 12 characters" class="form-control" style="width: 200px;">&nbsp;
+							<span ng-show="SingleValue">
+								<input type="text" ng-required="AECGINCDisp && SingleValue" ng-model="CommonForm.AECGINCSingleValue"  oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GINC Serial')" placeholder="Enter GINC Extension" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>								
 						
 						
 						<!-- Aggregation Event Parent ID is GSIN (Al 402) -->
 						<span ng-show="AEPGSINDISP">
 							<span>(402)</span>&nbsp;
-							<input type="text" ng-required="AEPGSINDISP" ng-model="CommonForm.AEPGSIN" pattern="\d{17}" maxlength="17" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');"  oninvalid="this.setCustomValidity('GSIN must be 17 digits')" placeholder="Enter GSIN code" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPGSINDISP" ng-model="CommonForm.AEPGSIN" pattern="^[0-9]{6,12}$" maxlength="12" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');"  oninvalid="this.setCustomValidity('GSIN Company Prefix must be b/w 6 & 12 digits')" placeholder="Company Prefix b/w 6 & 12 digits" class="form-control" style="width: 200px;">&nbsp;
+							
+							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">							
+								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
+									<input type="text" ng-model="CommonForm.AEPGSINStartValue"  ng-required="(CommonForm.SSCCType == 'userCustomized') && AEPGSINDISP" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Start Value required')"  title="Start value" placeholder="Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+								</span>
+								<input type="text" ng-model="CommonForm.AEPGSINCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Number of Count required')" title="Count" placeholder="GSIN Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>
+							
+							<span ng-show="SingleValue">
+								<input type="text" ng-required="AEPGSINDISP && SingleValue" ng-model="CommonForm.AEPGSINSingleValue"  oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GSIN Serial')" placeholder="Enter GSIN Extension" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Aggregation Event Parent ID is ITIP (Al 8006 + Al 21) -->
@@ -668,8 +738,7 @@
 							<span>(8006)</span>&nbsp;
 							<input type="text" ng-required="AEPITIPDISP" ng-model="CommonForm.AEPITIP1" pattern="\d{18}" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="18"  oninvalid="this.setCustomValidity('ITIP must be 18 Numeric Characters')" placeholder="Enter 18 digits ITCP code" class="form-control" style="width: 200px;">&nbsp;
 							<span>(21)</span>&nbsp;
-							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPITIP2" placeholder="UPUI Serial Number" class="form-control" style="width: 200px;">&nbsp;
-
+							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPITIP2" placeholder="ITIP Serial Number" class="form-control" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('ITIP Serial number is required')" style="width: 200px;">&nbsp;
 						</span>
 						
 						<!-- Aggregation Event Parent ID is UPI_UI (Al 01 + Al 235) -->
@@ -677,36 +746,69 @@
 							<span>(01)</span>&nbsp;
 							<input type="text" ng-required="AEPUPIUIDISP" ng-model="CommonForm.AEPUPIUI1" pattern="\d{14}" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="14"  oninvalid="this.setCustomValidity('UPUI must be 14 digits')" placeholder="UPUI must be 14 digits" class="form-control" style="width: 200px;">&nbsp;
 							<span>(235)</span>&nbsp;
-							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPUPIUI2" placeholder="UPUI Serial Number" class="form-control" style="width: 200px;">&nbsp;
+							
+							<span ng-show="SingleValue">
+								<input type="text" ng-required="AEPUPIUIDISP && SingleValue" ng-model="CommonForm.AEPUPIUI2" placeholder="UPUI Serial Number" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('UPUI TPX is required')" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>																																								
 						
 						
 						<!--Show the Fields for GID -->
-						<span ng-show="AEPGIDDisp">
+						<span ng-show="AEPGIDDisp" class="form-inline">
 							<span>Manager</span>&nbsp;
-							<input type="text" ng-required="AEPGIDDisp"	ng-model="CommonForm.AEPGID1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="9"  oninvalid="this.setCustomValidity('GID Manager must be upto 9 digits')" 	placeholder="Upto 9 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPGIDDisp"	ng-model="CommonForm.AEPGID1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="9"  oninvalid="this.setCustomValidity('GID Manager must be upto 9 digits')" 	placeholder="Upto 9 digits" 	class="form-control" style="width: 200px;">&nbsp;&nbsp;
 							<span>Class</span>&nbsp;
-							<input type="text" ng-required="AEPGIDDisp" ng-model="CommonForm.AEPGID2"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="8"  oninvalid="this.setCustomValidity('GID Class must be upto 8 digit')" 	placeholder="Upto 8 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPGIDDisp" ng-model="CommonForm.AEPGID2"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="8"  oninvalid="this.setCustomValidity('GID Class must be upto 8 digit')" 	placeholder="Upto 8 digits" 	class="form-control" style="width: 200px;">&nbsp;&nbsp;
 							<span>Serial</span>&nbsp;
-							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPGID3" 	 oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="11" oninvalid="this.setCustomValidity('GID Serial must be upto 11 digit')" 	placeholder="Upto 11 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							
+							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">
+								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
+									<input type="text" ng-model="CommonForm.GIDStartValue"  ng-required="(CommonForm.SSCCType == 'userCustomized') && AEPGIDDisp" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GID Serial Start Value required')"  title="GID Serial Start value" placeholder="GID Serial Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+								</span>
+								<input type="text" ng-model="CommonForm.GIDCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GID Count required')" title="GID Count" placeholder="GID Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>&nbsp;
+							
+							<span ng-show="SingleValue">
+								<input type="text" ng-required="AEPUPIUIDISP && AEPGIDDisp" ng-model="CommonForm.AEPGID3" 	 oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="11" oninvalid="this.setCustomValidity('GID Serial must be upto 11 digit')" 	placeholder="Upto 11 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Show the Fields for USDoD -->
 						<span ng-show="AEPDSDODDisp">
 							<span>CAGE/DoDAAC</span>&nbsp;
-							<input type="text" ng-required="AEPDSDODDisp" ng-model="CommonForm.AEPDSDOD1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="6"  oninvalid="this.setCustomValidity('USDoD CAGE/DoDAAC must be upto 6 digits')" placeholder="Upto 6 digits" 	class="form-control" style="width: 200px;">&nbsp;	
+							<input type="text" ng-required="AEPDSDODDisp" pattern="[0-9]{5,6}" maxlength="6" ng-model="CommonForm.AEPDSDOD1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('USDoD CAGE/DoDAAC must be at between 5 and 6 digits')" placeholder="Upto 6 digits" 	class="form-control" style="width: 200px;">&nbsp;	
 							<span>Serial</span>&nbsp;
-							<input type="text" ng-required="AEPDSDODDisp" ng-model="CommonForm.AEPDSDOD2" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="11"  oninvalid="this.setCustomValidity('USDoD Serial must be upto 11 digits')" 	 placeholder="Upto 11 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							
+							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">
+								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
+									<input type="text" ng-model="CommonForm.USDoDStartValue"  ng-required="(CommonForm.SSCCType == 'userCustomized') && AEPDSDODDisp" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('USDoD Serial Start Value required')"  title="USDoD Serial Start value" placeholder="USDoD Serial Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+								</span>
+								<input type="text" ng-model="CommonForm.USDoDCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('USDoD Count required')" title="USDoD Count" placeholder="USDoD Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>&nbsp;
+							
+							<span ng-show="SingleValue">
+								<input type="text" ng-required="SingleValue && AEPDSDODDisp" ng-model="CommonForm.AEPDSDOD2" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="11"  oninvalid="this.setCustomValidity('USDoD Serial must be upto 11 digits')" 	 placeholder="Upto 11 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Show the Fields for ADI -->
 						<span ng-show="AEPADIDisp">
 							<span>CAGE/DoDAAC</span>&nbsp;
-							<input type="text" ng-required="AEPADIDisp" ng-model="CommonForm.AEPADI1" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="6"   oninvalid="this.setCustomValidity('ADI CAGE/DoDAAC must be upto 6 digits')" 	placeholder="Upto 6 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPADIDisp" ng-model="CommonForm.AEPADI1" pattern="[0-9]{5,6}" maxlength="6" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('ADI CAGE/DoDAAC must be between 5 and 6 digits')" 	placeholder="Upto 6 digits" 	class="form-control" style="width: 200px;">&nbsp;
 							<span>PNO</span>&nbsp;
-							<input type="text" ng-required="AEPADIDisp" ng-model="CommonForm.AEPADI2"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="20"  oninvalid="this.setCustomValidity('ADI PNO must be upto 20 digits')" placeholder="Upto 20 digits" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-model="CommonForm.AEPADI2"  oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="20"  oninvalid="this.setCustomValidity('ADI PNO must be upto 20 digits')" placeholder="Upto 20 digits" class="form-control" style="width: 200px;">&nbsp;
 							<span>Serial</span>&nbsp;
-							<input type="text" ng-required="AEPADIDisp" ng-model="CommonForm.AEPADI3" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="20" oninvalid="this.setCustomValidity('ADI Serial must be upto 20 digits')" placeholder="Upto 20 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							
+							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">
+								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
+									<input type="text" ng-model="CommonForm.ADIStartValue"  ng-required="(CommonForm.SSCCType == 'userCustomized') && AEPADIDisp" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('ADI Serial Start Value required')"  title="ADI Serial Start value" placeholder="ADI Serial Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+								</span>
+								<input type="text" ng-model="CommonForm.ADICount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('ADI Count required')" title="ADI Count" placeholder="ADI Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>&nbsp;
+							
+							<span ng-show="SingleValue">
+								<input type="text" ng-required="SingleValue && AEPADIDisp" ng-model="CommonForm.AEPADI3" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="20" oninvalid="this.setCustomValidity('ADI Serial must be upto 20 digits')" placeholder="Upto 20 digits" 	class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Show the Fields for BIC -->
@@ -718,7 +820,17 @@
 						<!-- Show the Fields for IMOVN -->
 						<span ng-show="AEPIMOVNDisp">
 							<span>IMOVN</span>&nbsp;
-							<input type="text" ng-required="AEPIMOVNDisp" ng-model="CommonForm.AEPIMOVN" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="7" oninvalid="this.setCustomValidity('Not a valid pure identity URI scheme')" 	placeholder="7 Digits IMOV" class="form-control" style="width: 200px;">&nbsp;
+							
+							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">
+								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
+									<input type="text" ng-model="CommonForm.IMOVStartValue"  ng-required="(CommonForm.SSCCType == 'userCustomized') && AEPADIDisp" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('IMOV Start Value required')"  title="IMOV Start value" placeholder="IMOV Start value"  class="form-control" style="width: 200px;" autocomplete="off">&nbsp;
+								</span>
+								<input type="text" ng-model="CommonForm.IMOVCount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('IMOV Count required')" title="IMOV Count" placeholder="IMOV Count" class="form-control" style="width: 200px;">&nbsp;
+							</span>&nbsp;
+							
+							<span ng-show="SingleValue">
+								<input type="text" ng-required="SingleValue && AEPIMOVNDisp" ng-model="CommonForm.AEPIMOVN" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" maxlength="7" oninvalid="this.setCustomValidity('Not a valid pure identity URI scheme')" 	placeholder="7 Digits IMOV" class="form-control" style="width: 200px;">&nbsp;
+							</span>
 						</span>
 						
 						<!-- Show the fields for MANUAL URI -->
@@ -749,6 +861,7 @@
 							</select>
 						</span>
 					</div>
+							
 					<div class="form-group">
 						<div class="form-inline" ng-show="CommonForm.AggregationEventParentID">
 							<span ng-cloak ng-show="AutoGenerate" style="margin-top:10px;">
