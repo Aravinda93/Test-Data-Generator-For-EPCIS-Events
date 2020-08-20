@@ -432,7 +432,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	//Object Event Quantities Submit call the URI function
 	$scope.CommonEventQuantities	=	function(){
 		
-		var data 				=	JSON.stringify({input:$scope.CommonFormQuantity});			
+		var data 				=	JSON.stringify({input:$scope.CommonFormQuantity,formdata:$scope.formdata});			
 		angular.element('#ChildTypeModal').modal('hide');
 		$http({
 		url: "/CreateObjectEventQuantities",
@@ -1019,6 +1019,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												ErrorExtension	:	$scope.ErrorExtensionList,
 												BTT				:	$scope.BusinessTransactionList,
 												SensorForm		:	$rootScope.TotalSensorElementsArray,
+												XMLElement		:	"Single",
 												File			:	'ObjectEvent'
 											});
 		}
@@ -1028,12 +1029,13 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												input			:	$scope.formdata,
 												Extension		:	$scope.CommonExtensionsList,
 												ParentID		:	$scope.AggregationEventParentURI,		
-												ChildEPCS 		:	$scope.AggregationEventChildEPCsURI,			
-												ChildQuantities :	$scope.AggregationEventChildQuantitiesURI,
+												EPCs	 		:	$scope.AggregationEventChildEPCsURI,			
+												Quantities		:	$scope.AggregationEventChildQuantitiesURI,
 												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
 												ErrorExtension	:	$scope.ErrorExtensionList,
 												BTT				:	$scope.BusinessTransactionList,
 												SensorForm		:	$rootScope.TotalSensorElementsArray,
+												XMLElement		:	"Single",
 												File			:	'AggregationEvent'
 											});
 		}
@@ -1042,13 +1044,14 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			var data	=	JSON.stringify({
 												input			:	$scope.formdata,
 												Extension		:	$scope.CommonExtensionsList,
-												Parent 			:	$scope.TransactionEventParentIDURI,
+												ParentID		:	$scope.TransactionEventParentIDURI,
 												EPCs 			:	$scope.TransactionEventEPCsURI,
 												Quantities		:	$scope.TransactionEventQuantitiesURI,
 												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
 												ErrorExtension	:	$scope.ErrorExtensionList,
 												BTT				:	$scope.BusinessTransactionList,
 												SensorForm		:	$rootScope.TotalSensorElementsArray,
+												XMLElement		:	"Single",
 												File			:	'TransactionEvent'
 											});
 		}
@@ -1056,8 +1059,8 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		{
 			var data	=	JSON.stringify({
 												input			:	$scope.formdata,
-												InputEPCs		:	$scope.TransformationEventInputEPCsURI,
-												InputQuantities	:	$scope.TransformationEventInputQuantityURI,
+												EPCs			:	$scope.TransformationEventInputEPCsURI,
+												Quantities		:	$scope.TransformationEventInputQuantityURI,
 												OutputEPCs		:	$scope.TransformationEventOutputEPCSURI,
 												OutputQuantities:	$scope.TransformationEventOutputQuantityURI,
 												ILMD			:	$scope.TransformationEventILMDList,
@@ -1066,6 +1069,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												ErrorExtension	:	$scope.ErrorExtensionList,
 												BTT				:	$scope.BusinessTransactionList,
 												SensorForm		:	$rootScope.TotalSensorElementsArray,
+												XMLElement		:	"Single",
 												File			:	'TransformationEvent'
 											});
 		}
@@ -1075,12 +1079,13 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												input			:	$scope.formdata,
 												Extension		:	$scope.CommonExtensionsList,
 												ParentID		:	$scope.AssociationEventParentURI,		
-												ChildEPCS 		:	$scope.AssociationEventChildEPCsURI,			
-												ChildQuantities :	$scope.AssociationEventChildQuantitiesURI,
+												EPCs	 		:	$scope.AssociationEventChildEPCsURI,			
+												Quantities		:	$scope.AssociationEventChildQuantitiesURI,
 												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
 												ErrorExtension	:	$scope.ErrorExtensionList,
 												BTT				:	$scope.BusinessTransactionList,
 												SensorForm		:	$rootScope.TotalSensorElementsArray,
+												XMLElement		:	"Single",
 												File			:	'AssociationEvent'
 											});
 		}
@@ -1093,6 +1098,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		}).success(function(response) {
 			$location.hash('mainBody');
 			$anchorScroll();
+			$scope.xmldata	=	"";
 			$scope.xmldata 	=	response[0].XML;
 			$scope.jsondata	=	JSON.stringify(JSON.parse(response[1].JSON), undefined, 4);	
 			//Hide Table and Show the XML and JSON field

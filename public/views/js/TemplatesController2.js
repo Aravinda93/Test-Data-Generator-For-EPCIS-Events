@@ -19,8 +19,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		$scope.CommonExtensionsID					=	0;
 		$scope.BusinessTransactionList				=	[];
 		$scope.BusinessTransactionCount				=	0;
-		$scope.BTT									=	{};
-		
+		$scope.BTT									=	{};		
 			
 		//Object Event	
 		$scope.ObjectEventEpcsURI					=	[];
@@ -1194,13 +1193,12 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		}
 		else if($scope.formdata.eventtype1 == 'AggregationEvent')
 		{
-			console.log("HELLO")
 			var obj				=	new Object();
 			obj.input			=	$scope.formdata;
 			obj.Extension		=	$scope.CommonExtensionsList;
 			obj.ParentID		=	$scope.AggregationEventParentURI;		
-			obj.ChildEPCS 		=	$scope.AggregationEventChildEPCsURI;			
-			obj.ChildQuantities =	$scope.AggregationEventChildQuantitiesURI;
+			obj.EPCs	 		=	$scope.AggregationEventChildEPCsURI;			
+			obj.Quantities		=	$scope.AggregationEventChildQuantitiesURI;
 			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
@@ -1208,14 +1206,13 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.File			=	'AggregationEvent';
 			obj.NodeID			=	$scope.NodeEventId;
 			$rootScope.AllEventsArray.push(obj);
-			console.log($rootScope.AllEventsArray)
 		}
 		else if($scope.formdata.eventtype1 == 'TransactionEvent')
 		{
 			var obj				=	new Object();
 			obj.input			=	$scope.formdata;
 			obj.Extension		=	$scope.CommonExtensionsList;
-			obj.Parent 			=	$scope.TransactionEventParentIDURI;
+			obj.ParentID		=	$scope.TransactionEventParentIDURI;
 			obj.EPCs 			=	$scope.TransactionEventEPCsURI;
 			obj.Quantities		=	$scope.TransactionEventQuantitiesURI;
 			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
@@ -1230,8 +1227,8 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		{
 			var obj				=	new Object();
 			obj.input			=	$scope.formdata;
-			obj.InputEPCs		=	$scope.TransformationEventInputEPCsURI;
-			obj.InputQuantities	=	$scope.TransformationEventInputQuantityURI;
+			obj.EPCs			=	$scope.TransformationEventInputEPCsURI;
+			obj.Quantities		=	$scope.TransformationEventInputQuantityURI;
 			obj.OutputEPCs		=	$scope.TransformationEventOutputEPCSURI;
 			obj.OutputQuantities=	$scope.TransformationEventOutputQuantityURI;
 			obj.ILMD			=	$scope.TransformationEventILMDList;
@@ -1250,8 +1247,8 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.input			=	$scope.formdata;
 			obj.Extension		=	$scope.CommonExtensionsList;
 			obj.ParentID		=	$scope.AssociationEventParentURI;		
-			obj.ChildEPCS 		=	$scope.AssociationEventChildEPCsURI;			
-			obj.ChildQuantities =	$scope.AssociationEventChildQuantitiesURI;
+			obj.EPCs	 		=	$scope.AssociationEventChildEPCsURI;			
+			obj.Quantities		=	$scope.AssociationEventChildQuantitiesURI;
 			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;

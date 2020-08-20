@@ -2,6 +2,15 @@ var builder 			=	require('xmlbuilder');
 var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 var xml_json_functions	=	require('./XML_JSON_Functions');
+var currentTime 		=	moment().format();
+var root				= 	builder.create('epcis:EPCISDocument')
+								root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
+								root.att('xmlns:gs1', "https://gs1.de")
+								root.att('schemaVersion', "2.0")
+								root.att('creationDate', currentTime)
+								root.ele('EPCISBody')
+								root.ele('EventList')
+
 
 exports.createXMLData	=	function(Query,callback){
 	var input			=	Query.input;
@@ -18,15 +27,12 @@ exports.createXMLData	=	function(Query,callback){
 	var ErrorTimeArray	=	[];
 	var Domain			=	'https://gs1.org/';
 	var SyntaxType		=	input.syntaxType;
+	var xml				=	"";	
 	
-	var xml;	
-	var root 	= 	builder.create('epcis:EPCISDocument')
-					root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
-					root.att('xmlns:gs1', "https://gs1.de")
-					root.att('schemaVersion', "2.0")
-					root.att('creationDate', now)
-					root.ele('EPCISBody')
-					root.ele('EventList')
+	if(Query.XMLElement	!= undefined && Query.XMLElement == "Single")
+	{
+	
+	}
 	
 	if(input.eventtype1 == "AssociationEvent")
 	{
@@ -223,9 +229,9 @@ exports.createXMLData	=	function(Query,callback){
 				ObjectEvent.ele('parentID',Query.ParentID[0]).up()
 			}
 			//Add the CHILD EPCS of AggregationEvent
-			if(Query.ChildEPCS != null)
+			if(Query.EPCs != null)
 			{
-				var ChildEPCSURI	=	Query.ChildEPCS;
+				var ChildEPCSURI	=	Query.EPCs;
 				var childEPCs		=	ObjectEvent.ele('childEPCs')
 				
 				for(var o=0; o<ChildEPCSURI.length; o++)
@@ -240,9 +246,9 @@ exports.createXMLData	=	function(Query,callback){
 		else if(input.eventtype1 == "TransactionEvent")
 		{
 			//TransactionEvent Parent ID
-			if(Query.Parent.length >0)
+			if(Query.ParentID.length >0)
 			{
-				ObjectEvent.ele('parentID',Query.Parent[0]).up()
+				ObjectEvent.ele('parentID',Query.ParentID[0]).up()
 			}
 			//TransactionEvent EPCS
 			if(Query.EPCs.length > 0)
@@ -262,31 +268,33 @@ exports.createXMLData	=	function(Query,callback){
 		else if(input.eventtype1 == "TransformationEvent")
 		{		
 			//Add the Input EPCs
-			if(Query.InputEPCs.length > 0)
+			if(Query.EPCs.length > 0)
 			{
 				var InputList	=	ObjectEvent.ele('inputEPCList')
 				
-				for(var o=0; o<Query.InputEPCs.length; o++)
+				for(var o=0; o<Query.EPCs.length; o++)
 				{
-					for(var i=0; i<Query.InputEPCs[o].length; i++)
+					for(var i=0; i<Query.EPCs[o].length; i++)
 					{					
-						InputList.ele('epc',Query.InputEPCs[o][i]).up()
+						InputList.ele('epc',Query.EPCs[o][i]).up()
 					}
 				}				
 			}
 			
 			//Add the Input Quantities			
-			if(Query.InputQuantities.length > 0)
+			if(Query.Quantities.length > 0)
 			{
 				var inputQuantityList	=	ObjectEvent.ele('inputQuantityList')				
 				
-				for(var i=0; i<Query.InputQuantities.length; i++)
+				for(var i=0; i<Query.Quantities.length; i++)
 				{
-					var InputQuantities		=	Query.InputQuantities[i];
+					var InputQuantities		=	Query.Quantities[i];
 					
 					for(var q=0; q<InputQuantities.length; q++)
 					{	
-						var quantityElement		=	inputQuantityList.ele('quantityElement').up()						
+						var quantityElement		=	inputQuantityList.ele('quantityElement').up()
+						
+						quantityElement.ele('epcClass',InputQuantities[q].URI)
 						
 						if(InputQuantities[q].QuantityType == 'Fixed Measure Quantity')
 						{
@@ -356,9 +364,9 @@ exports.createXMLData	=	function(Query,callback){
 			}
 			
 			//Add the CHILD EPCS of AssociationEvent
-			if(Query.ChildEPCS != null)
+			if(Query.EPCs != null)
 			{
-				var ChildEPCSURI	=	Query.ChildEPCS;
+				var ChildEPCSURI	=	Query.EPCs;
 				var childEPCs		=	ObjectEvent.ele('childEPCs')
 				
 				for(var o=0; o<ChildEPCSURI.length; o++)
@@ -371,14 +379,14 @@ exports.createXMLData	=	function(Query,callback){
 			}
 			
 			//Add the Child Quan of Association Event
-			if(Query.ChildQuantities.length > 0)
+			if(Query.Quantities.length > 0)
 			{
 				var quantityList	= 	ObjectEvent.ele('quantityList')
 				
 				
-				for(var o=0; o<Query.ChildQuantities.length; o++)
+				for(var o=0; o<Query.Quantities.length; o++)
 				{
-					var ChildQuantitiesURI	=	Query.ChildQuantities[o];
+					var ChildQuantitiesURI	=	Query.Quantities[o];
 					
 					for(c=0; c<ChildQuantitiesURI.length;c++)
 					{
@@ -520,13 +528,13 @@ exports.createXMLData	=	function(Query,callback){
 		}
 		else if(input.eventtype1 == "AggregationEvent")
 		{	
-			if(Query.ChildQuantities.length > 0)
+			if(Query.Quantities.length > 0)
 			{
 				var quantityList	= 	extension.ele('quantityList')				
 				
-				for(var o=0; o<Query.ChildQuantities.length; o++)
+				for(var o=0; o<Query.Quantities.length; o++)
 				{
-					var ChildQuantitiesURI	=	Query.ChildQuantities[o];
+					var ChildQuantitiesURI	=	Query.Quantities[o];
 					
 					for(c=0; c<ChildQuantitiesURI.length;c++)
 					{

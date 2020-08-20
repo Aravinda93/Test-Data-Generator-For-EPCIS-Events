@@ -26,9 +26,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 												name 		:	name,
 												templateId	: 	"htmlTemplate",
 												labels		:	label,
-												label		:	'HELLO',
 												ports		:	ports,
-												text		: 	name,
 												value		:	{
 																	select 		:	$rootScope.IDValue
 																}
@@ -54,8 +52,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 				}
 			}
 		}
-	}
-	
+	}	
 	//Add connector to diagram on click
 	$scope.ConnectorAdd			=	function(){
 		var diagram 			= 	angular.element("#diagram").ejDiagram("instance");
@@ -68,7 +65,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 									}
 									
 		var tool 				= 	diagram.tool();
-		diagram.update({ tool: tool | ej.datavisualization.Diagram.Tool.DrawOnce })
+		diagram.update({ tool: tool | ej.datavisualization.Diagram.Tool.DrawOnce})
 		connectorCounter++;
 		var connectorObj		=	new Object();
 		connectorObj.Name		=	name;
@@ -98,6 +95,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 						NodeObj.NodeName		=	$rootScope.AllEventsArray[e].NodeID;
 						NodeObj.Type			=	"Source";
 						NodeObj.Count			=	connectorArray[con].Count;
+						NodeObj.QuantityCount	=	connectorArray[con].QuantityCount;
 						NodeObj.Childrens		=	[];
 						NodeObj.FormData		=	$rootScope.AllEventsArray[e];
 						
@@ -109,6 +107,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 								var NodeChildren			=	new Object();
 								NodeChildren.ChildNodeName	=	$rootScope.AllEventsArray[e2].NodeID;
 								NodeChildren.Count			=	connectorArray[con].Count;
+								NodeChildren.QuantityCount	=	connectorArray[con].QuantityCount;
 								NodeChildren.ChildType		=	"Target";								
 								NodeChildren.FormData		=	$rootScope.AllEventsArray[e2];
 								NodeObj.Childrens.push(NodeChildren);			
@@ -129,6 +128,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 									var NodeChildren				=	new Object();
 									NodeChildren.ChildNodeName		=	$rootScope.AllEventsArray[e3].NodeID;									
 									NodeChildren.Count				=	connectorArray[con].Count;
+									NodeChildren.QuantityCount		=	connectorArray[con].QuantityCount;
 									NodeChildren.ChildType			=	"Target";
 									NodeChildren.FormData			=	$rootScope.AllEventsArray[e3];
 									AllEventFinalArray[index].Childrens.push(NodeChildren);
@@ -152,6 +152,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 						NodeObj.NodeName		=	$rootScope.AllEventsArray[l].NodeID;
 						NodeObj.FormData		=	$rootScope.AllEventsArray[l];
 						NodeObj.Count			=	connectorArray[con].Count;
+						NodeObj.QuantityCount	=	connectorArray[con].QuantityCount;
 						NodeObj.Type			=	"Source";
 						NodeObj.Childrens		=	[];
 						AllEventFinalArray.push(NodeObj);
@@ -206,7 +207,15 @@ function connectorCollectionChange(args)
 {
 	//On addition note the source and tatget	
 	if(args.changeType	==	"insert" && args.state == "changed")
-	{			
+	{
+		//Show the labels to the user
+		var connectorName	=	args.element.addInfo.name;
+		var diagram 		= 	$("#diagram").ejDiagram("instance");
+        var connector 		= 	diagram.selectionList[0];
+        diagram.insertLabel(connector.name, {name: "EPCsCount", 		fontColor:"red", 		text:"EPCs", 		alignment: "before", segmentOffset: 0}, 0);
+        diagram.insertLabel(connector.name, {name: "QuantitiesCount", 	fontColor:"green", 		text:"Quantities", 	alignment: "after", segmentOffset: 1}, 1);
+       
+	   
 		for(var c=0; c<connectorArray.length; c++)
 		{
 			if(connectorArray[c].Name == args.element.addInfo.name)
@@ -272,17 +281,35 @@ function connectorTargetChange(args)
 //Get the text for the connector after adding the count
 function textChange(args) {
 	
-	if(args.elementType === "connector") {
-		
+	if(args.elementType === "connector")
+	{		
 		var connectorName	=	args.element.addInfo.name;
+		var EPCsCount, QuantitiesCount;
 		
-		for(var t=0; t<connectorArray.length; t++)
+		//Check which Label got edited of the connector
+		if(args.label.name == 'EPCsCount')
 		{
-			if(connectorArray[t].Name == connectorName)
+			for(var t=0; t<connectorArray.length; t++)
 			{
-				connectorArray[t].Count		=	args.value;
-				break;
+				if(connectorArray[t].Name == connectorName)
+				{
+					connectorArray[t].Count			=	args.value;
+					break;
+				}
 			}
 		}
+		else if(args.label.name == 'QuantitiesCount')
+		{			
+			for(var t=0; t<connectorArray.length; t++)
+			{
+				if(connectorArray[t].Name == connectorName)
+				{
+					connectorArray[t].QuantityCount	=	args.value;
+					break;
+				}
+			}
+		}
+		
+		console.log(connectorArray)
 	}
 }

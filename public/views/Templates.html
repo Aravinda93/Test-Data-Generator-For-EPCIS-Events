@@ -51,8 +51,7 @@
 		
 		<script ng-model="NodeEvents" id="htmlTemplate" type="text/ng-template">
 			<div style="margin-top:20%;" class="text-center"> 
-				<button class="btn btn-info" ng-click='$parent.ShowFormDataModal($event);'> Add Event Info </button>
-				<span id="{{$parent.nodeCounter}}" ></span>				
+				<button class="btn btn-info" ng-click='$parent.ShowFormDataModal($event);'> Add Event Info </button>			
 			</div>
 		</script>		
 		
@@ -63,7 +62,7 @@
 					<div class="col-sm-4">
 						<button class="btn btn-primary" ng-click="ConnectorAdd();">Add Connector</button>&nbsp;
 						<button class="btn btn-primary" ng-click="NodeAdd();">Add Event</button>&nbsp;
-						<button class="btn btn-success" ng-click="submitEvents();">Submit</button>&nbsp;
+						<button class="btn btn-success" ng-click="submitEvents(); xmldata = ''">Submit</button>&nbsp;
 					</div>
 				</div>
 				<br/>

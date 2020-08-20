@@ -9,7 +9,6 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 	var input		=	Query.input;
 	var syntaxType	=	Query.formdata.syntaxType;
 		EpcLists 	= 	[];
-	console.log(input)
 	var Domain		=	'https://id.gs1.org'
 
 	//Execute this if Multiple values needs to be created
@@ -978,7 +977,6 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		}
 		else if(input.AggregationEventParentID === 'GID')
 		{
-			console.log("ONE");
 			var Mgr		=	input.AEPGID1.toString();
 			var Class	=	input.AEPGID2.toString();
 			var Count	=	input.GIDCount;

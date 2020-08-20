@@ -238,10 +238,10 @@ exports.createJSONData	=	function(Query,callback){
 				ObjectEvent['parentID']	=	Query.ParentID[0];
 			}
 			//Add the CHILD EPCS of AggregationEvent
-			if(Query.ChildEPCS != null)
+			if(Query.EPCs != null)
 			{
 				ObjectEvent['childEPCs']	=	  {};
-				var ChildEPCSURI	=	Query.ChildEPCS;
+				var ChildEPCSURI	=	Query.EPCs;
 				var AllChildEpcs	=	[];
 				
 				for(var o=0; o<ChildEPCSURI.length; o++)
@@ -258,9 +258,9 @@ exports.createJSONData	=	function(Query,callback){
 		else if(input.eventtype1 == "TransactionEvent")
 		{
 			//TransactionEvent Parent ID
-			if(Query.Parent.length >0)
+			if(Query.ParentID.length >0)
 			{
-				ObjectEvent['parentID']		=	Query.Parent[0];
+				ObjectEvent['parentID']		=	Query.ParentID[0];
 			}
 			
 			//TransactionEvent EPCS
@@ -284,16 +284,16 @@ exports.createJSONData	=	function(Query,callback){
 		else if(input.eventtype1 == "TransformationEvent")
 		{
 			//Transformation Event Input EPCs
-			if(Query.InputEPCs.length > 0)
+			if(Query.EPCs.length > 0)
 			{
 				ObjectEvent['inputEPCList']		=	{};
 				var InputEPCs					=	[];
 				
-				for(var o=0; o<Query.InputEPCs.length; o++)
+				for(var o=0; o<Query.EPCs.length; o++)
 				{
-					for(var i=0; i<Query.InputEPCs[o].length; i++)
+					for(var i=0; i<Query.EPCs[o].length; i++)
 					{
-						InputEPCs.push(Query.InputEPCs[o][i]);
+						InputEPCs.push(Query.EPCs[o][i]);
 					}
 				}
 				
@@ -301,14 +301,14 @@ exports.createJSONData	=	function(Query,callback){
 			}
 			
 			//Transformation Event Input Quantities
-			if(Query.InputQuantities.length > 0)
+			if(Query.Quantities.length > 0)
 			{
 				ObjectEvent['inputQuantityList']	=	{};
 				var QuantityArray					=	[];
 				
-				for(var i=0; i<Query.InputQuantities.length; i++)
+				for(var i=0; i<Query.Quantities.length; i++)
 				{					
-					var InputQuantities		=	Query.InputQuantities[i];
+					var InputQuantities		=	Query.Quantities[i];
 					
 					for(var q=0; q<InputQuantities.length; q++)
 					{	
@@ -396,9 +396,9 @@ exports.createJSONData	=	function(Query,callback){
 			}
 			
 			//Add the CHILD EPCS of AssociationEvent
-			if(Query.ChildEPCS != null)
+			if(Query.EPCs != null)
 			{
-				var ChildEPCSURI			=	Query.ChildEPCS;
+				var ChildEPCSURI			=	Query.EPCs;
 				ObjectEvent['childEPCs']	=	  {};
 				var AllChildEpcs			=	[];
 				
@@ -414,13 +414,13 @@ exports.createJSONData	=	function(Query,callback){
 			}
 			
 			//Add the Child Quan of Association Event
-			if(Query.ChildQuantities.length > 0)
+			if(Query.Quantities.length > 0)
 			{
 				var QuantityEPCs	=	[];				
 				
-				for(var o=0; o<Query.ChildQuantities.length; o++)
+				for(var o=0; o<Query.Quantities.length; o++)
 				{
-					var ChildQuantitiesURI	=	Query.ChildQuantities[o];
+					var ChildQuantitiesURI	=	Query.Quantities[o];
 					
 					for(c=0; c<ChildQuantitiesURI.length;c++)
 					{
@@ -561,13 +561,13 @@ exports.createJSONData	=	function(Query,callback){
 		else if(input.eventtype1 == "AggregationEvent")
 		{
 			//AGGREGATION EVENT CHILD Quantities			
-			if(Query.ChildQuantities.length > 0)
+			if(Query.Quantities.length > 0)
 			{
 				var QuantityEPCs	=	[];
 				
-				for(var o=0; o<Query.ChildQuantities.length; o++)
+				for(var o=0; o<Query.Quantities.length; o++)
 				{
-					var ChildQuantitiesURI	=	Query.ChildQuantities[o];
+					var ChildQuantitiesURI	=	Query.Quantities[o];
 					
 					for(c=0; c<ChildQuantitiesURI.length;c++)
 					{

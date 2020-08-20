@@ -2,17 +2,27 @@
 exports.QuantitiesURI	=	function(Query,callback){
 	var input		=	Query.input;
 	var EpcLists	=	[];
+	var syntaxType	=	Query.formdata.syntaxType;
+	var Domain		=	'https://id.gs1.org';
 	
 	if(input.ObjectEventquantities == 'LGTIN (Al 01 + Al 10)')
 	{
-		var companyPrefixInput	=	input.OEQLGTIN1.toString();
-		var companyPrefixPoint	=	input.OEQuantityCompanyPrefix;
-			companyPrefixInput 	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
-			companyPrefixInput	=	companyPrefixInput.substring(0,14)
+		var companyPrefixInput		=	input.OEQLGTIN1.toString();
+		var companyPrefixPoint		=	input.OEQuantityCompanyPrefix;
+		var companyPrefixInputURN	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
+			companyPrefixInputURN	=	companyPrefixInputURN.substring(0,14)
 			
 		if(input.Quantitysgtintype == 'none')
 		{
-			var QuantityId		=	'urn:epc:id:lgtin:'+companyPrefixInput+"."+input.singleObjectId;
+			if(syntaxType 	== 'urn')
+			{
+				var QuantityId		=	'urn:epc:class:lgtin:'+companyPrefixInputURN+"."+input.singleObjectId;
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var QuantityId		=	Domain+'/lgtin/'+companyPrefixInput+input.singleObjectId;
+			}			
+			
 			var obj 			= 	new Object();
 			obj.URI				=	QuantityId;
 			obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -24,8 +34,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 		if(input.Quantitysgtintype == 'range')
 		{
 			for(var id=input.QuantitysgtnGTINFrom; id<=input.QuantitysgtnGTINTo; id++)
-			{				
-				var QuantityId			=	'urn:epc:id:lgtin:'+companyPrefixInput+"."+id;
+			{	
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:class:lgtin:'+companyPrefixInputURN+"."+id;
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/lgtin/'+companyPrefixInput+id;
+				}				
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -45,8 +63,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 			var data 				= RandomGenerator(min_Length,max_Length,randomType,randomCount);
 			
 			for(var arrCount=0; arrCount<data.length; arrCount++)
-			{			
-				var QuantityId			=	'urn:epc:id:lgtin:'+companyPrefixInput+"."+data[arrCount];
+			{		
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId	=	'urn:epc:class:lgtin:'+companyPrefixInputURN+"."+data[arrCount];
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId	=	Domain+'/lgtin/'+companyPrefixInput+data[arrCount];
+				}			
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -62,12 +88,20 @@ exports.QuantitiesURI	=	function(Query,callback){
 		//If the selected OBJECT EVENT Quantity is GTIN, no serial (Al 01)
 		var OEQuantityInput			=	input.OEQGTIN;
 		var OEQuantityPreifxPoint	=	input.OEQuantityCompanyPrefix;
-			OEQuantityInput			=	companyPrefix(OEQuantityInput, OEQuantityPreifxPoint);
-			OEQuantityInput			=	OEQuantityInput.substring(0,14)
+			OEQuantityInputURN		=	companyPrefix(OEQuantityInput, OEQuantityPreifxPoint);
+			OEQuantityInputURN		=	OEQuantityInputURN.substring(0,14)
 		
 		if(input.Quantitysgtintype == 'none')
 		{
-			var QuantityId		=	'urn:epc:idpat:sgtin:'+OEQuantityInput+'.'+input.singleObjectId;
+			if(syntaxType 	== 'urn')
+			{
+				var QuantityId		=	'urn:epc:idpat:sgtin:'+OEQuantityInputURN+'.'+input.singleObjectId;
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var QuantityId		=	Domain+'/sgtin/'+OEQuantityInput+input.singleObjectId;
+			}
+			
 			var obj 			= 	new Object();
 			obj.URI				=	QuantityId;
 			obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -79,8 +113,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 		if(input.Quantitysgtintype == 'range')
 		{
 			for(var id=input.QuantitysgtnGTINFrom; id<=input.QuantitysgtnGTINTo; id++)
-			{				
-				var QuantityId			=	'urn:epc:id:sgtin:'+OEQuantityInput+"."+id;
+			{
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:sgtin:'+OEQuantityInputURN+"."+id;
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/sgtin/'+OEQuantityInput+id;
+				}
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -101,8 +143,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 			var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 			
 			for(var arrCount=0; arrCount<data.length; arrCount++)
-			{			
-				var QuantityId			=	'urn:epc:id:sgtin:'+OEQuantityInput+"."+data[arrCount];
+			{
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:sgtin:'+OEQuantityInputURN+"."+data[arrCount];
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/sgtin/'+OEQuantityInput+data[arrCount];
+				}
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -119,12 +169,19 @@ exports.QuantitiesURI	=	function(Query,callback){
 		//If the selected OBJECT EVENT Quantity is GRAI, no serial (Al 8003)
 		var OEQuantityInput			=	input.OEQGRAI;
 		var OEQuantityPreifxPoint	=	input.OEQuantityCompanyPrefix;
-			OEQuantityInput			=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);
-			OEQuantityInput			=	OEQuantityInput.substring(0,13)
+		var OEQuantityInputURN		=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);
+			OEQuantityInputURN		=	OEQuantityInputURN.substring(0,13)
 		
 		if(input.Quantitysgtintype == 'none')
 		{
-			var QuantityId		=	'urn:epc:idpat:grai:'+OEQuantityInput+'.'+input.singleObjectId;
+			if(syntaxType 	== 'urn')
+			{
+				var QuantityId		=	'urn:epc:idpat:grai:'+OEQuantityInputURN+'.'+input.singleObjectId;
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var QuantityId		=	Domain+'/grai/'+OEQuantityInput+input.singleObjectId;
+			}			
 			var obj 			= 	new Object();
 			obj.URI				=	QuantityId;
 			obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -136,8 +193,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 		if(input.Quantitysgtintype == 'range')
 		{
 			for(var id=input.QuantitysgtnGTINFrom; id<=input.QuantitysgtnGTINTo; id++)
-			{				
-				var QuantityId		=	'urn:epc:idpat:grai:'+OEQuantityInput+'.'+id;
+			{	
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:grai:'+OEQuantityInputURN+'.'+id;
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/grai/'+OEQuantityInput+id;
+				}	
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -158,8 +223,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 			var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 			
 			for(var arrCount=0; arrCount<data.length; arrCount++)
-			{			
-				var QuantityId			=	'urn:epc:id:grai:'+OEQuantityInput+"."+data[arrCount];
+			{
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:grai:'+OEQuantityInputURN+"."+data[arrCount];
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/grai/'+OEQuantityInput+data[arrCount];
+				}				
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -176,12 +249,20 @@ exports.QuantitiesURI	=	function(Query,callback){
 		
 		var OEQuantityInput			=	input.OEQGDTI;
 		var OEQuantityPreifxPoint	=	input.OEQuantityCompanyPrefix;
-			OEQuantityInput			=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);
-			OEQuantityInput			=	OEQuantityInput.substring(0,13)
+		var OEQuantityInputURN		=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);
+			OEQuantityInputURN		=	OEQuantityInputURN.substring(0,13)
 			
 		if(input.Quantitysgtintype == 'none')
 		{
-			var QuantityId		=	'urn:epc:idpat:gdti:'+OEQuantityInput+'.'+input.singleObjectId;
+			if(syntaxType 	== 'urn')
+			{
+				var QuantityId	=	'urn:epc:idpat:gdti:'+OEQuantityInputURN+"."+input.singleObjectId;
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var QuantityId	=	Domain+'/gdti/'+OEQuantityInput+input.singleObjectId;
+			}				
+			
 			var obj 			= 	new Object();
 			obj.URI				=	QuantityId;
 			obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -194,7 +275,15 @@ exports.QuantitiesURI	=	function(Query,callback){
 		{
 			for(var id=input.QuantitysgtnGTINFrom; id<=input.QuantitysgtnGTINTo; id++)
 			{				
-				var QuantityId		=	'urn:epc:idpat:gdti:'+OEQuantityInput+'.'+id;
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:gdti:'+OEQuantityInputURN+'.'+id;
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/gdti/'+OEQuantityInput+id;
+				}		
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -215,8 +304,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 			var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 			
 			for(var arrCount=0; arrCount<data.length; arrCount++)
-			{			
-				var QuantityId			=	'urn:epc:id:gdti:'+OEQuantityInput+"."+data[arrCount];
+			{
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:gdti:'+OEQuantityInputURN+"."+data[arrCount];
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/gdti/'+OEQuantityInput+data[arrCount];
+				}					
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -233,12 +330,20 @@ exports.QuantitiesURI	=	function(Query,callback){
 		//If the selected OBJECT EVENT Quantity is GCN, no serial (Al 255)		
 		var OEQuantityInput			=	input.OEQGCN;
 		var OEQuantityPreifxPoint	=	input.OEQuantityCompanyPrefix;
-			OEQuantityInput			=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);
-			OEQuantityInput			=	OEQuantityInput.substring(0,13)
+		var OEQuantityInputURN		=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);
+			OEQuantityInputURN		=	OEQuantityInputURN.substring(0,13)
 			
 		if(input.Quantitysgtintype == 'none')
 		{
-			var QuantityId		=	'urn:epc:idpat:gcn:'+OEQuantityInput+'.'+input.singleObjectId;
+			if(syntaxType 	== 'urn')
+			{
+				var QuantityId		=	'urn:epc:idpat:sgcn:'+OEQuantityInputURN+'.'+input.singleObjectId;
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var QuantityId		=	Domain+'/gcn/'+OEQuantityInput+input.singleObjectId;
+			}
+			
 			var obj 			= 	new Object();
 			obj.URI				=	QuantityId;
 			obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -250,8 +355,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 		if(input.Quantitysgtintype == 'range')
 		{
 			for(var id=input.QuantitysgtnGTINFrom; id<=input.QuantitysgtnGTINTo; id++)
-			{				
-				var QuantityId		=	'urn:epc:idpat:gcn:'+OEQuantityInput+'.'+id;
+			{
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:sgcn:'+OEQuantityInputURN+'.'+id;
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/gcn/'+OEQuantityInput+id;
+				}			
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -272,8 +385,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 			var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 			
 			for(var arrCount=0; arrCount<data.length; arrCount++)
-			{			
-				var QuantityId			=	'urn:epc:id:gcn:'+OEQuantityInput+"."+data[arrCount];
+			{
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:sgcn:'+OEQuantityInputURN+"."+data[arrCount];
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/gcn/'+OEQuantityInput+data[arrCount];
+				}
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -289,11 +410,19 @@ exports.QuantitiesURI	=	function(Query,callback){
 		//If the selected OBJECT EVENT Quantity is CPI, no serial (Al 801 0)
 		var OEQuantityInput			=	input.OEQCPI;
 		var OEQuantityPreifxPoint	=	input.OEQuantityCompanyPrefix;
-			OEQuantityInput			=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);		
+		var OEQuantityInputURN		=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);		
 		
 		if(input.Quantitysgtintype == 'none')
 		{
-			var QuantityId		=	'urn:epc:idpat:cpi:'+OEQuantityInput+'.'+input.singleObjectId;
+			if(syntaxType 	== 'urn')
+			{
+				var QuantityId		=	'urn:epc:idpat:cpi:'+OEQuantityInputURN+"."+input.singleObjectId;
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var QuantityId		=	Domain+'/cpi/'+OEQuantityInput+input.singleObjectId;
+			}
+				
 			var obj 			= 	new Object();
 			obj.URI				=	QuantityId;
 			obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -305,8 +434,15 @@ exports.QuantitiesURI	=	function(Query,callback){
 		if(input.Quantitysgtintype == 'range')
 		{
 			for(var id=input.QuantitysgtnGTINFrom; id<=input.QuantitysgtnGTINTo; id++)
-			{				
-				var QuantityId		=	'urn:epc:idpat:cpi:'+OEQuantityInput+'.'+id;
+			{	
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:cpi:'+OEQuantityInputURN+'.'+id;
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/cpi/'+OEQuantityInput+id;
+				}
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -318,6 +454,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 		}
 		else if(input.Quantitysgtintype == 'random')
 		{
+			console.log(syntaxType)
 			var min_Length	=	parseInt(input.QuantityradomMinLength, 10);
 			var max_Length	=	parseInt(input.QuantityrandomMaxLength, 10);
 			var randomType	=	input.QuantityrandomType;
@@ -327,8 +464,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 			var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 			
 			for(var arrCount=0; arrCount<data.length; arrCount++)
-			{			
-				var QuantityId			=	'urn:epc:id:cpi:'+OEQuantityInput+"."+data[arrCount];
+			{	
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:cpi:'+OEQuantityInputURN+"."+data[arrCount];
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/cpi/'+OEQuantityInput+data[arrCount];
+				}
+				console.log(QuantityId)
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -344,11 +489,19 @@ exports.QuantitiesURI	=	function(Query,callback){
 		//If the selected OBJECT EVENT Quantity is ITIP, no serial (Al 8006)
 		var OEQuantityInput			=	input.OEQITIP;
 		var OEQuantityPreifxPoint	=	input.OEQuantityCompanyPrefix;
-			OEQuantityInput			=	companyPrefix(OEQuantityInput, OEQuantityPreifxPoint);
+		var OEQuantityInputURN		=	companyPrefix(OEQuantityInput, OEQuantityPreifxPoint);
 		
 		if(input.Quantitysgtintype == 'none')
 		{
-			var QuantityId		=	'urn:epc:idpat:itip:'+OEQuantityInput+'.'+input.singleObjectId;
+			if(syntaxType 	== 'urn')
+			{
+				var QuantityId		=	'urn:epc:idpat:itip:'+OEQuantityInputURN+'.'+input.singleObjectId;
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var QuantityId		=	Domain+'/itip/'+OEQuantityInput+input.singleObjectId;
+			}
+			
 			var obj 			= 	new Object();
 			obj.URI				=	QuantityId;
 			obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -360,8 +513,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 		if(input.Quantitysgtintype == 'range')
 		{
 			for(var id=input.QuantitysgtnGTINFrom; id<=input.QuantitysgtnGTINTo; id++)
-			{				
-				var QuantityId		=	'urn:epc:idpat:itip:'+OEQuantityInput+'.'+id;
+			{
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:itip:'+OEQuantityInputURN+'.'+id;
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/itip/'+OEQuantityInput+id;
+				}		
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -382,8 +543,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 			var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 			
 			for(var arrCount=0; arrCount<data.length; arrCount++)
-			{			
-				var QuantityId			=	'urn:epc:id:itip:'+OEQuantityInput+"."+data[arrCount];
+			{	
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId			=	'urn:epc:idpat:itip:'+OEQuantityInputURN+"."+data[arrCount];
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/itip/'+OEQuantityInput+data[arrCount];
+				}	
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -399,11 +568,19 @@ exports.QuantitiesURI	=	function(Query,callback){
 		//If the selected OBJECT EVENT Quantity is UPUI, no TPX (Al 01)
 		var OEQuantityInput			=	input.OEQUPUI;
 		var OEQuantityPreifxPoint	=	input.OEQuantityCompanyPrefix;
-			OEQuantityInput			=	companyPrefix(OEQuantityInput, OEQuantityPreifxPoint);
+		var OEQuantityInputURN		=	companyPrefix(OEQuantityInput, OEQuantityPreifxPoint);
 		
 		if(input.Quantitysgtintype == 'none')
 		{
-			var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInput+'.'+input.singleObjectId;
+			if(syntaxType 	== 'urn')
+			{
+				var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInputURN+'.'+input.singleObjectId;
+			}
+			else if(syntaxType == 'webURI')
+			{
+				var QuantityId		=	Domain+'/upui/'+OEQuantityInput+input.singleObjectId;
+			}
+			
 			var obj 			= 	new Object();
 			obj.URI				=	QuantityId;
 			obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -415,8 +592,15 @@ exports.QuantitiesURI	=	function(Query,callback){
 		if(input.Quantitysgtintype == 'range')
 		{
 			for(var id=input.QuantitysgtnGTINFrom; id<=input.QuantitysgtnGTINTo; id++)
-			{				
-				var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInput+'.'+id;
+			{
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInputURN+'.'+id;
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/upui/'+OEQuantityInput+id;
+				}				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
@@ -437,8 +621,16 @@ exports.QuantitiesURI	=	function(Query,callback){
 			var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
 			
 			for(var arrCount=0; arrCount<data.length; arrCount++)
-			{			
-				var QuantityId			=	'urn:epc:id:upui:'+OEQuantityInput+"."+data[arrCount];
+			{
+				if(syntaxType 	== 'urn')
+				{
+					var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInputURN+"."+data[arrCount];
+				}
+				else if(syntaxType == 'webURI')
+				{
+					var QuantityId		=	Domain+'/upui/'+OEQuantityInput+data[arrCount];
+				}				
+				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
 					obj.QuantityType	=	input.ObjectEventQuantityType;
