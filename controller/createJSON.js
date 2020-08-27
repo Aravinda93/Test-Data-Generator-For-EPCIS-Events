@@ -1,49 +1,43 @@
 var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 var xml_json_functions	=	require('./XML_JSON_Functions');
+var currentTime 		=	moment().format();
 
-exports.createJSONData	=	function(Query,callback){
-	var input			=	Query.input;
-	var today 		= 	new Date();
-	let date 			= 	today.toISOString().slice(0, 10).replace(/-/g,"_");
-	var time 			= 	(today.getHours()+1) + ":" + today.getMinutes() + ":" + today.getSeconds();
-			time			= 	time.replace(/:/g,"_");
-	var now 			=		date+"T"+time;
-	var offset		= 	today.getTimezoneOffset()/60+':00';
-	var data			=		{};
-
-	var jsonData	=		[];
-
-	var readPoint 			=	"";
-	var businessLocation	=	"";
-	var BusinessStep 		=	"";
-	var Disposition 		=	"";
-	var EventTime			=	"";
-	var RecordTime			=	"";
+exports.createJSONData	=	function(Query,JSONHeader,callback){
+	var input				=	Query.input;
+	var today 				= 	new Date();
+	let date 				= 	today.toISOString().slice(0, 10).replace(/-/g,"_");
+	var time 				= 	(today.getHours()+1) + ":" + today.getMinutes() + ":" + today.getSeconds();
+		time				= 	time.replace(/:/g,"_");
+	var now 				=	date+"T"+time;
+	var offset				=	today.getTimezoneOffset()/60+':00';
+	var data				=	{};
+	var jsonData			=	[];
 	var EpcLists			=	[];
 	var File 				= 	'JSON';
-	var SourceType			=	"";
-	var DestinationType		=	"";
-	var Source 				=	"";
-	var Destination			=	"";
 	var itemProcessed 		=	0;
 	var RecordTimeArray		=	[];	
 	var EventTimeArray		=	[];
-
-	//Create the initial strucutre for the JSON data
-
-	var JSONschemaParse 				=	{
-												"@context"		: 	"https://id.gs1.org/epcis-context.jsonld",
-												"isA"			:	"EPCISDocument",
-												"creationDate"	:	now,
-												"schemaVersion"	: 	2.0,
-												"format"		: 	"application/ld+json",
-												"epcisBody"		:	{}
-											}
-
-	var MainObject 	=	JSONschemaParse.epcisBody['EventList'] = {};
-	var MainArray	=	[];
+	var MainArray			=	[];
 	
+	if(Query.XMLElement == 'Single')
+	{
+		//Create the initial strucutre for the JSON data
+		var JSONschemaParse =	{
+									"@context"		: 	"https://id.gs1.org/epcis-context.jsonld",
+									"isA"			:	"EPCISDocument",
+									"creationDate"	:	currentTime,
+									"schemaVersion"	: 	2.0,
+									"format"		: 	"application/ld+json",
+									"epcisBody"		:	{}
+								}
+	}
+	else
+	{
+		var JSONschemaParse		=	JSONHeader;
+	}
+	
+	var MainObject 			=	JSONschemaParse.epcisBody['EventList'] = {};	
 
 	//Loop through the event count and create append to JSON data
 	for(var count=1; count<=input.eventcount; count++)

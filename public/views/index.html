@@ -113,6 +113,10 @@
 											<label class="custom-control-label" for="syntaxType2">Web URI</label>
 										</div>
 									</td>
+									<!-- Provide an option for user defined Web URI-->
+									<td ng-show="formdata.syntaxType == 'webURI' ">
+										<input ng-model="formdata.UserDefinedURI" placeholder="Web URI (Optional)" type="text" class="form-control"></input>
+									</td>
 								</tr>
 								<tr>
 									<td rowspan="2" class="column2"> Event Type </td>
@@ -782,8 +786,10 @@
 						<textarea stryle="height: 400px;" class="form-control" id="xmldata" ng-model="xmldata"></textarea>
 					</div>
 					<div class="col-md-2">
-						<br/><br/><br/><br/><br/><br/><br/><br/><br/>
-						<button ng-click="copytoclipboard('XML')" class="btn btn-default">Copy XML</button>
+						<br/><br/><br/><br/><br/><br/><br/>
+						<button ng-click="copytoclipboard('XML')" class="btn btn-primary" title="Copy XML Events data"><span><i class="fa fa-copy fa-2x" aria-hidden="true"></i></span></button>
+						<br/><br/>
+						<button ng-click="ExportData(xmldata,'XML')" class="btn btn-info" title="Export XML Events data"><span><i class="fa fa-download fa-2x" aria-hidden="true"></i></span></button>
 					</div>
 				</div>
 				<br/>
@@ -795,8 +801,10 @@
 						<br/><br/>
 					</div>
 					<div class="col-md-2">
-						<br/><br/><br/><br/><br/><br/><br/><br/><br/>
-						<button ng-click="copytoclipboard('JSON')" class="btn btn-default">Copy JSON</button>
+						<br/><br/><br/><br/><br/><br/><br/>
+						<button ng-click="copytoclipboard('JSON')" class="btn btn-primary" title="Copy JSON Events data"><span><i class="fa fa-copy fa-2x" aria-hidden="true"></i></span></button>
+						<br/><br/>
+						<button ng-click="ExportData(jsondata,'JSON')" class="btn btn-info" title="Export JSON Events data"><span><i class="fa fa-download fa-2x" aria-hidden="true"></i></span></button>
 					</div>
 				</div>
 			</div>

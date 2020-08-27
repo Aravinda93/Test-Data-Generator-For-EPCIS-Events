@@ -40,6 +40,7 @@
 		<script src="./js/app.js"></script>
 		<script src="./js/TemplatesController.js"></script>
 		<script src="./js/TemplatesController2.js"></script>
+		<script src="./js/CopyToClipboard.js"></script>
 		<!-- My Javascript file Ends-->
 
 	</head>
@@ -62,7 +63,8 @@
 					<div class="col-sm-4">
 						<button class="btn btn-primary" ng-click="ConnectorAdd();">Add Connector</button>&nbsp;
 						<button class="btn btn-primary" ng-click="NodeAdd();">Add Event</button>&nbsp;
-						<button class="btn btn-success" ng-click="submitEvents(); xmldata = ''">Submit</button>&nbsp;
+						<button class="btn btn-success" ng-click="submitEvents();">Submit</button>&nbsp;
+						<button class="btn btn-success" ng-click="ExportDiagram();">Export</button>&nbsp;
 					</div>
 				</div>
 				<br/>
@@ -88,7 +90,24 @@
 					</div>
 					<div class="col-sm-2">
 						<br/><br/><br/><br/><br/><br/><br/><br/><br/>
-						<button ng-click="copytoclipboard('XML')" class="btn btn-success">Copy XML</button>
+						<button ng-click="copytoclipboard('XML')" 		class="btn btn-primary" title="Copy XML Events data"><span><i class="fa fa-copy fa-2x" aria-hidden="true"></i></span></button>
+						<br/><br/>
+						<button ng-click="ExportData(xmldata,'XML')" 	class="btn btn-info" 	title="Export XML Events data"><span><i class="fa fa-download fa-2x" aria-hidden="true"></i></span></button>
+					</div>
+				</div>
+				<br/>
+				<div class="row">
+					<div class="col-md-2"></div>
+					<div class="col-md-8">
+						<h5>Test Events in JSON :</h5>
+						<textarea class="form-control" id="jsondata" ng-model="jsondata"></textarea>
+						<br/><br/>
+					</div>
+					<div class="col-md-2">
+						<br/><br/><br/><br/><br/><br/><br/><br/><br/>
+						<button ng-click="copytoclipboard('JSON')" 		class="btn btn-primary" title="Copy JSON Events data"><span><i class="fa fa-copy fa-2x" aria-hidden="true"></i></span></button>
+						<br/><br/>
+						<button ng-click="ExportData(jsondata,'JSON')" 	class="btn btn-info" 	title="Export JSON Events data"><span><i class="fa fa-download fa-2x" aria-hidden="true"></i></span></button>
 					</div>
 				</div>
 			</div>

@@ -6,6 +6,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	
 	//Onclick of the button show the Modal for formdata
 	$scope.ShowFormDataModal	=	function(event){
+		
 		//Common
 		$scope.formdata								=	{eventtype1:'', syntaxType:'urn'};
 		$scope.SensorForm							=	{Temperature:''};
@@ -67,6 +68,18 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		var node 									= 	diagram.selectionList[0];
 		$scope.NodeEventId							=	node.name;
 		angular.element('#EventModalForm').modal('show');
+		
+		//If the event already exists in the rootarray then delete it useful when they come back and make changes to any event
+		for(var del=0; del<$rootScope.AllEventsArray.length; del++)
+		{
+			var NodeID	=	$rootScope.AllEventsArray[del].NodeID;
+			
+			if(NodeID == $scope.NodeEventId)
+			{
+				$rootScope.AllEventsArray.splice(del, 1);
+				break;
+			}
+		}
 	}
 	
 	//Based on Event type selection create fields for the WHAT dimention
@@ -1187,6 +1200,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
 			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.XMLElement		=	"Multiple";
 			obj.File			=	'ObjectEvent';
 			obj.NodeID			=	$scope.NodeEventId;
 			$rootScope.AllEventsArray.push(obj);
@@ -1203,6 +1217,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
 			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.XMLElement		=	"Multiple";
 			obj.File			=	'AggregationEvent';
 			obj.NodeID			=	$scope.NodeEventId;
 			$rootScope.AllEventsArray.push(obj);
@@ -1219,6 +1234,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
 			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.XMLElement		=	"Multiple";
 			obj.File			=	'TransactionEvent';
 			obj.NodeID			=	$scope.NodeEventId;
 			$rootScope.AllEventsArray.push(obj);
@@ -1237,6 +1253,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
 			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.XMLElement		=	"Multiple";
 			obj.File			=	'TransformationEvent';			
 			obj.NodeID			=	$scope.NodeEventId;
 			$rootScope.AllEventsArray.push(obj);
@@ -1253,6 +1270,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
 			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.XMLElement		=	"Multiple";
 			obj.File			=	'AssociationEvent';
 			obj.NodeID			=	$scope.NodeEventId;			
 			$rootScope.AllEventsArray.push(obj);

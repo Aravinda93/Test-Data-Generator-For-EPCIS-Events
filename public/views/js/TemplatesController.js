@@ -4,7 +4,7 @@ var connectorCounter	=	1;
 var connectorArray		=	[];
 
 //Create the controller for Drag and Drop features
-syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
+syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipboard) {
 	
 	//EjDiagram functions
 	$scope.connectorTargetChange 		= 	"connectorTargetChange";
@@ -12,6 +12,25 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 	$scope.connectorCollectionChange 	= 	"connectorCollectionChange";
 	$scope.textChange 					= 	"textChange";
 	$scope.nodeCounter					=	1;
+	
+	//Export the Nodes in the digaram
+	$scope.ExportDiagram	=	function(){
+		var diagram 		=  	angular.element("#diagram").ejDiagram("instance");
+		var options 		= 	{
+									fileName	:	"EventsDiagram",
+									mode		: 	ej.datavisualization.Diagram.ExportModes.Download,
+									format		: 	ej.datavisualization.Diagram.FileFormats.SVG,
+									stretch		: 	"fill",
+									margin		: 
+													{
+														left	: 30,
+														right	: 30,
+														top		: 30,
+														bottom	: 30
+													},
+								};
+		diagram.exportDiagram(options);
+	}
 	
 	//Add Node to Diagram on click
 	$scope.NodeAdd	=	function()
@@ -162,25 +181,36 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 			}
 		}
 		
-		/*//Find the last event that does not have any connector source
-		for (var l = 0; l<$rootScope.AllEventsArray.length;l++)
+		//Sort the events based on the name
+		//AllEventFinalArray.sort((a, b) => (a.NodeName > b.NodeName) ? 1 : -1);		
+		console.log(AllEventFinalArray);
+		
+		//Check if the Child count matches the parent Count
+		for(var parentCount=0; parentCount<AllEventFinalArray.length; parentCount++)
 		{
-			var NodeName 	=	$rootScope.AllEventsArray[l].NodeID;
+			var TotalParentEPCCount			=	parseInt(AllEventFinalArray[parentCount].Count, 10);
+			var TotalParentQuantityCount	=	parseInt(AllEventFinalArray[parentCount].QuantityCount, 10);
+			var TotalChildEPCCount			=	0;
+			var TotalChildQuantityCount		=	0;
 			
-			if (!AllEventFinalArray.find(o => o.NodeName == NodeName))
+			for(var childCount=0; childCount<AllEventFinalArray[parentCount].Childrens.length; childCount++)
 			{
-				var NodeObj				=	new Object();
-				NodeObj.NodeName		=	$rootScope.AllEventsArray[l].NodeID;
-				NodeObj.FormData		=	$rootScope.AllEventsArray[l];
-				NodeObj.Type			=	"Source";
-				NodeObj.Childrens		=	[];
-				AllEventFinalArray.push(NodeObj);
+				TotalChildEPCCount			=	TotalChildEPCCount		+ parseInt(AllEventFinalArray[parentCount].Childrens[childCount].Count, 10);
+				TotalChildQuantityCount		=	TotalChildQuantityCount	+ parseInt(AllEventFinalArray[parentCount].Childrens[childCount].QuantityCount, 10);;
 			}
 			
-		}*/	
-		
-		AllEventFinalArray.sort((a, b) => (a.NodeName > b.NodeName) ? 1 : -1);		
-		console.log(AllEventFinalArray);
+			if(TotalParentEPCCount != TotalChildEPCCount || TotalParentQuantityCount != TotalChildQuantityCount)
+			{
+				console.log("Some Child Quantities/EPCs do not match: "+AllEventFinalArray[parentCount].NodeName)
+				//alertify.alert(" Error during the split ",' Please check the count provided for EPCs/Quantities');
+			}
+			else
+			{
+				console.log("Eveything is correct");
+				
+			}
+		}
+
 		var data	=	JSON.stringify({AllEventFinalArray:AllEventFinalArray});
 		$http({
 			url		:	"/CreateConfiguredXML",
@@ -188,16 +218,80 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope) {
 			method	:	"POST",
 			data	:	data
 		}).success(function(response) {
-			$scope.xmldata 	=	response[0].XML;
+			$scope.xmldata 		=	response[0].XML;			
+			$scope.jsondata 	= 	response[1].JSON;			
 		}).error(function(error) {
 			console.log(error);
-		});
+		});		
 	}
 	
 	//On click of Back button show the input data with EJ Diagram
 	$scope.showInputData	=	function(){
 		$scope.outputElements 		= 	false;
 		$scope.inputElements 		= 	true;
+	}
+	
+	//Copy to Clipboard the XML and JSON data
+	$scope.copytoclipboard = function(toCopy){
+		if(toCopy == 'XML')
+		{
+			$copyToClipboard.copy($scope.xmldata).then(function(){
+				alertify.alert(" Test Data Generator ",toCopy + ' content copied to clipboard');
+			});
+		}
+		else if(toCopy == 'JSON')
+		{
+			$copyToClipboard.copy($scope.jsondata).then(function(){
+				alertify.alert(" Test Data Generator ",toCopy + ' content copied to clipboard');
+			});
+		}
+	}
+		
+	//Export the contents of XML to text file
+	$scope.ExportData	=	function(Content, type)
+	{
+		var DateTime	= 	new Date().toISOString().replace('Z', ' ').replace('T', ' ');
+		
+		if(type == 'XML')
+		{
+			var FileName	=	"EPCIS_Events_"+DateTime+".xml";
+			var blob 		= 	new Blob([Content], {type: "text/xml"});
+			
+			if (window.navigator && window.navigator.msSaveOrOpenBlob)
+			{
+				window.navigator.msSaveOrOpenBlob(blob, FileName);
+			}
+			else
+			{
+				var e 					= 	document.createEvent('MouseEvents'),
+				a						= 	document.createElement('a');
+				a.download 				= 	FileName;
+				a.href 					= 	window.URL.createObjectURL(blob);
+				a.dataset.downloadurl 	= 	['text/json', a.download, a.href].join(':');
+				e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+				a.dispatchEvent(e);
+			}			
+		}
+		else if(type == 'JSON')
+		{
+			var FileName	=	"EPCIS_Events_"+DateTime+".json";			
+			var blob		= 	new Blob([Content], {type: "text/json"});
+			
+			if (window.navigator && window.navigator.msSaveOrOpenBlob)
+			{
+				window.navigator.msSaveOrOpenBlob(blob, FileName);
+			}
+			else
+			{
+				var e 					= 	document.createEvent('MouseEvents'),
+				a						= 	document.createElement('a');
+				a.download 				= 	FileName;
+				a.href 					= 	window.URL.createObjectURL(blob);
+				a.dataset.downloadurl 	= 	['text/json', a.download, a.href].join(':');
+				e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+				a.dispatchEvent(e);
+			}
+		}		
 	}
 
 });
@@ -212,8 +306,8 @@ function connectorCollectionChange(args)
 		var connectorName	=	args.element.addInfo.name;
 		var diagram 		= 	$("#diagram").ejDiagram("instance");
         var connector 		= 	diagram.selectionList[0];
-        diagram.insertLabel(connector.name, {name: "EPCsCount", 		fontColor:"red", 		text:"EPCs", 		alignment: "before", segmentOffset: 0}, 0);
-        diagram.insertLabel(connector.name, {name: "QuantitiesCount", 	fontColor:"green", 		text:"Quantities", 	alignment: "after", segmentOffset: 1}, 1);
+        diagram.insertLabel(connector.name, {name: "EPCsCount", 		fontColor:"red", 		text:"EPCs", 		alignment: "before",	segmentOffset: 0.1}, 0);
+        diagram.insertLabel(connector.name, {name: "QuantitiesCount", 	fontColor:"green", 		text:"Quantity", 	alignment: "after", 	segmentOffset: 0.7}, 1);
        
 	   
 		for(var c=0; c<connectorArray.length; c++)

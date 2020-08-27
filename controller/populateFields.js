@@ -24,25 +24,44 @@ exports.BusinessStep = function(callback){
 									{value:'repairing', 				text:'Repairing'},
 									{value:'replacing', 				text:'Replacing'},
 									{value:'retail_selling', 			text:'Retail Selling'},
-									{value:'shipping', 					text:'Shipping'}
+									{value:'sampling',					text:'Sampling'},
+									{value:'sensor_reporting',			text:'Sensor Reporting'},
+									{value:'shipping', 					text:'Shipping'},
+									{value:'staging_outbound',			text:'Staging Outbound'},
+									{value:'stock_taking',				text:'Stock Taking'},
+									{value:'stocking',					text:'Stocking'},
+									{value:'storing',					text:'Storing'},
+									{value:'transporting',				text:'Transporting'},
+									{value:'unloading',					text:'Unloading'},
+									{value:'unpacking',					text:'Unpacking'},
+									{value:'void_shipping',				text:'Void Shipping'}								
 								];
 	
 	var BusinessTransactions=	[
-									{value:'bol',						text: 'Bill of Lading'},
-									{value:'boldesadv',					text: 'Despatch Advice'},
-									{value:'inv',						text: 'Invoice'},
-									{value:'pedigree',					text: 'Pedigree'},
-									{value:'po',						text: 'Purchase Order'},
-									{value:'poc',						text: 'Purchase Order Confirmation'},
-									{value:'prodorder',					text: 'Production Order'},
-									{value:'recadv',					text: 'Receiving Advice'},
-									{value:'rma',						text: 'Return Merchandise Authorisation'}									
+									{value:'bol',						text:'Bill of Lading'},
+									{value:'cert',						text:'Certificate'},
+									{value:'boldesadv',					text:'Despatch Advice'},
+									{value:'inv',						text:'Invoice'},
+									{value:'pedigree',					text:'Pedigree'},
+									{value:'po',						text:'Purchase Order'},
+									{value:'poc',						text:'Purchase Order Confirmation'},
+									{value:'prodorder',					text:'Production Order'},
+									{value:'recadv',					text:'Receiving Advice'},
+									{value:'rma',						text:'Return Merchandise Authorisation'},
+									{value:'testprd',					text:'Test Procedure'},
+									{value:'testres',					text:'Test Results'},
+									{value:'upevt',						text:'Upstream EPCIS Event'},									
 								];
 		
 	var dispositions 		= 	[
 									{value:'DispositionEnter',			text: 'Enter Manually'},
 									{value:'active',					text: 'Active'},
+									{value:'available',					text: 'Available'},
+									{value:'completeness_verified',		text: 'Completeness Verified'},
+									{value:'completeness_inferred',		text: 'Completeness Inferred'},
+									{value:'conformant',				text: 'Conformant'},
 									{value:'container_closed',			text: 'Container Closed'},
+									{value:'container_open',			text: 'Container Open'},
 									{value:'damaged',					text: 'Damaged'},
 									{value:'destroyed',					text: 'Destroyed'},
 									{value:'dispensed',					text: 'Dispensed'},
@@ -52,10 +71,22 @@ exports.BusinessStep = function(callback){
 									{value:'in_progress',				text: 'In Progress'},
 									{value:'in_transit',				text: 'In Transit'},
 									{value:'inactive',					text: 'Inactive'},
-									{value:'no_pedigree_match',			text: 'No Pedigree Match'},
+									{value:'mismatch_instance',			text: 'Mismatch Instance'},
+									{value:'mismatch_class',			text: 'Mismatch Class'},
+									{value:'mismatch_ quantity',		text: 'Mismatch Quantity'},
+									{value:'needs_replacement',			text: 'Needs Replacement'},
+									{value:'non_conformant',			text: 'Non Conformant'},
 									{value:'non_sellable_other',		text: 'Non Sellable Other'},
 									{value:'partially_dispensed',		text: 'Partially Dispensed'},
-									{value:'recalled',					text: 'Recalled'}
+									{value:'recalled',					text: 'Recalled'},
+									{value:'reserved',					text: 'Reserved'},
+									{value:'retail_sold',				text: 'Retail Sold'},
+									{value:'returned',					text: 'Returned'},
+									{value:'sellable_accessible',		text: 'Sellable Accessible'},
+									{value:'sellable_not_accessible',	text: 'Sellable Not Accessible'},
+									{value:'stolen',					text: 'Stolen'},
+									{value:'unavailable',				text: 'Uavailable'},
+									{value:'unknown',					text: 'Unknown'}									
 								];
 		
 	var eventType 			= 	[

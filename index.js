@@ -18,6 +18,7 @@ const 	ReadExcelFile				=	require("./controller/ReadExcelFile");
 const 	createXML					=	require("./controller/createXML");
 const 	createJSON					=	require("./controller/createJSON");
 const 	CreateConfiguredXML			=	require("./controller/CreateConfiguredXML");
+const 	DataExporter				=	require("./controller/DataExporter");
 
 //Create an XML and JSON document based on the user inputs
 
@@ -61,10 +62,10 @@ app.post('/CreateAggregationEventURI', function(req,res){
 //call functions to create XML and JSON
 app.post('/createEvents', function(req,res){
 	var data = [];
-	createXML.createXMLData(req.body, function(XMLdata){
+	createXML.createXMLData(req.body,'dummy',function(XMLdata){
 		var xml = {'XML':XMLdata};
 		data.push(xml);
-		createJSON.createJSONData(req.body, function(JSONdata){
+		createJSON.createJSONData(req.body,'dummy',function(JSONdata){
 			var json = {'JSON':JSONdata}
 			data.push(json);
 			res.send(data);
@@ -100,10 +101,14 @@ app.post('/DrawFieldsData',function(req,res){
 
 //Create XML data for the drag and drop field
 app.post('/CreateConfiguredXML',function(req,res){
-	var data = [];
-	CreateConfiguredXML.createXML(req.body,function(XMLdata){
-		var xml = {'XML':XMLdata};
-		data.push(xml);
+	CreateConfiguredXML.createXML(req.body,function(data){
+		res.send(data);
+	});
+});
+
+//Export the Data into the Text file
+app.post('/ExportData',function(req,res){
+	DataExporter.exportfile(req,res,function(data){
 		res.send(data);
 	});
 })

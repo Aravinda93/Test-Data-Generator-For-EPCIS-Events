@@ -9,7 +9,20 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 	var input		=	Query.input;
 	var syntaxType	=	Query.formdata.syntaxType;
 		EpcLists 	= 	[];
-	var Domain		=	'https://id.gs1.org'
+	var Domain		=	"";
+	
+	//Check if user has provided their own WEB URI 
+	if(syntaxType == 'webURI')
+	{
+		if(Query.formdata.UserDefinedURI != "" && Query.formdata.UserDefinedURI != null && typeof Query.formdata.UserDefinedURI != undefined)
+		{
+			Domain 	=	Query.formdata.UserDefinedURI;
+		}
+		else
+		{
+			Domain	=	'https://id.gs1.org';
+		}
+	}
 
 	//Execute this if Multiple values needs to be created
 	if(Query.MultiValues)

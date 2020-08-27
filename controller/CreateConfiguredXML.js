@@ -2,7 +2,8 @@ var builder 			=	require('xmlbuilder');
 var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 var xml_json_functions	=	require('./XML_JSON_Functions');
-var createXML			=	require('./createXML');
+const createXML			=	require('./createXML');
+const createJSON		=	require("./createJSON");
 
 exports.createXML	=	function(AllData,callback){
 	var currentTime 	=	moment().format();
@@ -13,9 +14,28 @@ exports.createXML	=	function(AllData,callback){
 	var AddedEvents		=	[];
 	var GlobalCount		=	0;
 	var FinalXML		=	"";
+	var FinalJSON		=	"";
 	var itemProcessed	=	0;
+	var AllEventsArray	=	AllData.AllEventFinalArray;	
 	
-	var AllEventsArray	=	AllData.AllEventFinalArray;
+	//Create the initial strucutre for the JSON data
+	var JSONHeader		=	{
+								"@context"		: 	"https://id.gs1.org/epcis-context.jsonld",
+								"isA"			:	"EPCISDocument",
+								"creationDate"	:	currentTime,
+								"schemaVersion"	: 	2.0,
+								"format"		: 	"application/ld+json",
+								"epcisBody"		:	{}
+							}
+	
+	//Create the header for XML	
+	var root			= 	builder.create('epcis:EPCISDocument')
+								root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
+								root.att('xmlns:gs1', "https://gs1.de")
+								root.att('schemaVersion', "2.0")
+								root.att('creationDate', currentTime)
+								root.ele('EPCISBody')
+								root.ele('EventList')	
 	
 	//Main loop based on the number of events/nodes in drag and drop
 	for(var parent=0; parent<AllEventsArray.length; parent++)
@@ -140,7 +160,12 @@ exports.createXML	=	function(AllData,callback){
 		
 		if(itemProcessed == AllEventsArray.length)
 		{
-			callback(FinalXML)
+			var Returndata 	=	[];
+			Returndata.push({'XML':FinalXML});
+			Returndata.push({'JSON':FinalJSON});
+			callback(Returndata);
+			createXML.resetRoot(function(){
+			});
 		}
 	}
 	
@@ -181,8 +206,16 @@ exports.createXML	=	function(AllData,callback){
 		AddedEvents.push(NodeName);
 		
 		//Call create XML function to create the XML
-		createXML.createXMLData(Query,function(data){
+		createXML.createXMLData(Query,root,function(data){
+			//FinalXML	=	FinalXML.concat(data);
 			FinalXML	=	data;
+		});
+		
+		//Call createJSON function to create JSON
+		createJSON.createJSONData(Query,JSONHeader,function(JSONdata){
+			console.log(JSONdata)
+			FinalJSON	=	FinalJSON.concat(JSONdata);
+			//FinalJSON = JSONdata;
 		});
 	}
 }

@@ -3,16 +3,9 @@ var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 var xml_json_functions	=	require('./XML_JSON_Functions');
 var currentTime 		=	moment().format();
-var root				= 	builder.create('epcis:EPCISDocument')
-								root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
-								root.att('xmlns:gs1', "https://gs1.de")
-								root.att('schemaVersion', "2.0")
-								root.att('creationDate', currentTime)
-								root.ele('EPCISBody')
-								root.ele('EventList')
-
-
-exports.createXMLData	=	function(Query,callback){
+var rootCounter			=	0;
+								
+exports.createXMLData	=	function(Query,Root,callback){
 	var input			=	Query.input;
 	var today 			= 	new Date();
 	let date 			= 	today.toISOString().slice(0, 10).replace(/-/g,"-");
@@ -25,15 +18,39 @@ exports.createXMLData	=	function(Query,callback){
 	var RecordTimeArray	=	[];
 	var EventTimeArray	=	[];
 	var ErrorTimeArray	=	[];
-	var Domain			=	'https://gs1.org/';
+	var Domain			=	"";
 	var SyntaxType		=	input.syntaxType;
-	var xml				=	"";	
+	var xml				=	"";		
 	
-	if(Query.XMLElement	!= undefined && Query.XMLElement == "Single")
+	//Check if user has provided their own WEB URI 
+	if(SyntaxType == 'webURI')
 	{
+		if(input.UserDefinedURI != "" && input.UserDefinedURI != null && typeof input.UserDefinedURI != undefined)
+		{
+			Domain 	=	input.UserDefinedURI;
+		}
+		else
+		{
+			Domain	=	'https://gs1.org/';
+		}
+	}	
 	
+	//Assign the root node based on calling function							
+	if(Query.XMLElement == 'Single')
+	{
+		var root		= 	builder.create('epcis:EPCISDocument')
+								root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
+								root.att('xmlns:gs1', "https://gs1.de")
+								root.att('schemaVersion', "2.0")
+								root.att('creationDate', currentTime)
+								root.ele('EPCISBody')
+								root.ele('EventList')
 	}
-	
+	else
+	{
+		var root		=	Root;
+	}
+
 	if(input.eventtype1 == "AssociationEvent")
 	{
 		var AEMainExtension = 	root.ele('extension')
@@ -639,13 +656,29 @@ exports.createXMLData	=	function(Query,callback){
 					if(input.SourceLNType == 'pgln')
 					{
 						var sources 	= 	sourceList.ele('source',FormattedData)
-						sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)						
+						if(SyntaxType == 'urn')
+						{
+							sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)
+						}
+						else if(SyntaxType == 'webURI')
+						{
+							sources.att('type',Domain+'sdt:'+input.sourcesType)
+						}
+												
 					}
 					else if(input.SourceLNType == 'sgln')
 					{
 						FormattedData	=	FormattedData + '.' + input.SourceGLNExtension;
 						var sources 	= 	sourceList.ele('source',FormattedData)
-						sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)	
+						if(SyntaxType == 'urn')
+						{
+							sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)	
+						}
+						else if(SyntaxType == 'webURI')
+						{
+							sources.att('type',Domain+'sdt:'+input.sourcesType)	
+						}
+						
 					}
 				}
 				
@@ -653,7 +686,15 @@ exports.createXMLData	=	function(Query,callback){
 				{
 					FormattedData	=	FormattedData + '.' + input.SourceGLNExtension;
 					var sources 	= 	sourceList.ele('source',FormattedData)
-					sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)	
+					if(SyntaxType == 'urn')
+					{
+						sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)	
+					}
+					else if(SyntaxType == 'webURI')
+					{
+						sources.att('type',Domain+'sdt:'+input.sourcesType)
+					}
+					
 				}
 				
 				
@@ -687,13 +728,29 @@ exports.createXMLData	=	function(Query,callback){
 					if(input.DestinationLNType == 'pgln')
 					{
 						var destinations 	=	destinationList.ele('destination', FormattedData)
-						destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)						
+						
+						if(SyntaxType == 'urn')
+						{
+							destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
+						}
+						else if(SyntaxType == 'webURI')
+						{
+							destinations.att('type',Domain+'sdt:'+input.destinationsType)
+						}												
 					}
 					else if(input.DestinationLNType == 'sgln')
 					{
 						FormattedData		=	FormattedData + '.' + input.DestinationGLNExtension;
 						var destinations 	= 	destinationList.ele('destination',FormattedData)
-						destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)	
+						
+						if(SyntaxType == 'urn')
+						{
+							destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
+						}
+						else if(SyntaxType == 'webURI')
+						{
+							destinations.att('type',Domain+'sdt:'+input.destinationsType)
+						}							
 					}
 				}
 				
@@ -701,7 +758,15 @@ exports.createXMLData	=	function(Query,callback){
 				{
 					FormattedData		=	FormattedData + '.' + input.DestinationGLNExtension;
 					var destinations 	= 	destinationList.ele('destination',FormattedData)
-					destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
+					
+					if(SyntaxType == 'urn')
+					{
+						destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
+					}
+					else if(SyntaxType == 'webURI')
+					{
+						destinations.att('type',Domain+'sdt:'+input.destinationsType)
+					}
 				}
 			}
 			else if(input.destinationsType == 'other')
@@ -846,7 +911,7 @@ exports.createXMLData	=	function(Query,callback){
 		//After creation of all the XML events return the data to index.js
 		if(itemProcessed == input.eventcount)
 		{
-			xml = root.end({ pretty: true});
+			xml 	= 	root.end({ pretty: true});
 			callback(xml);
 		}
 	}

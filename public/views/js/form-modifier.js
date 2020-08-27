@@ -48,6 +48,69 @@ app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$
 		}
 	}
 	
+	//Export the contents of XML to text file
+	$scope.ExportData	=	function(Content, type)
+	{
+		var DateTime	= 	new Date().toISOString().replace('Z', ' ').replace('T', ' ');
+		var FileName	=	"";
+		var DatasetName	=	$scope.DatasetName;
+		
+		if(type == 'XML')
+		{
+			if(DatasetName == '' || DatasetName == undefined || DatasetName == null)
+			{
+				FileName	=	"EPCIS_Events_"+DateTime+".xml";
+			}
+			else
+			{
+				FileName	=	DatasetName+".xml";
+			}
+			
+			var blob = new Blob([Content], {type: "text/xml"});
+			if (window.navigator && window.navigator.msSaveOrOpenBlob)
+			{
+				window.navigator.msSaveOrOpenBlob(blob, FileName);
+			}
+			else
+			{
+				var e 					= 	document.createEvent('MouseEvents'),
+				a						= 	document.createElement('a');
+				a.download 				= 	FileName;
+				a.href 					= 	window.URL.createObjectURL(blob);
+				a.dataset.downloadurl 	= 	['text/json', a.download, a.href].join(':');
+				e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+				a.dispatchEvent(e);
+			}			
+		}
+		else if(type == 'JSON')
+		{
+			if(DatasetName == '' || DatasetName == undefined || DatasetName == null)
+			{
+				FileName	=	"EPCIS_Events_"+DateTime+".json";
+			}
+			else
+			{
+				FileName	=	DatasetName+".json";
+			}
+			
+			var blob = new Blob([Content], {type: "text/json"});
+			if (window.navigator && window.navigator.msSaveOrOpenBlob)
+			{
+				window.navigator.msSaveOrOpenBlob(blob, FileName);
+			}
+			else
+			{
+				var e 					= 	document.createEvent('MouseEvents'),
+				a						= 	document.createElement('a');
+				a.download 				= 	FileName;
+				a.href 					= 	window.URL.createObjectURL(blob);
+				a.dataset.downloadurl 	= 	['text/json', a.download, a.href].join(':');
+				e.initEvent('click', true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+				a.dispatchEvent(e);
+			}
+		}		
+	}
+	
 	/* SENSOR INFORMATION START*/
 	
 	//Sensor information variables
