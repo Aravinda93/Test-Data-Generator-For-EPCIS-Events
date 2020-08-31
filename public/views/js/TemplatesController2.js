@@ -9,7 +9,6 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		
 		//Common
 		$scope.formdata								=	{eventtype1:'', syntaxType:'urn'};
-		$scope.SensorForm							=	{Temperature:''};
 		$scope.AddExtensionForm						=	{};
 		$scope.EditExtensionForm					=	{};
 		$scope.EventTypeRowSpan						= 	5;
@@ -58,10 +57,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		$scope.ErrorExtensionID 					=	0;
 		
 		//Sensor information variables
-		$scope.TotalSensorElementsArray				=	[];
-		$scope.SensorElementsArray					=	[];
-		$scope.SensorElementCount					=	0;
-		$scope.ToalSensorElementCount				=	0;
+		$rootScope.TotalSensorElementsArray			=	[];
 		
 		//Find the nodeID
 		var diagram 								= 	angular.element("#diagram").ejDiagram("instance"); 
@@ -186,32 +182,6 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			$scope.AssociationEventChildEPCSButton			=	true;
 			$scope.AssociationEventChildQuantitiesButton	=	true;
 		}
-	}
-	
-		
-	//Call the init function to get the values for various fields
-	$scope.init 	=	function () {
-		$scope.outputElements 	= false;
-		$scope.inputElements 	= true;
-		$http({
-		url: "/populateFields",
-		method: "GET"
-		}).success(function(response) {
-			$scope.businessSteps 		=	response.businessStep;
-			$scope.eventType			=	response.eventType;	
-			$scope.dispositions			=	response.dispositions;
-			$scope.BusinessTransactions	=	response.BusinessTransactions;
-			$scope.companyPrefixs		=	response.companyPrefixs;
-			$scope.ObjectEventEpcsTypes	=	response.ObjectEventEpcsTypes;
-			$scope.ObjectEventQuantities=	response.ObjectEventQuantities;
-			$scope.UOMs					=	response.UOMs;
-			$scope.SensorElements		=	response.SensorElements;
-			$scope.AllUOMs				=	response.Temperatures;
-			$scope.SensorUOMs			=	response.SensorUOMs;
-			$scope.SensorValueTypes		=	response.SensorValueTypes;
-		}).error(function(error) {
-		console.log(error);
-		});
 	}
 	
 	/* OBJECT EVENT EPC AND QUANTITIES STARTS */
@@ -1085,79 +1055,6 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	/* BUSINESS TRANSACTION TYPE ENDS */
 	
 	
-	/* SENSOR INFORMATION STARTS */
-	
-	//Show the Sensor Data Modal on click of the button
-	$scope.AddSensorData	=	function(){
-		$scope.SensorForm	=	{};
-		angular.element('#EventModalForm').modal('hide');
-		angular.element('#SensorInformation').modal('show');
-	}
-	
-	//Show fields for adding new sensor Element
-	$scope.AddSensorElement		=	function(e){
-		e.preventDefault();
-		item 					= 	{};
-		item["ID"]				=	$scope.SensorElementCount;
-		item["SensorFields"]	=	{};
-		$scope.SensorElementsArray.push(item);
-		$scope.SensorElementCount++;
-	}
-	
-	//Close the modal for Sensor data as information is already saved
-	$scope.SensorInformationSubmit	=	function(){
-		angular.element('#SensorInformation').modal('hide');
-		angular.element('#EventModalForm').modal('show');		
-		var TemporaryArray				=	[];
-		var MetaDataItem				=	{};
-		MetaDataItem["CheckBox"]		=	$scope.SensorForm.MetaDataCheck
-		MetaDataItem["Time"]			=	$scope.SensorForm.MetaDataDateTime;
-		MetaDataItem["StartTime"]		=	$scope.SensorForm.MetaDataStartTime;
-		MetaDataItem["EndTime"]			=	$scope.SensorForm.MetaDataEndTime;
-		MetaDataItem["SENSORELEMENTS"]	=	$scope.SensorElementsArray;
-		TemporaryArray.push(MetaDataItem);
-		$scope.TotalSensorElementsArray.push(TemporaryArray)
-		$scope.ToalSensorElementCount++;
-		$scope.SensorElementsArray	=	[];
-		$scope.SensorElementCount	=	0;
-	}
-	
-	//For Every Sensor Element addition populate the corresponding Array
-	$scope.SensorElementPopulator	=	function(SensorElementID){
-		
-		for(var s=0;s<$scope.SensorElementsArray.length;s++)
-		{
-			if($scope.SensorElementsArray[s].ID ==	SensorElementID)
-			{
-				$scope.SensorElementsArray[s].SensorFields["Type"]		=	$scope.SensorForm.SensorElementType[SensorElementID];
-				$scope.SensorElementsArray[s].SensorFields["Value"]		=	$scope.SensorForm.SensorElementValue[SensorElementID];
-				$scope.SensorElementsArray[s].SensorFields["UOM"]		=	$scope.SensorForm.SensorElementUOM[SensorElementID];
-				$scope.SensorElementsArray[s].SensorFields["DateTime"]	=	$scope.SensorForm.SensorElementTime[SensorElementID];				
-				break;
-			}
-		}	
-	}
-	
-	//Remove the sensor element on click
-	$scope.RemoveSensorElement	=	function(Delete_ID,e){
-		e.preventDefault();
-		for(var d=0; d<$scope.SensorElementsArray.length; d++)
-		{
-			if($scope.SensorElementsArray[d].ID ==	Delete_ID)
-			{
-				$scope.SensorElementsArray.splice(d, 1);		
-				break;	
-			}
-		}
-	}
-	
-	//Remove the Element from TOTALSENSORELEMENTARRAY displayed on INDEX.html
-	$scope.DeleteTotalSensorElement	=	function(Delete_Sensor_Id){
-		$scope.TotalSensorElementsArray.splice(Delete_Sensor_Id, 1);
-	}
-	
-	/* SENSOR INFORMATION ENDS */
-	
 	//On load of the page populate the drop-downs
 	$scope.init = function () {
 		//call the MODALS.html file
@@ -1177,9 +1074,12 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			$scope.ObjectEventQuantities=	response.ObjectEventQuantities;
 			$scope.UOMs					=	response.UOMs;
 			$scope.SensorElements		=	response.SensorElements;
-			$scope.AllUOMs				=	response.Temperatures;
+			$scope.AllUOMs				=	response.Temperatures;			
 			$scope.SensorUOMs			=	response.SensorUOMs;
 			$scope.SensorValueTypes		=	response.SensorValueTypes;
+			$scope.SensorMetaDatas		=	response.SensorMetaDatas;
+			$scope.SensorReportDatas	=	response.SensorReportDatas;
+			$scope.TimeZones			=	response.TimeZones;
 		}).error(function(error) {
 			console.log(error);
 		});
@@ -1199,7 +1099,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
-			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
 			obj.XMLElement		=	"Multiple";
 			obj.File			=	'ObjectEvent';
 			obj.NodeID			=	$scope.NodeEventId;
@@ -1216,7 +1116,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
-			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
 			obj.XMLElement		=	"Multiple";
 			obj.File			=	'AggregationEvent';
 			obj.NodeID			=	$scope.NodeEventId;
@@ -1233,7 +1133,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
-			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
 			obj.XMLElement		=	"Multiple";
 			obj.File			=	'TransactionEvent';
 			obj.NodeID			=	$scope.NodeEventId;
@@ -1252,7 +1152,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
-			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
 			obj.XMLElement		=	"Multiple";
 			obj.File			=	'TransformationEvent';			
 			obj.NodeID			=	$scope.NodeEventId;
@@ -1269,7 +1169,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
 			obj.ErrorExtension	=	$scope.ErrorExtensionList;
 			obj.BTT				=	$scope.BusinessTransactionList;
-			obj.SensorForm		=	$scope.TotalSensorElementsArray;
+			obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
 			obj.XMLElement		=	"Multiple";
 			obj.File			=	'AssociationEvent';
 			obj.NodeID			=	$scope.NodeEventId;			

@@ -164,8 +164,6 @@ exports.createXML	=	function(AllData,callback){
 			Returndata.push({'XML':FinalXML});
 			Returndata.push({'JSON':FinalJSON});
 			callback(Returndata);
-			createXML.resetRoot(function(){
-			});
 		}
 	}
 	
@@ -213,7 +211,6 @@ exports.createXML	=	function(AllData,callback){
 		
 		//Call createJSON function to create JSON
 		createJSON.createJSONData(Query,JSONHeader,function(JSONdata){
-			console.log(JSONdata)
 			FinalJSON	=	FinalJSON.concat(JSONdata);
 			//FinalJSON = JSONdata;
 		});

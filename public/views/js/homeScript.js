@@ -994,6 +994,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			$scope.SensorValueTypes		=	response.SensorValueTypes;
 			$scope.SensorMetaDatas		=	response.SensorMetaDatas;
 			$scope.SensorReportDatas	=	response.SensorReportDatas;
+			$scope.TimeZones			=	response.TimeZones;
 		}).error(function(error) {
 			console.log(error);
 		});

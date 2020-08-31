@@ -74,10 +74,9 @@ exports.createXMLData	=	function(Query,Root,callback){
 			//If Specific Event time has been selected
 			if(input.EventTimeSelector == 'SpecificTime')
 			{
-				input.eventtimeSpecific 	= 	new Date(input.eventtimeSpecific);
-				input.eventtimeSpecific		= 	moment(input.eventtimeSpecific).format();
-				ObjectEvent.ele('eventTime', input.eventtimeSpecific).up()
-				ObjectEvent.ele('eventTimeZoneOffset', offset).up()
+				input.eventtimeSpecific		=	input.eventtimeSpecific.substring(0,input.eventtimeSpecific.length-1)
+				ObjectEvent.ele('eventTime', input.eventtimeSpecific+input.EventTimeZone).up()
+				ObjectEvent.ele('eventTimeZoneOffset', input.EventTimeZone).up()
 			}
 			else if(input.EventTimeSelector == 'TimeRange')
 			{	
@@ -93,10 +92,9 @@ exports.createXMLData	=	function(Query,Root,callback){
 					});	
 				}
 				
-				ObjectEvent.ele('eventTime', EventTimeArray[count]).up()
-				ObjectEvent.ele('eventTimeZoneOffset', offset).up()
+				ObjectEvent.ele('eventTime', EventTimeArray[count]+input.EventTimeZone).up()
+				ObjectEvent.ele('eventTimeZoneOffset', input.EventTimeZone).up()
 			}
-
 		}
 		
 		//Check what type of RECORD TIME is required and fill the values accordingly
@@ -110,11 +108,11 @@ exports.createXMLData	=	function(Query,Root,callback){
 				{
 					if(input.EventTimeSelector == 'TimeRange')
 					{
-						ObjectEvent.ele('recordTime', EventTimeArray[count]).up()
+						ObjectEvent.ele('recordTime', EventTimeArray[count]+input.EventTimeZone).up()
 					}
 					else if(input.EventTimeSelector == 'SpecificTime')
 					{
-						ObjectEvent.ele('recordTime', input.eventtimeSpecific).up()
+						ObjectEvent.ele('recordTime', input.eventtimeSpecific+input.EventTimeZone).up()
 					}					
 				}
 				else if(input.RecordTimeOptionType	== 'RecordTimeCurrentTime')
@@ -148,8 +146,8 @@ exports.createXMLData	=	function(Query,Root,callback){
 					if(input.ErrorDeclarationTimeSelector == 'SpecificTime')
 					{
 						//Add Error Declaration Time
-						input.ErrorDeclarationTime	=	moment(input.ErrorDeclarationTime).format();
-						errorDeclaration.ele('declarationTime',input.ErrorDeclarationTime)
+						input.ErrorDeclarationTime		=	input.ErrorDeclarationTime.substring(0,input.ErrorDeclarationTime.length-1)
+						errorDeclaration.ele('declarationTime',input.ErrorDeclarationTime+input.ErrorTimeZone)
 					}
 					else if(input.ErrorDeclarationTimeSelector == 'TimeRange')
 					{
@@ -164,9 +162,8 @@ exports.createXMLData	=	function(Query,Root,callback){
 							xml_json_functions.RandomEventTimeGenerator(From,To,EventCount,File,function(RandomErrorTime){
 								ErrorTimeArray	= RandomErrorTime;
 							});	
-						}
-						
-						errorDeclaration.ele('declarationTime',ErrorTimeArray[count])	
+						}						
+						errorDeclaration.ele('declarationTime',ErrorTimeArray[count]+input.ErrorTimeZone)	
 					}
 				}
 				

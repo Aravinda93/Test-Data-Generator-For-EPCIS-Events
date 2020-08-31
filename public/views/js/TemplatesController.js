@@ -293,6 +293,230 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 			}
 		}		
 	}
+	
+	/* SENSOR INFORMATION START*/
+	
+	//Sensor information variables
+	$rootScope.TotalSensorElementsArray			=	[];
+	$scope.SensorElementsArray					=	[];
+	$scope.SensorElementCount					=	0;
+	$scope.ToalSensorElementCount				=	0;
+	
+	//Show the Sensor Data Modal on click of the button	
+	$scope.AddSensorData	=	function(){
+		$scope.SensorForm	=	{};
+		angular.element('#EventModalForm').modal('hide');
+		angular.element("#SelectReqMetaData").val('default');
+		angular.element('#SelectReqMetaData').selectpicker("refresh");
+		angular.element('#SelectReqReport').val('default');
+		angular.element('#SelectReqReport').selectpicker("refresh");
+		angular.element('#SensorInformation').modal('show');
+	}
+	
+	//Show fields for adding new sensor Element
+	$scope.AddSensorElement		=	function(e){
+		e.preventDefault();
+		item 					= 	{};
+		item["ID"]				=	$scope.SensorElementCount;
+		item["SensorFields"]	=	{};
+		$scope.SensorElementsArray.push(item);
+		$scope.SensorElementCount++;
+	}
+	
+	//For each click on Save, Save the information related to partoicular Sensor modal
+	$scope.SensorInformationSubmit	=	function(){
+		angular.element('#SensorInformation').modal('hide');
+		angular.element('#EventModalForm').modal('show');		
+		var TemporaryArray				=	[];
+		var MetaDataItem				=	{};
+		
+		if($scope.SensorForm.SelectReqMetaData.includes('Time'))
+		{
+			MetaDataItem["Time"]		=	$scope.SensorForm.MetaDataDateTime;
+		}
+		
+		if($scope.SensorForm.SelectReqMetaData.includes('Start Time'))
+		{
+			MetaDataItem["StartTime"]	=	$scope.SensorForm.MetaDataStartTime;
+		}
+		
+		if($scope.SensorForm.SelectReqMetaData.includes('End Time'))
+		{
+			MetaDataItem["EndTime"]	=	$scope.SensorForm.MetaDataEndTime;
+		}
+		
+		if($scope.SensorForm.SelectReqMetaData.includes('Device ID'))
+		{
+			MetaDataItem["DeviceID"]	=	$scope.SensorForm.MetaDataDeviceID;
+		}
+		
+		if($scope.SensorForm.SelectReqMetaData.includes('Device Metadata'))
+		{
+			MetaDataItem["DeviceMetadata"]	=	$scope.SensorForm.MetaDataDeviceMetadata;
+		}
+		
+		if($scope.SensorForm.SelectReqMetaData.includes('Raw Data'))
+		{
+			MetaDataItem["RawData"]		=	$scope.SensorForm.MetaDataRawData;
+		}		
+		
+		if($scope.SensorForm.SelectReqMetaData.includes('Data Processing Method'))
+		{
+			MetaDataItem["DataProcessingMethod"]	=	$scope.SensorForm.MetaDataDataProcessingMethod;
+		}
+		
+		if($scope.SensorForm.SelectReqMetaData.includes('Business Rules'))
+		{
+			MetaDataItem["BusinessRules"]		=	$scope.SensorForm.MetaDataBusinessRules;
+		}
+		
+		MetaDataItem['SensorElements']			=	$scope.SensorElementsArray;	
+		TemporaryArray.push(MetaDataItem);
+		//TemporaryArray.push($scope.SensorElementsArray);
+		$rootScope.TotalSensorElementsArray.push(TemporaryArray)
+		$scope.ToalSensorElementCount++;
+		$scope.SensorElementsArray		=	[];
+		$scope.SensorElementCount		=	0;		
+		console.log($rootScope.TotalSensorElementsArray)
+	}
+	
+	//For Every Sensor Element addition populate the corresponding Array
+	$scope.SensorElementPopulator	=	function(SensorElementID, Type){
+		
+		for(var s=0;s<$scope.SensorElementsArray.length;s++)
+		{
+			if($scope.SensorElementsArray[s].ID ==	SensorElementID)
+			{
+				if(Type == 'Type')
+				{
+					$scope.SensorElementsArray[s].SensorFields["Type"]				=	$scope.SensorForm.SensorReportType[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Device ID') && Type == 'Device ID')
+				{
+					$scope.SensorElementsArray[s].SensorFields["DeviceID"]			=	$scope.SensorForm.SensorReportDeviceID[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Device MetaData') && Type == 'Device MetaData')
+				{
+					$scope.SensorElementsArray[s].SensorFields["DeviceMetaData"]	=	$scope.SensorForm.SensorReportDeviceMetadata[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Raw Data') && Type == 'Raw Data')
+				{
+					$scope.SensorElementsArray[s].SensorFields["RawData"]			=	$scope.SensorForm.SensorReportRawData[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Data Processing Method') && Type == 'Data Processing Method')
+				{
+					$scope.SensorElementsArray[s].SensorFields["DataProcessingMethod"]	=	$scope.SensorForm.SensorReportDataProcessingMethod[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Time') && Type == 'Time')
+				{
+					$scope.SensorElementsArray[s].SensorFields["Time"]	=	$scope.SensorForm.SensorReportDataTime[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Microorganism') && Type == 'Microorganism')
+				{
+					$scope.SensorElementsArray[s].SensorFields["Microorganism"]	=	$scope.SensorForm.SensorReportMicroorganism[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Chemical Substance') && Type == 'Chemical Substance')
+				{
+					$scope.SensorElementsArray[s].SensorFields["ChemicalSubstance"]	=	$scope.SensorForm.SensorReportChemicalSubstance[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Value') && Type == 'Value')
+				{
+					$scope.SensorElementsArray[s].SensorFields["Value"]	=	$scope.SensorForm.SensorReportValue[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Component') && Type == 'Component')
+				{
+					$scope.SensorElementsArray[s].SensorFields["Component"]	=	$scope.SensorForm.SensorReportComponent[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('String Value') && Type == 'String Value')
+				{
+					$scope.SensorElementsArray[s].SensorFields["StringValue"]	=	$scope.SensorForm.SensorReportStringValue[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Boolean Value') && Type == 'Boolean Value')
+				{
+					$scope.SensorElementsArray[s].SensorFields["BooleanValue"]	=	$scope.SensorForm.SensorReportBooleanValue[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Hex Binary Value') && Type == 'Hex Binary Value')
+				{
+					$scope.SensorElementsArray[s].SensorFields["HexBinaryValue"]	=	$scope.SensorForm.SensorReportHexBinaryValue[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('URI Value') && Type == 'URI Value')
+				{
+					$scope.SensorElementsArray[s].SensorFields["URIValue"]	=	$scope.SensorForm.SensorReportURIValue[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Max Value') && Type == 'Max Value')
+				{
+					$scope.SensorElementsArray[s].SensorFields["MaxValue"]	=	$scope.SensorForm.SensorReportMaxValue[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Min Value') && Type == 'Min Value')
+				{
+					$scope.SensorElementsArray[s].SensorFields["MinValue"]	=	$scope.SensorForm.SensorReportMinValue[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Mean Value') && Type == 'Mean Value')
+				{
+					$scope.SensorElementsArray[s].SensorFields["MeanValue"]	=	$scope.SensorForm.SensorReportMeanValue[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Standard Deviation') && Type == 'Standard Deviation')
+				{
+					$scope.SensorElementsArray[s].SensorFields["StandardDeviation"]	=	$scope.SensorForm.SensorReportStandardDeviation[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Perc Rank') && Type == 'Perc Rank')
+				{
+					$scope.SensorElementsArray[s].SensorFields["PercRank"]	=	$scope.SensorForm.SensorReportPercRank[SensorElementID];
+				}
+				
+				if($scope.SensorForm.SelectReqReport.includes('Perc Value') && Type == 'Perc Value')
+				{
+					$scope.SensorElementsArray[s].SensorFields["PercValue"]	=	$scope.SensorForm.SensorReportPercValue[SensorElementID];
+				}
+				
+				if(Type == 'UOM')
+				{
+					$scope.SensorElementsArray[s].SensorFields["UOM"]			=	$scope.SensorForm.SensorElementUOM[SensorElementID];
+				}			
+				
+				console.log($scope.SensorElementsArray);
+				break;
+			}
+		}	
+	}
+	
+	//Remove the sensor element on click
+	$scope.RemoveSensorElement	=	function(Delete_ID,e){
+		e.preventDefault();
+		for(var d=0; d<$scope.SensorElementsArray.length; d++)
+		{
+			if($scope.SensorElementsArray[d].ID ==	Delete_ID)
+			{
+				$scope.SensorElementsArray.splice(d, 1);		
+				break;	
+			}
+		}
+	}
+	
+	//Remove the Element from TOTALSENSORELEMENTARRAY displayed on INDEX.html
+	$scope.DeleteTotalSensorElement	=	function(Delete_Sensor_Id){
+		$rootScope.TotalSensorElementsArray.splice(Delete_Sensor_Id, 1);
+	}
+	
+	/* SENSOR INFORMATION ENDS*/
 
 });
 
@@ -403,7 +627,5 @@ function textChange(args) {
 				}
 			}
 		}
-		
-		console.log(connectorArray)
 	}
 }

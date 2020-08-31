@@ -60,7 +60,8 @@ exports.RandomEventTimeGenerator	=	function(DateFrom,DateTo,Count,File,callback)
 		for(var r=0; r<Count; r++)
 		{
 			var RandomEventTime		=	new Date(DateFrom.getTime() + Math.random() * (DateTo.getTime() - DateFrom.getTime()));
-			RandomEventTime			= 	moment(RandomEventTime).format();	
+			RandomEventTime			=	RandomEventTime.toISOString();
+			RandomEventTime			=	RandomEventTime.substring(0,RandomEventTime.length-1);
 			EventTimeArray.push(RandomEventTime)
 		}
 		callback(EventTimeArray);	
@@ -70,27 +71,4 @@ exports.RandomEventTimeGenerator	=	function(DateFrom,DateTo,Count,File,callback)
 		callback(EventTimeArray);
 	}	
 	
-}
-
-//Randome RECORD TIME Generator Based on the From and To date time
-exports.RandomRecordTimeGenerator	=	function(DateFrom,DateTo,Count,File,callback){
-	var DateFrom			= 	new Date(DateFrom);
-	var DateTo				= 	new Date(DateTo);
-	
-	if(File == 'XML')
-	{
-		RecordTimeArray		=	[];
-		
-		for(var r=0; r<Count; r++)
-		{
-			var RandomRecordTime	=	new Date(DateFrom.getTime() + Math.random() * (DateTo.getTime() - DateFrom.getTime()));
-			RandomRecordTime		= 	moment(RandomRecordTime).format();		
-			RecordTimeArray.push(RandomRecordTime)
-		}
-		callback(RecordTimeArray);	
-	}
-	else if(File == 'JSON')
-	{
-		callback(RecordTimeArray);
-	}	
 }

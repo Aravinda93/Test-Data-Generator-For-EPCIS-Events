@@ -362,7 +362,42 @@ exports.BusinessStep = function(callback){
 									{value:'Perc Rank',					text:'Perc Rank'},
 									{value:'Perc Value',				text:'Perc Value'},
 									{value:'UOM',						text:'UOM'},
-								];	
+								];
+	
+	var TimeZones			=	[
+									{value:'00:00',						text:'Greenwich Mean Time (GMT+00:00)'},
+									{value:'00:00',						text:'Universal Coordinated Time (GMT+00:00)'},
+									{value:'+1:00',						text:'European Central Time (GMT+01:00)'},
+									{value:'+2:00',						text:'Eastern European Time (GMT+02:00)'},
+									{value:'+2:00',						text:'(Arabic) Egypt Standard Time (GMT+02:00)'},
+									{value:'+3:00',						text:'Eastern African Time (GMT+03:00)'},
+									{value:'+3:30',						text:'Middle East Time (GMT+03:30)'},
+									{value:'+4:00',						text:'Near East Time (GMT+04:00)'},
+									{value:'+5:00',						text:'Pakistan Lahore Time (GMT+5:00)'},
+									{value:'+5:30',						text:'India Standard Time (GMT+5:30)'},
+									{value:'+6:00',						text:'Bangladesh Standard Time (GMT+6:00)'},
+									{value:'+7:00',						text:'Vietnam Standard Time (GMT+7:00)'},
+									{value:'+8:00',						text:'China Taiwan Time (GMT+8:00)'},
+									{value:'+9:00',						text:'Japan Standard Time (GMT+9:00)'},
+									{value:'+9:30',						text:'Australia Central Time (GMT+9:30)'},
+									{value:'+10:00',					text:'Australia Eastern Time (GMT+10:00)'},
+									{value:'+11:00',					text:'Solomon Standard Time (GMT+11:00)'},
+									{value:'+12:00',					text:'New Zealand Standard Time (GMT+12:00)'},
+									{value:'-11:00',					text:'Midway Islands Time (GMT-11:00)'},
+									{value:'-10:00',					text:'Hawaii Standard Time (GMT-10:00)'},
+									{value:'-9:00',						text:'Alaska Standard Time (GMT-9:00)'},
+									{value:'-8:00',						text:'Pacific Standard Time (GMT-8:00)'},
+									{value:'-7:00',						text:'Phoenix Standard Time (GMT-7:00)'},
+									{value:'-7:00',						text:'Mountain Standard Time (GMT-7:00)'},
+									{value:'-6:00',						text:'Central Standard Time (GMT-6:00)'},
+									{value:'-5:00',						text:'Eastern Standard Time (GMT-5:00)'},
+									{value:'-5:00',						text:'Indiana Eastern Standard Time (GMT-5:00)'},
+									{value:'-4:00',						text:'Puerto Rico and US Virgin Islands Time (GMT-4:00)'},
+									{value:'-3:30',						text:'Canada Newfoundland Time (GMT-3:30)'},
+									{value:'-3:00',						text:'Argentina Standard Time (GMT-3:00)'},
+									{value:'-3:00',						text:'Brazil Eastern Time (GMT-3:00)'},
+									{value:'-1:00',						text:'Central African Time (GMT-1:00)'}
+								];
 							
 
 		var returnData 		= 	{
@@ -379,6 +414,7 @@ exports.BusinessStep = function(callback){
 									'SensorValueTypes'		:	SensorValueTypes,
 									'SensorMetaDatas'		:	SensorMetaDatas,
 									'SensorReportDatas'		:	SensorReportDatas,
+									'TimeZones'				:	TimeZones
 								};
 		
 	callback(returnData);

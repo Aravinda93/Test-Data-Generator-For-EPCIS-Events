@@ -87,6 +87,13 @@
 									<span> TO </span>&ensp;
 									<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeTo" title="Event Time Range TO">
 								</td>
+								
+								<td ng-show="formdata.ErrorDeclarationTimeSelector == 'SpecificTime' || formdata.ErrorDeclarationTimeSelector == 'TimeRange' ">
+									<select ng-model="formdata.ErrorTimeZone" class="form-control" ng-required="formdata.ErrorDeclarationTimeSelector == 'SpecificTime' || formdata.ErrorDeclarationTimeSelector == 'TimeRange' ">
+										<option class="dropdown-item" value="" selected> Choose Timezone </option>
+										<option class="dropdown-item" ng-repeat="timezone in TimeZones | orderBy:'text'" value="{{ timezone.value }}"> {{ timezone.text }} </option>
+									</select>
+								</td>
 							</tr>
 
 							<tr ng-show="formdata.eventtype2 == 'errordeclaration' ">
@@ -164,6 +171,13 @@
 									<input type="datetime-local" class="form-control" ng-model="formdata.EventTimeFrom" title="Event Time Range FROM">&ensp;&ensp;
 									<span> TO </span>&ensp;
 									<input type="datetime-local" class="form-control" ng-model="formdata.EventTimeTo" title="Event Time Range TO">
+								</td>
+								
+								<td ng-show="formdata.EventTimeSelector == 'SpecificTime' || formdata.EventTimeSelector == 'TimeRange' ">
+									<select ng-model="formdata.EventTimeZone" class="form-control" ng-required="formdata.EventTimeSelector == 'SpecificTime' || formdata.EventTimeSelector == 'TimeRange'">
+										<option class="dropdown-item" value="" selected> Choose Timezone </option>
+										<option class="dropdown-item" ng-repeat="timezone in TimeZones | orderBy:'text'" value="{{ timezone.value }}"> {{ timezone.text }} </option>
+									</select>
 								</td>
 							</tr>
 							<tr>
