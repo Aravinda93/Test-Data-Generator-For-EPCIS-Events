@@ -2,8 +2,21 @@
 exports.QuantitiesURI	=	function(Query,callback){
 	var input		=	Query.input;
 	var EpcLists	=	[];
-	var syntaxType	=	Query.formdata.syntaxType;
-	var Domain		=	'https://id.gs1.org';
+	var syntaxType	=	Query.formdata.ElementssyntaxType;
+	var Domain		=	'';
+	
+	//Check if user has provided their own WEB URI 
+	if(syntaxType == 'webURI')
+	{
+		if(Query.formdata.UserDefinedURI != "" && Query.formdata.UserDefinedURI != null && typeof Query.formdata.UserDefinedURI != undefined)
+		{
+			Domain 	=	Query.formdata.UserDefinedURI;
+		}
+		else
+		{
+			Domain	=	'https://id.gs1.org';
+		}
+	}
 	
 	if(input.ObjectEventquantities == 'LGTIN (Al 01 + Al 10)')
 	{

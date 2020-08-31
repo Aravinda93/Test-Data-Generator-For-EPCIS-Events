@@ -52,10 +52,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			//If Specific Event time has been selected
 			if(input.EventTimeSelector == 'SpecificTime')
 			{
-				input.eventtimeSpecific				= 	new Date(input.eventtimeSpecific);
-				input.eventtimeSpecific				= 	moment(input.eventtimeSpecific).format();
-				ObjectEvent['eventTime']			=	input.eventtimeSpecific;
-				ObjectEvent['eventTimeZoneOffset']	=	offset;
+				ObjectEvent['eventTime']			=	input.eventtimeSpecific+input.EventTimeZone;
+				ObjectEvent['eventTimeZoneOffset']	=	input.EventTimeZone;
 			}
 			else if(input.EventTimeSelector == 'TimeRange')
 			{
@@ -71,40 +69,36 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					});
 				}
 				
-				ObjectEvent['eventTime']			=	EventTimeArray[count-1];
-				ObjectEvent['eventTimeZoneOffset']	=	offset;
+				ObjectEvent['eventTime']			=	EventTimeArray[count-1]+input.EventTimeZone;
+				ObjectEvent['eventTimeZoneOffset']	=	input.EventTimeZone;
 			}
 
 		}
 		
 		//Check what type of RECORD TIME is required and fill the values accordingly
-		if(input.RecordTimeSelector != "" && input.RecordTimeSelector != null && typeof input.RecordTimeSelector != undefined)
+		if(input.RecordTimeOption != "" && input.RecordTimeOption != null && typeof input.RecordTimeOption != undefined)
 		{
-			//If specific Record Time has been selected
-			if(input.RecordTimeSelector == 'SpecificTime')
+			//Check if the Record Time Option is YES
+			if(input.RecordTimeOption == 'yes')
 			{
-				input.recordtimeSpecific	= 	new Date(input.recordtimeSpecific);
-				input.recordtimeSpecific	= 	moment(input.recordtimeSpecific).format();
-				ObjectEvent['recordtime']	=	input.recordtimeSpecific;
-			}
-			else if(input.RecordTimeSelector == 'TimeRange')
-			{				
-				//If Range of time Record Time has been selected
-				var From			=	input.RecordTimeFrom;
-				var To				=	input.RecordTimeTo;
-				var EventCount		=	input.eventcount;
-				
-				if(count == 1)
-				{	
-					RecordTimeArray	=	[];					
-					xml_json_functions.RandomRecordTimeGenerator(From,To,EventCount,File,function(data){
-						RecordTimeArray = data;
-					});	
+				//Check if Record Time Option is Same as Event TIME
+				if(input.RecordTimeOptionType	== 'RecordTimeSameAsEventTime')
+				{
+					if(input.EventTimeSelector == 'TimeRange')
+					{
+						ObjectEvent['recordTime'] 	=		EventTimeArray[count-1]+input.EventTimeZone;
+					}
+					else if(input.EventTimeSelector == 'SpecificTime')
+					{
+						ObjectEvent['recordTime'] 	=		input.eventtimeSpecific+input.EventTimeZone;
+					}					
 				}
-				
-				ObjectEvent['recordtime']	=	RecordTimeArray[count-1];				
+				else if(input.RecordTimeOptionType	== 'RecordTimeCurrentTime')
+				{
+					//If the current time is choosen
+					ObjectEvent['recordTime'] 	=		currentTime;
+				}
 			}
-
 		}
 
 		//If error declaration has been set then add the below tags
@@ -130,7 +124,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					{
 						//Add Error Declaration Time
 						input.ErrorDeclarationTime	=	moment(input.ErrorDeclarationTime).format();
-						ObjectEvent.baseExtension.errorDeclaration['declarationTime']		=	input.ErrorDeclarationTime;
+						ObjectEvent.baseExtension.errorDeclaration['declarationTime']		=	input.ErrorDeclarationTime+input.ErrorTimeZone;
 					}
 					else if(input.ErrorDeclarationTimeSelector == 'TimeRange')
 					{
@@ -147,7 +141,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 							});	
 						}
 						
-						ObjectEvent.baseExtension.errorDeclaration['declarationTime']		=	ErrorTimeArray[count-1];	
+						ObjectEvent.baseExtension.errorDeclaration['declarationTime']		=	ErrorTimeArray[count-1]+input.ErrorTimeZone;	
 					}
 				}
 

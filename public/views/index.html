@@ -87,21 +87,37 @@
 									</td>
 								</tr>
 								<tr>
-									<td>Syntax Type</td>
+									<td>Elements Syntax Type</td>
 									<td>
 										<div class="custom-control custom-radio custom-control-inline">
-											<input type="radio" ng-model="formdata.syntaxType" class="custom-control-input" value="urn" id="syntaxType1" name="syntaxType">
+											<input type="radio" ng-model="formdata.ElementssyntaxType" class="custom-control-input" value="urn" id="syntaxType1" name="syntaxType">
 											<label class="custom-control-label" for="syntaxType1">URN</label>
 										</div>
 										<div class="custom-control custom-radio custom-control-inline">
-											<input type="radio" ng-model="formdata.syntaxType" class="custom-control-input" value="webURI" id="syntaxType2" name="syntaxType">
+											<input type="radio" ng-model="formdata.ElementssyntaxType" class="custom-control-input" value="webURI" id="syntaxType2" name="syntaxType">
 											<label class="custom-control-label" for="syntaxType2">Web URI</label>
 										</div>
 									</td>
+									
 									<!-- Provide an option for user defined Web URI-->
-									<td ng-show="formdata.syntaxType == 'webURI' ">
+									<td ng-show="formdata.ElementssyntaxType == 'webURI' ">
 										<input ng-model="formdata.UserDefinedURI" placeholder="Web URI (Optional)" type="text" class="form-control"></input>
 									</td>
+								</tr>
+								
+								<tr>
+									<td> Vocabular Syntay Type  </td>
+									
+									<td>
+										<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" ng-model="formdata.VocabSyntaxType" class="custom-control-input" value="urn" id="VocabsyntaxType1" name="VocabsyntaxType">
+											<label class="custom-control-label" for="VocabsyntaxType1">URN</label>
+										</div>
+										<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" ng-model="formdata.VocabSyntaxType" class="custom-control-input" value="webURI" id="VocabsyntaxType2" name="VocabsyntaxType">
+											<label class="custom-control-label" for="VocabsyntaxType2">Web URI</label>
+										</div>
+									</td>									
 								</tr>
 								<tr>
 									<td rowspan="2" class="column2"> Event Type </td>

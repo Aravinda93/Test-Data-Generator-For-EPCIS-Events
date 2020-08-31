@@ -7,7 +7,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 	//CHANGE THIS AFTER ALL
 	//var input		=	Query.input;
 	var input		=	Query.input;
-	var syntaxType	=	Query.formdata.syntaxType;
+	var syntaxType	=	Query.formdata.ElementssyntaxType;
 		EpcLists 	= 	[];
 	var Domain		=	"";
 	

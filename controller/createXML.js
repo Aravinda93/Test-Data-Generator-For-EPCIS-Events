@@ -18,22 +18,8 @@ exports.createXMLData	=	function(Query,Root,callback){
 	var RecordTimeArray	=	[];
 	var EventTimeArray	=	[];
 	var ErrorTimeArray	=	[];
-	var Domain			=	"";
-	var SyntaxType		=	input.syntaxType;
-	var xml				=	"";		
-	
-	//Check if user has provided their own WEB URI 
-	if(SyntaxType == 'webURI')
-	{
-		if(input.UserDefinedURI != "" && input.UserDefinedURI != null && typeof input.UserDefinedURI != undefined)
-		{
-			Domain 	=	input.UserDefinedURI;
-		}
-		else
-		{
-			Domain	=	'https://gs1.org/';
-		}
-	}	
+	var Domain			=	'https://gs1.org/';
+	var SyntaxType		=	input.VocabSyntaxType;
 	
 	//Assign the root node based on calling function							
 	if(Query.XMLElement == 'Single')

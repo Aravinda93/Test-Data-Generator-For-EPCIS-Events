@@ -8,10 +8,10 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	$scope.ShowFormDataModal	=	function(event){
 		
 		//Common
-		$scope.formdata								=	{eventtype1:'', syntaxType:'urn'};
+		$scope.formdata								=	{eventtype1:'', ElementssyntaxType:'urn', VocabSyntaxType:'urn'};
 		$scope.AddExtensionForm						=	{};
 		$scope.EditExtensionForm					=	{};
-		$scope.EventTypeRowSpan						= 	5;
+		$scope.EventTypeRowSpan						= 	6;
 		$scope.rowspanWHAT							=	1;
 		$scope.rowspanWHY							=	4;
 		$scope.OEQuantities							=	1;
@@ -82,54 +82,11 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	$scope.EventTypeChange = function() {
 		if($scope.formdata.eventtype1 == 'ObjectEvent' || $scope.formdata.eventtype1 == 'AggregationEvent' || $scope.formdata.eventtype1 == 'TransactionEvent')
 		{
-			$scope.EventTypeRowSpan 	= 	6;
+			$scope.EventTypeRowSpan 		= 	7;
 		}
 		else
-		{
-			$scope.EventTypeRowSpan 	= 	5;
-		}
-		
-		//Add Number of rows to tabled based on Event Selection
-		if($scope.formdata.eventtype1 == 'ObjectEvent')
-		{
-			$scope.rowspanWHAT 						= 	2;
-			$scope.rowspanWHY						=	7;
-			$rootScope.ObjectEventEpcsURI			=	[];
-			$rootScope.AggregationEventParentURI	=	[];			
-			$rootScope.ObjectEventEPCSbutton		= 	true;
-			$rootScope.OEAddQuantitiesButton		=	true;
-		}
-		else if($scope.formdata.eventtype1 == 'AggregationEvent')
-		{
-			$scope.rowspanWHAT 	= 	3;
-			$scope.rowspanWHY	=	6;
-		}
-		else if($scope.formdata.eventtype1 == 'TransactionEvent')
-		{
-			$scope.rowspanWHAT 	= 	3;
-			$scope.rowspanWHY	=	6;
-		}
-		else if($scope.formdata.eventtype1 == 'TransformationEvent')
-		{
-			$scope.rowspanWHAT 	= 	5;
-			$scope.rowspanWHY	=	5;	
-		}
-		else if($scope.formdata.eventtype1 == 'AssociationEvent')
-		{
-			$scope.rowspanWHAT 	= 	3;
-			$scope.rowspanWHY	=	6;
-		}
-	}
-	
-	//Based on Event type selection create fields for the WHAT dimention
-	$scope.EventTypeChange = function() {
-		if($scope.formdata.eventtype1 == 'ObjectEvent' || $scope.formdata.eventtype1 == 'AggregationEvent' || $scope.formdata.eventtype1 == 'TransactionEvent')
 		{
 			$scope.EventTypeRowSpan 		= 	6;
-		}
-		else
-		{
-			$scope.EventTypeRowSpan 		= 	5;
 		}
 		
 		//Add Number of rows to tabled based on Event Selection
@@ -145,8 +102,8 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		}
 		else if($scope.formdata.eventtype1 == 'AggregationEvent')
 		{
-			$scope.rowspanWHAT 	= 	3;
-			$scope.rowspanWHY	=	6;
+			$scope.rowspanWHAT 					= 	3;
+			$scope.rowspanWHY					=	6;
 			
 			$scope.ObjectEventEpcsURI			=	[];
 			$scope.AggregationEventParentURI	=	[];	
@@ -175,8 +132,8 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		}
 		else if($scope.formdata.eventtype1 == 'AssociationEvent')
 		{
-			$scope.rowspanWHAT 			= 	3;
-			$scope.rowspanWHY			=	6;
+			$scope.rowspanWHAT 								= 	3;
+			$scope.rowspanWHY								=	6;
 			
 			$scope.AssociationEventParentButton				=	true;
 			$scope.AssociationEventChildEPCSButton			=	true;

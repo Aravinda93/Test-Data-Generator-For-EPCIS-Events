@@ -2,11 +2,11 @@ var app = angular.module('myApp', ['CopyToClipboard'], function() {});
 
 app.controller('AppController', function($scope,$http,$location,$anchorScroll,$copyToClipboard,$rootScope){
 	//Common
-	$scope.formdata								=	{eventtype1:'', syntaxType:'urn'};
+	$scope.formdata								=	{eventtype1:'', ElementssyntaxType:'urn', VocabSyntaxType:'urn'};
 	$scope.SensorForm							=	{Temperature:''};
 	$scope.AddExtensionForm						=	{};
 	$scope.EditExtensionForm					=	{};
-	$scope.EventTypeRowSpan						= 	5;
+	$scope.EventTypeRowSpan						= 	6;
 	$scope.rowspanWHAT							=	1;
 	$scope.rowspanWHY							=	5;
 	$scope.OEQuantities							=	1;
@@ -56,11 +56,11 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	$scope.EventTypeChange = function() {
 		if($scope.formdata.eventtype1 == 'ObjectEvent' || $scope.formdata.eventtype1 == 'AggregationEvent' || $scope.formdata.eventtype1 == 'TransactionEvent')
 		{
-			$scope.EventTypeRowSpan 		= 	6;
+			$scope.EventTypeRowSpan 		= 	7;
 		}
 		else
 		{
-			$scope.EventTypeRowSpan 		= 	5;
+			$scope.EventTypeRowSpan 		= 	6;
 		}
 		
 		//Add Number of rows to tabled based on Event Selection
@@ -1005,8 +1005,6 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		//params: 	{input:$scope.formdata,Extension:$scope.ExtensionList}	
 		//headers: 	{'Content-Type': 'application/x-www-form-urlencoded'},
 		//Based on the Selected Event Send the respective values
-		console.log("SENSOR ELEMENTS: ");
-		console.log($rootScope.TotalSensorElementsArray);
 		
 		if($scope.formdata.eventtype1 == 'ObjectEvent')
 		{
