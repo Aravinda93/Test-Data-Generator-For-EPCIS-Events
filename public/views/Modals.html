@@ -417,7 +417,7 @@
 						
 						<span ng-show="OEQuantityITIPDisplay">
 							<span>(8006)</span>&nbsp;
-							<input type="text" ng-required="OEQuantityITIPDisplay" id="OEQITIP" ng-model="CommonFormQuantity.OEQITIP" maxlength="18" pattern="([0-9]{18})$" oninvalid="this.setCustomValidity('ITIP must be 18 digits')" placeholder="Enter ITIP digits" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="OEQuantityITIPDisplay" id="OEQITIP" ng-model="CommonFormQuantity.OEQITIP" maxlength="18" pattern="([0-9]{18})$" oninvalid="this.setCustomValidity('ITIP must be 18 digits')" placeholder="Enter 18-digit ITIP" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" style="width: 200px;">&nbsp;
 						</span>
 						
 						<span ng-show="OEQuantityUPUIDisplay">
@@ -665,16 +665,16 @@
 						<!-- Aggregation Event Parent ID is GDTI (Al 253) -->
 						<span ng-show="AEPGDTIDisp">
 							<span>(253)</span>&nbsp;
-							<input type="text" ng-required="AEPGDTIDisp" ng-model="CommonForm.AEPGDTI" maxlength="14" pattern="^\d{14}[a-zA-Z0-9]{0,17}$" oninput="setCustomValidity('');"  oninvalid="this.setCustomValidity('GDTI must be 14 digits')" placeholder="Enter 14 digits GDTI" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPGDTIDisp" ng-model="CommonForm.AEPGDTI" maxlength="13" pattern="^\d{13}$" oninput="setCustomValidity('');"  oninvalid="this.setCustomValidity('GDTI must be 13 digits')" placeholder="Enter 13 digits GDTI" class="form-control" style="width: 200px;">&nbsp;
 							<span ng-show="SingleValue">
-								<input type="text" ng-model="CommonForm.AEPGDTISerial" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GSTI Serial required')" title="GDTI Serial" placeholder="GDTI Serial" class="form-control" style="width: 200px;">&nbsp;
+								<input type="text" ng-model="CommonForm.AEPGDTISerial" ng-required="AEPGDTIDisp && SingleValue" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GSTI Serial required')" title="GDTI Serial" placeholder="GDTI Serial" class="form-control" style="width: 200px;">&nbsp;
 							</span>
 						</span>
 						
 						<!-- Aggregation Event Parent ID is GCN (Al 255) -->
 						<span ng-show="AEPGSNDisp">
 							<span>(255)</span>&nbsp;
-							<input type="text" ng-required="AEPGSNDisp" ng-model="CommonForm.AEPGSN" maxlength="14" pattern="^\d{14}[a-zA-Z0-9]{0,17}$" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('14 Digits GCN')" title="GCN must be 14 digits"  placeholder="Enter 14 digits GCN code" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPGSNDisp" ng-model="CommonForm.AEPGSN" maxlength="13" pattern="([0-9]{13})$" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('13 Digits GCN')" title="GCN must be 13 digits"  placeholder="Enter 13 digits GCN" class="form-control" style="width: 200px;">&nbsp;
 							
 							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">							
 								<span ng-show="CommonForm.SSCCType == 'userCustomized'">
@@ -684,7 +684,7 @@
 							</span>
 							
 							<span ng-show="SingleValue">
-								<input type="text" ng-model="CommonForm.AEPGCNSerial" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GCN Serial required')" title="GCN Serial" placeholder="GCN Serial" class="form-control" style="width: 200px;">&nbsp;
+								<input type="text" ng-model="CommonForm.AEPGCNSerial" ng-required="AEPGSNDisp && SingleValue" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GCN Serial required')" title="GCN Serial" placeholder="GCN Serial" class="form-control" style="width: 200px;">&nbsp;
 							</span>
 						</span>
 						

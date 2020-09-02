@@ -657,8 +657,15 @@ exports.QuantitiesURI	=	function(Query,callback){
 	else if(input.ObjectEventquantities == 'Enter a URI Manually')
 	{
 		//If the selected OBJECT EVENT Quantity is Enter a URI Manually
-		var OEQuantityInput			=	input.OEQManualURI;	
-		callback(OEQuantityInput)		
+		console.log(input.OEQManualURI)
+		var obj 				= 	new Object();
+		obj.URI					=	input.OEQManualURI;
+		obj.QuantityType		=	input.ObjectEventQuantityType;
+		obj.Quantity			=	input.ObjectEventQuantityQuantity;
+		obj.QuantityUOM			=	input.ObjectEventQuantityQuantityUOM;
+		EpcLists.push(obj);
+		console.log(EpcLists)
+		callback(EpcLists)		
 	}
 }
 

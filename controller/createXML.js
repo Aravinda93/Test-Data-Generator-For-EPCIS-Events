@@ -29,16 +29,19 @@ exports.createXMLData	=	function(Query,Root,callback){
 								root.att('xmlns:gs1', "https://gs1.de")
 								root.att('schemaVersion', "2.0")
 								root.att('creationDate', currentTime)
-								root.ele('EPCISBody')
-								root.ele('EventList')
 	}
 	else
 	{
 		var root		=	Root;
+	
 	}
-
+	
+	root			=	root.ele('EPCISBody')
+	root			=	root.ele('EventList')
+	
 	if(input.eventtype1 == "AssociationEvent")
 	{
+		
 		var AEMainExtension = 	root.ele('extension')
 		var AESubExtension	=	AEMainExtension.ele('extension')
 	}
@@ -441,10 +444,14 @@ exports.createXMLData	=	function(Query,Root,callback){
 			}
 		}
 		
+		//Define the outer and inner extension 
+		var OuterExtension	=	ObjectEvent.ele('extension')
+		var extension		= 	OuterExtension.ele('extension')	
+		
 		//Check for the PERSISTENT DISPOSITION
 		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
 		{
-			var persistentDisposition	=	ObjectEvent.ele('persistentDisposition')
+			var persistentDisposition	=	extension.ele('persistentDisposition')
 			
 			if(input.PersistentDisposition == 'DispositionEnter')
 			{
@@ -491,17 +498,13 @@ exports.createXMLData	=	function(Query,Root,callback){
 					urnWebURIchecker(businesslocation,'id','sgln',data)
 				});					
 			}
-		}
-		
-		var OuterExtension		=	ObjectEvent.ele('extension')
-		var extension			= 	OuterExtension.ele('extension')		
+		}	
 		
 		//Check for the Quantity element and add it to the XML		
 		if(input.eventtype1 == "ObjectEvent")
-		{			
+		{	
 			if(Query.Quantities.length > 0)
-			{	
-				
+			{					
 				var quantityList	= 	extension.ele('quantityList')				
 				var QuantitiesURIs	=	Query.Quantities;			
 				
@@ -529,7 +532,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 		else if(input.eventtype1 == "AggregationEvent")
 		{	
 			if(Query.Quantities.length > 0)
-			{
+			{				
 				var quantityList	= 	extension.ele('quantityList')				
 				
 				for(var o=0; o<Query.Quantities.length; o++)
@@ -585,7 +588,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 		
 		//Populate The Business Transacation List
 		if(Query.BTT.length > 0)
-		{
+		{	
 			var bizTransactionList	=	extension.ele('bizTransactionList')
 			
 			for(var b=0; b<Query.BTT.length; b++)

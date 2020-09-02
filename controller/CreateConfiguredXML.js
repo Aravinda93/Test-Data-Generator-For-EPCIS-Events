@@ -34,8 +34,6 @@ exports.createXML	=	function(AllData,callback){
 								root.att('xmlns:gs1', "https://gs1.de")
 								root.att('schemaVersion', "2.0")
 								root.att('creationDate', currentTime)
-								root.ele('EPCISBody')
-								root.ele('EventList')	
 	
 	//Main loop based on the number of events/nodes in drag and drop
 	for(var parent=0; parent<AllEventsArray.length; parent++)

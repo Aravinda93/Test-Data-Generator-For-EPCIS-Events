@@ -19,7 +19,7 @@
 								</td>
 							</tr>
 							<tr>
-								<td>Elements Syntax Type</td>
+								<td>Identifier Syntax</td>
 								<td>
 									<div class="custom-control custom-radio custom-control-inline">
 										<input type="radio" ng-model="formdata.ElementssyntaxType" class="custom-control-input" value="urn" id="syntaxType1" name="syntaxType">
@@ -39,7 +39,7 @@
 							
 								
 							<tr>
-								<td> Vocabular Syntay Type  </td>
+								<td> Standard Vocabulary Syntax  </td>
 								<td>
 									<div class="custom-control custom-radio custom-control-inline">
 										<input type="radio" ng-model="formdata.VocabSyntaxType" class="custom-control-input" value="urn" id="VocabsyntaxType1" name="VocabsyntaxType">
@@ -93,7 +93,7 @@
 								<td rowspan="4" style="background-color: #cc0000;text-align: center;"> Error </td>
 								<td style="background-color: #f2c2c2;"> Declaration Time </td>
 								<td>
-									<select ng-model="formdata.ErrorDeclarationTimeSelector" class="form-control">
+									<select ng-model="formdata.ErrorDeclarationTimeSelector" class="form-control" ng-required="formdata.eventtype2 == 'errordeclaration' " oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Error Declaration Time is required for Error Declaration event')">
 										<option class="dropdown-item" value="" selected> Choose </option>
 										<option class="dropdown-item" value="SpecificTime"> Specific Time </option>
 										<option class="dropdown-item" value="TimeRange"> Time Range </option>
@@ -101,14 +101,14 @@
 								</td>
 								
 								<td ng-show='formdata.ErrorDeclarationTimeSelector == "SpecificTime" '>
-									<input type="datetime-local" ng-model="formdata.ErrorDeclarationTime" placeholder="Declaration Time" class="form-control">
+									<input type="datetime-local" ng-model="formdata.ErrorDeclarationTime" ng-required='formdata.ErrorDeclarationTimeSelector == "SpecificTime" ' placeholder="Declaration Time" class="form-control" oninvalid="this.setCustomValidity('Error Declaration Time is required for Error Declaration event')" oninput="setCustomValidity('');">
 								</td>
 								
 								<td ng-show="formdata.ErrorDeclarationTimeSelector == 'TimeRange' " class="form-inline">
 									<span> FROM </span>&ensp;
-									<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeFrom" title="Event Time Range FROM">&ensp;&ensp;
+									<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeFrom" title="Event Time Range FROM" ng-required="formdata.ErrorDeclarationTimeSelector == 'TimeRange' " oninvalid="this.setCustomValidity('Error Declaration Time is required for Error Declaration event')" oninput="setCustomValidity('');">&ensp;&ensp;
 									<span> TO </span>&ensp;
-									<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeTo" title="Event Time Range TO">
+									<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeTo" title="Event Time Range TO" ng-required="formdata.ErrorDeclarationTimeSelector == 'TimeRange' " oninvalid="this.setCustomValidity('Error Declaration Time is required for Error Declaration event')" oninput="setCustomValidity('');">
 								</td>
 								
 								<td ng-show="formdata.ErrorDeclarationTimeSelector == 'SpecificTime' || formdata.ErrorDeclarationTimeSelector == 'TimeRange' ">

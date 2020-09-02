@@ -87,7 +87,7 @@
 									</td>
 								</tr>
 								<tr>
-									<td>Elements Syntax Type</td>
+									<td>Identifier Type</td>
 									<td>
 										<div class="custom-control custom-radio custom-control-inline">
 											<input type="radio" ng-model="formdata.ElementssyntaxType" class="custom-control-input" value="urn" id="syntaxType1" name="syntaxType">
@@ -106,7 +106,7 @@
 								</tr>
 								
 								<tr>
-									<td> Vocabular Syntay Type  </td>
+									<td> Standard Vocabulary Syntax  </td>
 									
 									<td>
 										<div class="custom-control custom-radio custom-control-inline">
@@ -159,7 +159,7 @@
 									<td rowspan="4" style="background-color: #cc0000;text-align: center;"> Error </td>
 									<td style="background-color: #f2c2c2;"> Declaration Time </td>
 									<td>
-										<select ng-model="formdata.ErrorDeclarationTimeSelector" class="form-control">
+										<select ng-model="formdata.ErrorDeclarationTimeSelector" class="form-control" ng-required="formdata.eventtype2 == 'errordeclaration' " oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Error Declaration Time is required for Error Declaration event')">
 											<option class="dropdown-item" value="" selected> Choose </option>
 											<option class="dropdown-item" value="SpecificTime"> Specific Time </option>
 											<option class="dropdown-item" value="TimeRange"> Time Range </option>
@@ -167,18 +167,18 @@
 									</td>
 									
 									<td ng-show='formdata.ErrorDeclarationTimeSelector == "SpecificTime" '>
-										<input type="datetime-local" ng-model="formdata.ErrorDeclarationTime" placeholder="Declaration Time" class="form-control">
+										<input type="datetime-local" ng-model="formdata.ErrorDeclarationTime" ng-required='formdata.ErrorDeclarationTimeSelector == "SpecificTime" ' placeholder="Declaration Time" class="form-control" oninvalid="this.setCustomValidity('Error Declaration Time is required for Error Declaration event')" oninput="setCustomValidity('');">
 									</td>
 									
 									<td ng-show="formdata.ErrorDeclarationTimeSelector == 'TimeRange' " class="form-inline">
 										<span> FROM </span>&ensp;
-										<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeFrom" title="Event Time Range FROM">&ensp;&ensp;
+										<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeFrom" ng-required="formdata.ErrorDeclarationTimeSelector == 'TimeRange' " title="Event Time Range FROM" oninvalid="this.setCustomValidity('Error Declaration Time is required for Error Declaration event')" oninput="setCustomValidity('');">&ensp;&ensp;
 										<span> TO </span>&ensp;
-										<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeTo" title="Event Time Range TO">
+										<input type="datetime-local" class="form-control" ng-model="formdata.ErrorDeclarationTimeTo" ng-required="formdata.ErrorDeclarationTimeSelector == 'TimeRange' " title="Event Time Range TO" oninvalid="this.setCustomValidity('Error Declaration Time is required for Error Declaration event')" oninput="setCustomValidity('');">
 									</td>
 									
 									<td ng-show="formdata.ErrorDeclarationTimeSelector == 'SpecificTime' || formdata.ErrorDeclarationTimeSelector == 'TimeRange' ">
-										<select ng-model="formdata.ErrorTimeZone" class="form-control" ng-required="formdata.ErrorDeclarationTimeSelector == 'SpecificTime' || formdata.ErrorDeclarationTimeSelector == 'TimeRange' ">
+										<select ng-model="formdata.ErrorTimeZone" class="form-control" ng-required="formdata.ErrorDeclarationTimeSelector == 'SpecificTime' || formdata.ErrorDeclarationTimeSelector == 'TimeRange' " oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Error Timezone is required for Error Declaration event')">
 											<option class="dropdown-item" value="" selected> Choose Timezone </option>
 											<option class="dropdown-item" ng-repeat="timezone in TimeZones | orderBy:'text'" value="{{ timezone.value }}"> {{ timezone.text }} </option>
 										</select>
@@ -374,9 +374,9 @@
 									<!-- When AGGREGATION EVENT has been selected -->
 									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'AggregationEvent' "> Child EPCs </td>
 									<td ng-show="formdata.eventtype1 == 'AggregationEvent' ">
-										<button ng-show="AEChildEPCButton" ng-click="AggregationEventChildEPCs()" type="button" class="btn-btn-info" >Add Child EPCS</button>
+										<button ng-show="AEChildEPCButton" ng-click="AggregationEventChildEPCs()" type="button" class="btn-btn-info" >Add Child EPCs</button>
 										<span ng-hide="AEChildEPCButton">
-											<button title="Delete Child EPCS" type="button" ng-click="AEChildEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
+											<button title="Delete Child EPCs" type="button" ng-click="AEChildEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
 											Child EPCs has been added
 										</span>
 									</td>
@@ -384,9 +384,9 @@
 									<!-- When TRANSACTION EVENT has been Selected show EPCS -->
 									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransactionEvent' "> EPCs </td>
 									<td ng-show="formdata.eventtype1 == 'TransactionEvent' ">
-										<button ng-show="TransactionEventEPCSbutton" ng-click="TransactionEventEPCS()" type="button" class="btn-btn-info" >Add Child EPCS</button>
+										<button ng-show="TransactionEventEPCSbutton" ng-click="TransactionEventEPCS()" type="button" class="btn-btn-info" >Add Child EPCs</button>
 										<span ng-hide="TransactionEventEPCSbutton">
-											<button title="Delete Child EPCS" type="button" ng-click="TransactionEventChildEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
+											<button title="Delete Child EPCs" type="button" ng-click="TransactionEventChildEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
 											<span>Child EPCs has been added</span>
 										</span>
 									</td>
@@ -406,9 +406,9 @@
 									<!-- When ASSOCIATION EVENT has been selected -->
 									<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'AssociationEvent' "> Child EPCs </td>
 									<td ng-show="formdata.eventtype1 == 'AssociationEvent' ">
-										<button ng-show="AssociationEventChildEPCSButton" ng-click="AssociationEventChildEPCS()" type="button" class="btn-btn-info" >Add Child EPCS</button>
+										<button ng-show="AssociationEventChildEPCSButton" ng-click="AssociationEventChildEPCS()" type="button" class="btn-btn-info" >Add Child EPCs</button>
 										<span ng-hide="AssociationEventChildEPCSButton">
-											<button title="Delete Child EPCS" type="button" ng-click="AssociationEventChildEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
+											<button title="Delete Child EPCs" type="button" ng-click="AssociationEventChildEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
 											Child EPCs has been added
 										</span>
 									</td>
@@ -512,7 +512,7 @@
 
 									<td ng-show="formdata.readpointselector == 'manually' " class="form-inline form-control">
 										<span> URI </span>&ensp;
-										<input type="text" class="form-control" ng-model="formdata.readpoint" id="readpoint" placeholder="Ex: urn:epc:id:1234.121"></input>
+										<input type="text" class="form-control" ng-model="formdata.readpoint" id="readpoint" placeholder="Ex:urn:example:loc:123"></input>
 									</td>
 
 									<td ng-show="formdata.readpointselector == 'sgln'" class="form-inline form-control">
