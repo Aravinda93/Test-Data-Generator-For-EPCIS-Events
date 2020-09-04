@@ -587,11 +587,11 @@ exports.QuantitiesURI	=	function(Query,callback){
 		{
 			if(syntaxType 	== 'urn')
 			{
-				var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInputURN+'.'+input.singleObjectId;
+				var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInputURN+'.*';
 			}
 			else if(syntaxType == 'webURI')
 			{
-				var QuantityId		=	Domain+'/upui/'+OEQuantityInput+input.singleObjectId;
+				var QuantityId		=	Domain+'/upui/'+OEQuantityInput+'*';
 			}
 			
 			var obj 			= 	new Object();
@@ -608,11 +608,11 @@ exports.QuantitiesURI	=	function(Query,callback){
 			{
 				if(syntaxType 	== 'urn')
 				{
-					var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInputURN+'.'+id;
+					var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInputURN+'.*';
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var QuantityId		=	Domain+'/upui/'+OEQuantityInput+id;
+					var QuantityId		=	Domain+'/upui/'+OEQuantityInput+'*';
 				}				
 				var obj 				= 	new Object();
 					obj.URI				=	QuantityId;
@@ -637,11 +637,11 @@ exports.QuantitiesURI	=	function(Query,callback){
 			{
 				if(syntaxType 	== 'urn')
 				{
-					var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInputURN+"."+data[arrCount];
+					var QuantityId		=	'urn:epc:idpat:upui:'+OEQuantityInputURN+'.*';
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var QuantityId		=	Domain+'/upui/'+OEQuantityInput+data[arrCount];
+					var QuantityId		=	Domain+'/upui/'+OEQuantityInput+'*';
 				}				
 				
 				var obj 				= 	new Object();

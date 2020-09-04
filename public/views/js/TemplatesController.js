@@ -38,7 +38,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 		$scope.diagram 					=  	angular.element("#diagram").ejDiagram("instance");
 		var ports 						= 	[{name:"port1",offset:{x:0,y: 0.5},shape: "circle"},{name:"port2",offset:{x: 1,y: 0.5},shape: "circle"},{name:"port3",offset:{x:0.5,y:0},shape: "circle"},{name:"port4",offset:{x:0.5,y:1},shape: "circle"}];
 		var name						=	"Event"+$scope.nodeCounter;
-		var label						=	[{text:name ,offset:{x: 0.5,y: 0.1 }}];
+		var label						=	[{text:name ,offset:{x: 0.5,y: 0.06 }}];
 		$rootScope.IDValue				=	'Event'+$scope.nodeCounter;
 		$scope.diagram.model.drawType 	= 	{ 
 												type		: 	"html", 

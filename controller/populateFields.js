@@ -121,7 +121,7 @@ exports.BusinessStep = function(callback){
 									{value:'GINC (Al 401)',				text:'GINC (Al 401)'},
 									{value:'GSIN (Al 402)',				text:'GSIN (Al 402)'},
 									{value:'ITIP (Al 8006 + Al 21)',	text:'ITIP (Al 8006 + Al 21)'},
-									{value:'UPI_UI (Al 01 + Al 235)',	text:'UPIUI (Al 01 + Al 235)'},
+									{value:'UPI_UI (Al 01 + Al 235)',	text:'UPUI (Al 01 + Al 235)'},
 									{value:'Other EPC Identifier',		text:'Other EPC Identifier',	class:'bold',	disabled:true},
 									{value:'GID',						text:'GID'},
 									{value:'USDoD',						text:'USDoD'},

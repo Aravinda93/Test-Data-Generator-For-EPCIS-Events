@@ -54,7 +54,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Based on Event type selection create fields for the WHAT dimention
 	$scope.EventTypeChange = function() {
-		if($scope.formdata.eventtype1 == 'ObjectEvent' || $scope.formdata.eventtype1 == 'AggregationEvent' || $scope.formdata.eventtype1 == 'TransactionEvent')
+		if($scope.formdata.eventtype1 == 'ObjectEvent' || $scope.formdata.eventtype1 == 'AggregationEvent' || $scope.formdata.eventtype1 == 'TransactionEvent' || $scope.formdata.eventtype1 == 'AssociationEvent')
 		{
 			$scope.EventTypeRowSpan 		= 	7;
 		}

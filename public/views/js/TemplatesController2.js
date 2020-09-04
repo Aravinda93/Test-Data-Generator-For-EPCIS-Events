@@ -1045,6 +1045,8 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	//If submit button is clicked then send data to Nodejs for XML and JSON creation
 	$scope.EventInformation	= 	function(){
 		
+		var EventTypeLabel;
+		
 		if($scope.formdata.eventtype1 == 'ObjectEvent')
 		{
 			var obj				=	new Object();
@@ -1061,6 +1063,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.File			=	'ObjectEvent';
 			obj.NodeID			=	$scope.NodeEventId;
 			$rootScope.AllEventsArray.push(obj);
+			EventTypeLabel		=	"Object Event";					
 		}
 		else if($scope.formdata.eventtype1 == 'AggregationEvent')
 		{
@@ -1078,6 +1081,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.File			=	'AggregationEvent';
 			obj.NodeID			=	$scope.NodeEventId;
 			$rootScope.AllEventsArray.push(obj);
+			EventTypeLabel		=	"Aggregation Event";		
 		}
 		else if($scope.formdata.eventtype1 == 'TransactionEvent')
 		{
@@ -1095,6 +1099,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.File			=	'TransactionEvent';
 			obj.NodeID			=	$scope.NodeEventId;
 			$rootScope.AllEventsArray.push(obj);
+			EventTypeLabel		=	"Transaction Event";
 		}
 		else if($scope.formdata.eventtype1 == 'TransformationEvent')
 		{
@@ -1114,6 +1119,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.File			=	'TransformationEvent';			
 			obj.NodeID			=	$scope.NodeEventId;
 			$rootScope.AllEventsArray.push(obj);
+			EventTypeLabel		=	"Transformation Event";
 		}
 		else if($scope.formdata.eventtype1 == 'AssociationEvent')
 		{
@@ -1131,14 +1137,16 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.File			=	'AssociationEvent';
 			obj.NodeID			=	$scope.NodeEventId;			
 			$rootScope.AllEventsArray.push(obj);
+			EventTypeLabel		=	"Association Event";
 		}		
 		angular.element('#EventModalForm').modal('hide');
 		
-		//var diagram 				= 	angular.element("#diagram").ejDiagram("instance"); 
-		//console.log($rootScope.IDValue)
-		//document.getElementById($rootScope.IDValue).innerHTML = 'Information Added'+$rootScope.IDValue; 
-		//$scope.appTitle 			=	"<b>Information Added</b>";
-		//$scope.trustedAppTitle  	=	$sce.trustAsHtml($scope.appTitle);
+		//Add the Labels to the Particular Event
+		var diagram 			= 	angular.element("#diagram").ejDiagram("instance");		
+		var label 				= 	{name: "label", 	text:EventTypeLabel, 				offset: { x: 0.5, y: 0.6}};
+		var label2 				= 	{name: "label2", 	text: $scope.formdata.businessStep, offset: { x: 0.5, y: 0.8}};
+		diagram.addLabel($scope.NodeEventId, label,2);
+		diagram.addLabel($scope.NodeEventId, label2,2);		
 	}
 	
 	//Go BACK and display the input fields again

@@ -2,7 +2,6 @@ var builder 			=	require('xmlbuilder');
 var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 var xml_json_functions	=	require('./XML_JSON_Functions');
-var currentTime 		=	moment().format();
 var rootCounter			=	0;
 								
 exports.createXMLData	=	function(Query,Root,callback){
@@ -20,15 +19,17 @@ exports.createXMLData	=	function(Query,Root,callback){
 	var ErrorTimeArray	=	[];
 	var Domain			=	'https://gs1.org/';
 	var SyntaxType		=	input.VocabSyntaxType;
+	var OuterExtension,extension,baseExtension;
 	
 	//Assign the root node based on calling function							
 	if(Query.XMLElement == 'Single')
 	{
 		var root		= 	builder.create('epcis:EPCISDocument')
 								root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
-								root.att('xmlns:gs1', "https://gs1.de")
 								root.att('schemaVersion', "2.0")
-								root.att('creationDate', currentTime)
+								root.att('creationDate', moment().format())
+								root.att('xmlns:xsi', "http://www.w3.org/2001/XMLSchema-instance")
+								root.att('xsi:schemaLocation',"urn:epcglobal:epcis:xsd:1 EPCglobal-epcis-2_0.xsd")
 	}
 	else
 	{
@@ -41,7 +42,6 @@ exports.createXMLData	=	function(Query,Root,callback){
 	
 	if(input.eventtype1 == "AssociationEvent")
 	{
-		
 		var AEMainExtension = 	root.ele('extension')
 		var AESubExtension	=	AEMainExtension.ele('extension')
 	}
@@ -107,8 +107,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 				else if(input.RecordTimeOptionType	== 'RecordTimeCurrentTime')
 				{
 					//If the current time is choosen
-					var currentTime = moment().format()
-					ObjectEvent.ele('recordTime',currentTime).up()
+					ObjectEvent.ele('recordTime',moment().format()).up()
 				}
 			}
 		}
@@ -119,14 +118,17 @@ exports.createXMLData	=	function(Query,Root,callback){
 			//Add the error declaration if its populated
 			if(input.EventId != "" && input.EventId != null && typeof input.EventId != undefined)
 			{
-				var baseExtension		=	ObjectEvent.ele('baseExtension')
+				baseExtension		=	ObjectEvent.ele('baseExtension')
 				baseExtension.ele('eventID',input.EventId)
 			}	
 			
 			//Add the error declaration if its populated
 			if(input.eventtype2 == 'errordeclaration')
 			{
-				var baseExtension		=	ObjectEvent.ele('baseExtension')
+				if(baseExtension == undefined){
+					baseExtension			=	ObjectEvent.ele('baseExtension')
+				}
+				
 				var errorDeclaration	=	baseExtension.ele('errorDeclaration')
 				
 				//Check what type of error declaration has been choosen
@@ -300,13 +302,11 @@ exports.createXMLData	=	function(Query,Root,callback){
 						quantityElement.ele('epcClass',InputQuantities[q].URI)
 						
 						if(InputQuantities[q].QuantityType == 'Fixed Measure Quantity')
-						{
-							quantityElement.ele('epcClass',InputQuantities[q].URI)
+						{							
 							quantityElement.ele('quantity',InputQuantities[q].Quantity)
 						}
 						else if(InputQuantities[q].QuantityType == 'Variable Measure Quantity')
 						{
-							quantityElement.ele('epcClass',InputQuantities[q].URI)
 							quantityElement.ele('quantity',InputQuantities[q].Quantity)
 							quantityElement.ele('uom',InputQuantities[q].QuantityUOM)
 						}
@@ -444,14 +444,18 @@ exports.createXMLData	=	function(Query,Root,callback){
 			}
 		}
 		
-		//Define the outer and inner extension 
-		var OuterExtension	=	ObjectEvent.ele('extension')
-		var extension		= 	OuterExtension.ele('extension')	
-		
 		//Check for the PERSISTENT DISPOSITION
 		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
 		{
-			var persistentDisposition	=	extension.ele('persistentDisposition')
+			if(OuterExtension == undefined){
+				if(input.eventtype1 != "AssociationEvent"){
+					OuterExtension	=	ObjectEvent.ele('extension')
+				}else{
+					OuterExtension	=	ObjectEvent;
+				}				
+			}
+			
+			var persistentDisposition	=	OuterExtension.ele('persistentDisposition')
 			
 			if(input.PersistentDisposition == 'DispositionEnter')
 			{
@@ -499,13 +503,21 @@ exports.createXMLData	=	function(Query,Root,callback){
 				});					
 			}
 		}	
-		
+			
 		//Check for the Quantity element and add it to the XML		
 		if(input.eventtype1 == "ObjectEvent")
 		{	
 			if(Query.Quantities.length > 0)
-			{					
-				var quantityList	= 	extension.ele('quantityList')				
+			{	
+				if(OuterExtension == undefined){
+					if(input.eventtype1 != "AssociationEvent"){
+						OuterExtension	=	ObjectEvent.ele('extension')
+					}else{
+						OuterExtension	=	ObjectEvent;
+					}				
+				}
+				
+				var quantityList	= 	OuterExtension.ele('quantityList')				
 				var QuantitiesURIs	=	Query.Quantities;			
 				
 				for(var o=0; o<QuantitiesURIs.length; o++)
@@ -532,8 +544,16 @@ exports.createXMLData	=	function(Query,Root,callback){
 		else if(input.eventtype1 == "AggregationEvent")
 		{	
 			if(Query.Quantities.length > 0)
-			{				
-				var quantityList	= 	extension.ele('quantityList')				
+			{	
+				if(OuterExtension == undefined){
+					if(input.eventtype1 != "AssociationEvent"){
+						OuterExtension	=	ObjectEvent.ele('extension')
+					}else{
+						OuterExtension	=	ObjectEvent;
+					}				
+				}
+			
+				var quantityList	= 	OuterExtension.ele('quantityList')				
 				
 				for(var o=0; o<Query.Quantities.length; o++)
 				{
@@ -561,7 +581,15 @@ exports.createXMLData	=	function(Query,Root,callback){
 		{			
 			if(Query.Quantities.length >0)
 			{
-				var quantityList	= 	extension.ele('quantityList')
+				if(OuterExtension == undefined){
+					if(input.eventtype1 != "AssociationEvent"){
+						OuterExtension	=	ObjectEvent.ele('extension')
+					}else{
+						OuterExtension	=	ObjectEvent;
+					}				
+				}
+				
+				var quantityList	= 	OuterExtension.ele('quantityList')
 				
 				for(var o=0; o<Query.Quantities.length; o++)
 				{
@@ -589,7 +617,15 @@ exports.createXMLData	=	function(Query,Root,callback){
 		//Populate The Business Transacation List
 		if(Query.BTT.length > 0)
 		{	
-			var bizTransactionList	=	extension.ele('bizTransactionList')
+			if(OuterExtension == undefined){
+				if(input.eventtype1 != "AssociationEvent"){
+					OuterExtension	=	ObjectEvent.ele('extension')
+				}else{
+					OuterExtension	=	ObjectEvent;
+				}				
+			}
+				
+			var bizTransactionList	=	OuterExtension.ele('bizTransactionList')
 			
 			for(var b=0; b<Query.BTT.length; b++)
 			{
@@ -623,7 +659,15 @@ exports.createXMLData	=	function(Query,Root,callback){
 		//Check for the Source and Source type
 		if(input.sourcesType != '' && input.sourcesType != null && input.sourcesType != undefined)
 		{
-			var sourceList 	= extension.ele('sourceList')			
+			if(OuterExtension == undefined){
+				if(input.eventtype1 != "AssociationEvent"){
+					OuterExtension	=	ObjectEvent.ele('extension')
+				}else{
+					OuterExtension	=	ObjectEvent;
+				}				
+			}
+			
+			var sourceList 	= OuterExtension.ele('sourceList')			
 			
 			if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party' || input.sourcesType == 'location')
 			{
@@ -695,7 +739,15 @@ exports.createXMLData	=	function(Query,Root,callback){
 		//Check for the Destination and Destination type
 		if(input.destinationsType != '' && input.destinationsType != null && input.destinationsType != undefined)
 		{
-			var destinationList 	= 	extension.ele('destinationList')
+			if(OuterExtension == undefined){
+				if(input.eventtype1 != "AssociationEvent"){
+					OuterExtension	=	ObjectEvent.ele('extension')
+				}else{
+					OuterExtension	=	ObjectEvent;
+				}				
+			}
+			
+			var destinationList 	= 	OuterExtension.ele('destinationList')
 			
 			if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party' || input.destinationsType == 'location')
 			{
@@ -765,6 +817,19 @@ exports.createXMLData	=	function(Query,Root,callback){
 		//Sensor Information
 		if(Query.SensorForm.length > 0)
 		{
+			if(OuterExtension == undefined){
+				if(input.eventtype1 != "AssociationEvent"){
+					OuterExtension	=	ObjectEvent.ele('extension')
+					extension		= 	OuterExtension.ele('extension')
+				}else{
+					extension		=	ObjectEvent;
+				}				
+			}
+			else
+			{
+				extension		=	ObjectEvent;
+			}
+				
 			var SensorForm			=	Query.SensorForm;
 			var sensorElementList	=	extension.ele('sensorElementList')
 			
