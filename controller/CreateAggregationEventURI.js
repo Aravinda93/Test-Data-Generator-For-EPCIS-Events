@@ -38,7 +38,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				
 				if(input.sgtintype == 'none')
 				{
-					var epcID	=	'urn:epc:id:sgtin:'+companyPrefixInput+"."+input.singleObjectId;
+					var epcID	=	'urn:epc:id:sgtin:'+companyPrefixInput+"."+input.singleObjectIdText;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
@@ -72,7 +72,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 			{
 				if(input.sgtintype == 'none')
 				{
-					var epcID	=	Domain+'/01/'+companyPrefixInput+'/21/'+input.singleObjectId;
+					var epcID	=	Domain+'/01/'+companyPrefixInput+'/21/'+input.singleObjectIdText;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
@@ -166,7 +166,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
 						var FinalVal	=	GCP + AppendVal;
 						FinalVal		=	FinalVal.substring(0,18)
-						var epcID		=	Domain+'/sscc/'+FinalVal;
+						var epcID		=	Domain+'/00/'+FinalVal;
 						EpcLists.push(epcID);
 						Start++;
 					}
@@ -184,7 +184,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					
 					for(var r=0; r<data.length; r++)
 					{
-						var epcID 	=	Domain+'/sscc/'+GCP+companyPrefixNormal(data[r],input.SSCCCompanyPrefix);
+						var epcID 	=	Domain+'/00/'+GCP+companyPrefixNormal(data[r],input.SSCCCompanyPrefix);
 						EpcLists.push(epcID);
 					}
 					callback(EpcLists);
@@ -279,7 +279,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					
 				if(input.sgtintype == 'none')
 				{
-					var epcID	=	'urn:epc:id:grai:'+companyPrefixInput+input.singleObjectId;
+					var epcID	=	'urn:epc:id:grai:'+companyPrefixInput+input.singleObjectIdText;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
@@ -319,7 +319,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				
 				if(input.sgtintype == 'none')
 				{
-					var epcID	=	Domain+'/grai/'+companyPrefixInput+input.singleObjectId;
+					var epcID	=	Domain+'/8003/'+companyPrefixInput+input.singleObjectIdText;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
@@ -329,7 +329,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					{
 						var appendValue	=	companyPrefixInput+id;
 							appendValue	=	appendValue.substring(0,30)
-						var epcID		=	Domain+'/grai/'+appendValue;
+						var epcID		=	Domain+'/8003/'+appendValue;
 						EpcLists.push(epcID);
 					}
 					callback(EpcLists);
@@ -347,7 +347,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					{		
 						var appendValue	=	companyPrefixInput+data[arrCount];
 							appendValue	=	appendValue.substring(0,30)
-						var epcID		=	Domain+'/grai/'+appendValue;
+						var epcID		=	Domain+'/8003/'+appendValue;
 						EpcLists.push(epcID);	
 					}
 					callback(EpcLists);
@@ -362,11 +362,11 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 			{
 				if(syntaxType 	== 'urn')
 				{
-					var epcID	=	'urn:epc:id:giai:'+companyPrefixInput+'.'+input.singleObjectId;
+					var epcID	=	'urn:epc:id:giai:'+companyPrefixInput+'.'+input.singleObjectIdText;
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var epcID	=	Domain+'/giai/'+companyPrefixInput+input.singleObjectId;
+					var epcID	=	Domain+'/8004/'+companyPrefixInput+input.singleObjectIdText;
 				}			
 				
 				EpcLists.push(epcID);
@@ -385,7 +385,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID	=	Domain+'/giai/'+appendValue;
+						var epcID	=	Domain+'/8004/'+appendValue;
 					}					
 					EpcLists.push(epcID);
 				}
@@ -410,7 +410,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID	=	Domain+'/giai/'+appendValue;
+						var epcID	=	Domain+'/8004/'+appendValue;
 					}					
 					EpcLists.push(epcID);	
 				}
@@ -440,7 +440,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID 	=	Domain+'/gsrn/'+companyPrefixInput+data[r];
+						var epcID 	=	Domain+'/8018/'+companyPrefixInput+data[r];
 					}
 					EpcLists.push(epcID);
 				}
@@ -468,7 +468,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 						var AppendLen	=	18-EPCValueLen+StartLen;
 						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
 						var FinalVal	=	companyPrefixInput + AppendVal;	
-						var epcID		=	Domain+'/gsrn/'+FinalVal;
+						var epcID		=	Domain+'/8018/'+FinalVal;
 					}					
 					EpcLists.push(epcID);
 					Start++;
@@ -499,7 +499,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID 	=	Domain+'/gsrnp/'+companyPrefixInput+data[r];
+						var epcID 	=	Domain+'/8017/'+companyPrefixInput+data[r];
 					}
 					EpcLists.push(epcID);
 				}
@@ -527,7 +527,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 						var AppendLen	=	18-EPCValueLen+StartLen;
 						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
 						var FinalVal	=	companyPrefixInput + AppendVal;	
-						var epcID		=	Domain+'/gsrnp/'+FinalVal;
+						var epcID		=	Domain+'/8017/'+FinalVal;
 					}					
 					EpcLists.push(epcID);
 					Start++;
@@ -548,7 +548,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				
 				if(input.singleObjectId != undefined)
 				{
-					Serial		=	input.singleObjectId;
+					Serial		=	input.singleObjectIdText;
 				}
 				
 				if(syntaxType == 'urn')
@@ -559,7 +559,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var epcID	=	Domain+'/gdti/'+companyPrefixInput+Serial;
+					var epcID	=	Domain+'/253/'+companyPrefixInput+Serial;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}					
@@ -575,7 +575,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID	=	Domain+'/gdti/'+companyPrefixInput+id;
+						var epcID	=	Domain+'/253/'+companyPrefixInput+id;
 						EpcLists.push(epcID);
 					}					
 				}
@@ -599,7 +599,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID	=	Domain+'/gdti/'+companyPrefixInput+data[arrCount];
+						var epcID	=	Domain+'/253/'+companyPrefixInput+data[arrCount];
 						EpcLists.push(epcID);
 					}				
 				}
@@ -723,13 +723,13 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 			{
 				if(syntaxType == 'urn')
 				{
-					var epcID			=	'urn:epc:id:ginc:'+companyPrefixInput+'.'+input.singleObjectId;
+					var epcID			=	'urn:epc:id:ginc:'+companyPrefixInput+'.'+input.singleObjectIdText;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var epcID			=	Domain+'/ginc/'+companyPrefixInput+input.singleObjectId;
+					var epcID			=	Domain+'/ginc/'+companyPrefixInput+input.singleObjectIdText;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
@@ -801,7 +801,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID 	=	Domain+'/gsin/'+companyPrefixInput+data[r];
+						var epcID 	=	Domain+'/402/'+companyPrefixInput+data[r];
 					}
 					EpcLists.push(epcID);
 				}
@@ -831,7 +831,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
 						var FinalVal	=	companyPrefixInput + AppendVal;
 						FinalVal		=	FinalVal.substring(0,17)
-						var epcID		=	Domain+'/gsin/'+FinalVal;
+						var epcID		=	Domain+'/402/'+FinalVal;
 					}					
 					EpcLists.push(epcID);
 					Start++;
@@ -858,7 +858,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				
 				if(input.sgtintype == 'none')
 				{
-					var epcID	=	'urn:epc:id:itip:'+companyPrefixInput+"."+input.singleObjectId;
+					var epcID	=	'urn:epc:id:itip:'+companyPrefixInput+"."+input.singleObjectIdText
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
@@ -892,7 +892,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 			{
 				if(input.sgtintype == 'none')
 				{
-					var epcID	=	Domain+'/itip/'+companyPrefixInput+input.singleObjectId;
+					var epcID	=	Domain+'/8006/'+companyPrefixInput+'/21/'+input.singleObjectIdText;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
@@ -900,7 +900,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				{
 					for(var id=input.sgtnGTINFrom; id<=input.sgtnGTINTo; id++)
 					{	
-						var epcID	=	Domain+'/itip/'+companyPrefixInput+id;
+						var epcID	=	Domain+'/8006/'+companyPrefixInput+'/21/'+id;
 						EpcLists.push(epcID);
 					}
 					callback(EpcLists);
@@ -916,7 +916,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					
 					for(var arrCount=0; arrCount<data.length; arrCount++)
 					{	
-						var epcID	=	Domain+'/itip/'+companyPrefixInput+data[arrCount];
+						var epcID	=	Domain+'/8006/'+companyPrefixInput+'/21/'+data[arrCount];
 						EpcLists.push(epcID);	
 					}
 					callback(EpcLists);
@@ -933,13 +933,13 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 			{
 				if(syntaxType == 'urn')
 				{
-					var epcID			=	'urn:epc:id:upui:'+CompanyPrefixURN+'.'+input.singleObjectId;
+					var epcID			=	'urn:epc:id:upui:'+CompanyPrefixURN+'.'+input.singleObjectIdText;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var epcID			=	Domain+'/upui/'+companyPrefixInput+input.singleObjectId;
+					var epcID			=	Domain+'/01/'+companyPrefixInput+'/235/'+input.singleObjectIdText;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
@@ -956,7 +956,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID			=	Domain+'/upui/'+companyPrefixInput+id;
+						var epcID			=	Domain+'/01/'+companyPrefixInput+'/235/'+id;
 						EpcLists.push(epcID);
 					}						
 				}
@@ -981,7 +981,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID		=	Domain+'/upui/'+companyPrefixInput+data[arrCount];
+						var epcID		=	Domain+'/01/'+companyPrefixInput+'/235/'+data[arrCount];
 						EpcLists.push(epcID);
 					}					
 				}

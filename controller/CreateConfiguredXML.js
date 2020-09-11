@@ -46,7 +46,22 @@ exports.createXML	=	function(AllData,callback){
 		var ParentData			=	AllEventsArray[parent];
 		var OuterParentName		=	ParentData.NodeName;
 		var ParentEventType		=	AllEventsArray[parent].FormData.input.eventtype1;
+		var ParentEPCs			=	[];
+		var ParentQuantitiy		=	[];
 		
+		//Merge all the EPCs into single array list
+		for(var merge=0; merge<ParentData.FormData.EPCs.length; merge++)
+		{
+			ParentEPCs	=	ParentEPCs.concat(ParentData.FormData.EPCs[merge]);
+		}		
+			
+		//Merge all the Quantities into a single Array
+		for(var mergeQ=0;mergeQ<ParentData.FormData.Quantities.length; mergeQ++)
+		{
+			ParentQuantitiy	=	ParentQuantitiy.concat(ParentData.FormData.Quantities[mergeQ]);
+		}
+		
+		//Loop through child and split the EPCs and Quantities
 		for(var child=0; child<AllEventsArray[parent].Childrens.length; child++)
 		{
 			var ChildData		=	AllEventsArray[parent].Childrens[child];
@@ -54,56 +69,84 @@ exports.createXML	=	function(AllData,callback){
 			var EndCount		=	parseInt(AllEventsArray[parent].Childrens[child].Count);
 			var EndQuantityCount=	parseInt(AllEventsArray[parent].Childrens[child].QuantityCount);
 			var ChildEventType	=	AllEventsArray[parent].Childrens[child].FormData.input.eventtype1;
-			
+			var EventCount		=	parseInt(AllEventsArray[parent].Childrens[child].FormData.input.eventcount);
+				
 			//Check if the Child EPCs value is empty
 			if(ChildData.FormData.EPCs.length == 0 && ParentData.FormData.EPCs.length > 0)
 			{
-				EPCsArray	=	ParentData.FormData.EPCs[0].slice(LastCounter,LastCounter+EndCount);
-				ChildData.FormData.EPCs.push(EPCsArray)
-				LastCounter	=	LastCounter + EndCount;	
-							
-				//Write the respective children data into the parent of same node
-				for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
+				//Obtain the complete list of EPCS belonging to particular Child EPCS
+				EPCsArray		=	ParentEPCs.slice(LastCounter,LastCounter+(EndCount*EventCount));
+				LastCounter		=	EndCount*EventCount;
+				
+				//Assign the EPCS based on number of events in Child NODE
+				var EventStart	=	0;
+				var EventEnd	=	0;
+				var EventArray	=	[];
+				
+				for(var event=0; event<EventCount; event++)
 				{
-					var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
+					EventArray	=	EPCsArray.slice(EventStart, EventStart + EndCount);
+					EventStart	=	EventStart	+ EndCount;
 					
-					if(ChildNodeName	==	ParentNodeName)
-					{
-						if(AllEventsArray[ParentNode].FormData.EPCs.length == 0)
+					ChildData.FormData.EPCs.push(EventArray);
+					
+					//Write the respective children data into the parent of same node
+					for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
+					{	
+						var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
+						
+						if(ChildNodeName	==	ParentNodeName)
 						{
-							AllEventsArray[ParentNode].FormData.EPCs.push(EPCsArray);
-						}
-						else
-						{
-							AllEventsArray[ParentNode].FormData.EPCs[0].push.apply(AllEventsArray[ParentNode].FormData.EPCs[0],EPCsArray);
-						}							
-					}					
+							if(AllEventsArray[ParentNode].FormData.EPCs.length > 0 && EventCount == 1)
+							{
+								AllEventsArray[ParentNode].FormData.EPCs[0] = AllEventsArray[ParentNode].FormData.EPCs[0].concat(EventArray);	
+							}
+							else
+							{
+								AllEventsArray[ParentNode].FormData.EPCs.push(EventArray);	
+							}																			
+						}	
+					}
+					
+					
 				}
 			}
 			
 			//Check if the Quantity elements of the Children are empty
 			if(ChildData.FormData.Quantities.length == 0 && ParentData.FormData.Quantities.length > 0)
 			{
-				QuantityArray	=	ParentData.FormData.Quantities[0].slice(QuantityLastCount,QuantityLastCount+EndQuantityCount);
-				ChildData.FormData.Quantities.push(QuantityArray);
-				QuantityLastCount	=	QuantityLastCount + EndQuantityCount;
+				QuantityArray		=	ParentQuantitiy.slice(QuantityLastCount,QuantityLastCount+(EndQuantityCount*EventCount));
+				QuantityLastCount	=	EndQuantityCount * EventCount;
 				
-				//Write the respective children data into the parent of same node
-				for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
+				//Assign the Quantities based on number of events in Child NODE
+				var EventStart	=	0;
+				var EventEnd	=	0;
+				var EventArray	=	[];
+				
+				for(var event=0; event<EventCount; event++)
 				{
-					var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
+					EventArray	=	QuantityArray.slice(EventStart, EventStart + EndQuantityCount);
+					EventStart	=	EventStart	+ EndQuantityCount;
+					console.log(EventArray)
+					ChildData.FormData.Quantities.push(EventArray);
 					
-					if(ChildNodeName	==	ParentNodeName)
+					//Write the respective children data into the parent of same node
+					for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
 					{
-						if(AllEventsArray[ParentNode].FormData.Quantities.length == 0)
+						var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
+						
+						if(ChildNodeName	==	ParentNodeName)
 						{
-							AllEventsArray[ParentNode].FormData.Quantities.push(QuantityArray);
-						}
-						else
-						{
-							AllEventsArray[ParentNode].FormData.Quantities[0].push.apply(AllEventsArray[ParentNode].FormData.Quantities[0],QuantityArray);
-						}							
-					}					
+							if(AllEventsArray[ParentNode].FormData.Quantities.length > 0 && EventCount == 1)
+							{
+								AllEventsArray[ParentNode].FormData.Quantities[0] = AllEventsArray[ParentNode].FormData.Quantities[0].concat(EventArray);
+							}
+							else
+							{
+								AllEventsArray[ParentNode].FormData.Quantities.push(EventArray);
+							}							
+						}					
+					}
 				}
 			}
 			
@@ -141,10 +184,14 @@ exports.createXML	=	function(AllData,callback){
 			}
 		}
 	}
-
+	
+	
+	
 	//Loop through the the created array and create the XML
 	for(var parent=0; parent<AllEventsArray.length; parent++)
 	{
+		//console.log(AllData.AllEventFinalArray[parent].Childrens[0].FormData.EPCs);
+		
 		XMLCreator(AllData, parent, 'Parent');
 	
 		//Loop through children for(var child=0; child<)

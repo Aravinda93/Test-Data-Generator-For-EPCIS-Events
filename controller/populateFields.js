@@ -17,6 +17,7 @@ exports.BusinessStep = function(callback){
 									{value:'inspecting', 				text:'Inspecting'},
 									{value:'installing', 				text:'Installing'},
 									{value:'loading', 					text:'Loading'},
+									{value:'packing', 					text:'Packing'},
 									{value:'picking', 					text:'Picking'},
 									{value:'receiving', 				text:'Receiving'},
 									{value:'removing', 					text:'Removing'},

@@ -33,7 +33,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 			}
 			else if(syntaxType == 'webURI')
 			{
-				var QuantityId		=	Domain+'/lgtin/'+companyPrefixInput+input.singleObjectId;
+				var QuantityId		=	Domain+'/01/'+companyPrefixInput+'/10/'+input.singleObjectId;
 			}			
 			
 			var obj 			= 	new Object();
@@ -54,7 +54,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var QuantityId		=	Domain+'/lgtin/'+companyPrefixInput+id;
+					var QuantityId		=	Domain+'/01/'+companyPrefixInput+'/10/'+id;
 				}				
 				
 				var obj 				= 	new Object();
@@ -83,7 +83,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var QuantityId	=	Domain+'/lgtin/'+companyPrefixInput+data[arrCount];
+					var QuantityId	=	Domain+'/01/'+companyPrefixInput+'/10/'+data[arrCount];
 				}			
 				
 				var obj 				= 	new Object();

@@ -201,12 +201,12 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 			
 			if(TotalParentEPCCount != TotalChildEPCCount || TotalParentQuantityCount != TotalChildQuantityCount)
 			{
-				console.log("Some Child Quantities/EPCs do not match: "+AllEventFinalArray[parentCount].NodeName)
+				//console.log("Some Child Quantities/EPCs do not match: "+AllEventFinalArray[parentCount].NodeName)
 				//alertify.alert(" Error during the split ",' Please check the count provided for EPCs/Quantities');
 			}
 			else
 			{
-				console.log("Eveything is correct");
+				//console.log("Eveything is correct");
 				
 			}
 		}

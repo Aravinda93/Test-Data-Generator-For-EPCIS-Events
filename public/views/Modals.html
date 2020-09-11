@@ -300,11 +300,11 @@
 					</div>
 					<div class="form-group">
 						<label for="message-text" class="col-form-label">Namespace URI:</label>
-						<input type="text" class="form-control" id="AddExtensionNamespaceURI" ng-model="AddExtensionForm.AddExtensionNamespaceURI" autocomplete="off"></input>
+						<input type="text" pattern="^[A-Za-z]\w+$" class="form-control" id="AddExtensionNamespaceURI" ng-model="AddExtensionForm.AddExtensionNamespaceURI" autocomplete="off" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Invalid Characters in Namespace field')"></input>
 					</div>
 					<div class="form-group">
 						<label for="message-text" class="col-form-label">Local Name:</label>
-						<input type="text" pattern="^[A-Za-z0-9 ]*$" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Invalid Characters in Local Name field')" class="form-control" ng-model="AddExtensionForm.AddExtensionLocalName" autocomplete="off"></input>
+						<input type="text" pattern="^[A-Za-z0-9]*$" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Invalid Characters in Local Name field')" class="form-control" ng-model="AddExtensionForm.AddExtensionLocalName" autocomplete="off"></input>
 					</div>
 					<div class="form-group">
 						<label for="AddExtensionDataType" class="col-form-label">Data Type:</label>
@@ -343,7 +343,7 @@
 					</div>
 					<div class="form-group">
 						<label for="EditExtensionNamespaceURI" class="col-form-label">Namespace URI:</label>
-						<input type="text" class="form-control" id="EditExtensionNamespaceURI" ng-model="EditExtensionForm.EditExtensionNamespaceURI" autocomplete="off"></input>
+						<input type="text" pattern="^[A-Za-z]\w+$" class="form-control" id="EditExtensionNamespaceURI" ng-model="EditExtensionForm.EditExtensionNamespaceURI" autocomplete="off" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Invalid Characters in Namespace field')"></input>
 					</div>
 					<div class="form-group">
 						<label for="EditExtensionLocalName" class="col-form-label">Local Name:</label>
@@ -462,7 +462,7 @@
 								</div>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" ng-required="AutoGenerateRequired" ng-model="CommonFormQuantity.Quantitysgtintype" class="custom-control-input" value="random" id="Quantitysgtintype2" name="Quantitysgtintype">
-									<label class="custom-control-label" for="Quantitysgtintype2">Random Number</label>
+									<label class="custom-control-label" for="Quantitysgtintype2">Random</label>
 								</div>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" ng-required="AutoGenerateRequired" ng-model="CommonFormQuantity.Quantitysgtintype" class="custom-control-input" value="none" id="Quantitysgtintype3" name="Quantitysgtintype">
@@ -476,7 +476,7 @@
 							<span>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" class="custom-control-input" value="numeric" ng-model="CommonFormQuantity.QuantityrandomType" ng-required="CommonFormQuantity.Quantitysgtintype == 'random'" name="QuantityrandomType" id="QuantityrandomType1">
-									<label class="custom-control-label" for="QuantityrandomType1">Numeric</label>
+									<label class="custom-control-label" for="QuantityrandomType1">Numeric characters</label>
 								</div>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" class="custom-control-input" value="alphaNumeric" ng-model="CommonFormQuantity.QuantityrandomType" ng-required="CommonFormQuantity.Quantitysgtintype == 'random'" name="QuantityrandomType" id="QuantityrandomType2">
@@ -484,7 +484,7 @@
 								</div>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" class="custom-control-input" value="alphaNumericwithSpecial" ng-model="CommonFormQuantity.QuantityrandomType" ng-required="CommonFormQuantity.Quantitysgtintype == 'random'" name="QuantityrandomType" id="QuantityrandomType3">
-									<label class="custom-control-label" for="QuantityrandomType3">AlphaNumeric with Special Characters</label>
+									<label class="custom-control-label" for="QuantityrandomType3">All permitted characters</label>
 								</div>
 							</span>	
 						</div>
@@ -559,7 +559,7 @@
 							<span>(01)</span>&nbsp;
 							<input type="text" ng-required="AEPSGTINDisp" ng-model="CommonForm.AEPSGTIN1" maxlength="14" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GTIN must be 14 digits')"  title="14 characters length required" placeholder="Enter 14-digit GTIN" class="form-control" style="width: 200px;" >&nbsp;
 							<span>(21)</span>&nbsp;
-							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPSGTIN2" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-hide="AutoGenerate" ng-model="CommonForm.AEPSGTIN2" oninput="setCustomValidity('');" class="form-control" style="width: 200px;">&nbsp;
 						</span>
 						
 						<!--If Association Event and SGLN is selected -->
@@ -597,17 +597,6 @@
 							<span ng-show="SingleValue">
 								<input type="text" ng-model="CommonForm.AEPSSCCSingleSerial" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Serial required')" title="SSCC Serial" placeholder="SSCC Serial" class="form-control" style="width: 200px;">&nbsp;
 							</span>
-							<!--
-							<span ng-show="CommonForm.SSCCType == 'random' ">
-								<br/><br/>
-								<input type="text" ng-model="CommonForm.AEPSSCCRandomCount"	ng-required="CommonForm.SSCCType == 'random'" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('SSCC Count required')" title="SSCC Count" placeholder="SSCC Count" class="form-control" style="width: 200px;">&nbsp;
-								<span> Company Prefix: </span> &ensp;
-								<select ng-required="CommonForm.SSCCType == 'random'" ng-model="CommonForm.SSCCCompanyPrefix" class="form-control">
-									<option class="dropdown-item" value="" selected> Choose </option>
-									<option class="dropdown-item" ng-repeat="companyPrefix in companyPrefixs" value="{{companyPrefix.value}}">{{companyPrefix.text}}</option>
-								</select>
-							</span>
-							-->
 						</span>
 						
 						
@@ -616,7 +605,7 @@
 							<span>(8003) 0</span>&nbsp;
 							<input type="text" ng-required="AEPGRAIDisp" ng-model="CommonForm.AEPGRAI" maxlength="14" pattern="^\d{14}" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GRAI with Serial must be 14 digits')" placeholder="Enter 14 Digit Code" class="form-control" style="width: 200px;">&nbsp;
 							<span ng-show="SingleValue">
-								<input type="text" ng-model="CommonForm.AEPGRAISerial" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('GRAI Serial required')" title="GRAI Serial" placeholder="GRAI Serial" class="form-control" style="width: 200px;">&nbsp;
+								<input type="text" ng-model="CommonForm.AEPGRAISerial" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GRAI Serial required')" title="GRAI Serial" placeholder="GRAI Serial" class="form-control" style="width: 200px;">&nbsp;
 							</span>
 						</span>
 						
@@ -667,7 +656,7 @@
 							<span>(253)</span>&nbsp;
 							<input type="text" ng-required="AEPGDTIDisp" ng-model="CommonForm.AEPGDTI" maxlength="13" pattern="^\d{13}$" oninput="setCustomValidity('');"  oninvalid="this.setCustomValidity('GDTI must be 13 digits')" placeholder="Enter 13 digits GDTI" class="form-control" style="width: 200px;">&nbsp;
 							<span ng-show="SingleValue">
-								<input type="text" ng-model="CommonForm.AEPGDTISerial" ng-required="AEPGDTIDisp && SingleValue" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GSTI Serial required')" title="GDTI Serial" placeholder="GDTI Serial" class="form-control" style="width: 200px;">&nbsp;
+								<input type="text" ng-model="CommonForm.AEPGDTISerial" ng-required="AEPGDTIDisp && SingleValue" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('GDTI Serial required')" title="GDTI Serial" placeholder="GDTI Serial" class="form-control" style="width: 200px;">&nbsp;
 							</span>
 						</span>
 						
@@ -748,7 +737,7 @@
 							<span>(235)</span>&nbsp;
 							
 							<span ng-show="SingleValue">
-								<input type="text" ng-required="AEPUPIUIDISP && SingleValue" ng-model="CommonForm.AEPUPIUI2" placeholder="UPUI Serial Number" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('UPUI TPX is required')" class="form-control" style="width: 200px;">&nbsp;
+								<input type="text" ng-required="AEPUPIUIDISP && SingleValue" ng-model="CommonForm.AEPUPIUI2" placeholder="UPUI Serial Number" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('UPUI TPX is required')" class="form-control" style="width: 200px;">&nbsp;
 							</span>
 						</span>																																								
 						
@@ -849,8 +838,9 @@
 							<input type="number" id="randomCount" min="1"	class="form-control" ng-model="CommonForm.randomCount" placeholder="Number of Objects" title="Enter the Number of Objects" ng-required="CommonForm.sgtintype == 'random'" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Number of Objects required and should be greater than 0')"></input>&nbsp;
 						</span>
 						
-						<span ng-show="CommonForm.sgtintype == 'none' && NoneValuesShow">
-							<input type="text" ng-required="CommonForm.sgtintype == 'none' && NoneValuesShow" id="singleObjectId" ng-model="CommonForm.singleObjectId" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Missing Serial')" maxwidth="17" class="form-control" placeholder="Enter serial number" title="Enter serial number"></input>&nbsp;
+						<span ng-show="CommonForm.sgtintype == 'none' ">
+							<input type="text" ng-show="NoneValuesShow" ng-required="CommonForm.sgtintype == 'none' && NoneValuesShow" id="singleObjectId" 		ng-model="CommonForm.singleObjectId" 		oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Missing Serial')" maxwidth="17" class="form-control" placeholder="Enter serial number" title="Enter serial number"></input>&nbsp;
+							<input type="text" pattern="[a-zA-Z0-9-]+" ng-show="NoneValuesText" ng-required="CommonForm.sgtintype == 'none' && NoneValuesText" id="singleObjectIdText"	ng-model="CommonForm.singleObjectIdText"	oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Enter valid serial number')" maxwidth="17" class="form-control" placeholder="Enter serial number" title="Enter serial number"></input>&nbsp;
 						</span>	
 						
 						<!-- Aggregation Event Parent Id Company Prefix -->
@@ -872,7 +862,7 @@
 								</div>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" ng-required="AutoGenerateRequired" ng-model="CommonForm.sgtintype" class="custom-control-input" value="random" id="sgtintype2" name="sgtintype">
-									<label class="custom-control-label" for="sgtintype2">Random Number</label>
+									<label class="custom-control-label" for="sgtintype2">Random</label>
 								</div>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" ng-required="AutoGenerateRequired" ng-model="CommonForm.sgtintype" class="custom-control-input" value="none" id="sgtintype3" name="sgtintype">
@@ -886,15 +876,15 @@
 							<span>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" class="custom-control-input" value="numeric" ng-model="CommonForm.randomType" ng-required="CommonForm.sgtintype == 'random'" name="randomType" id="randomType1">
-									<label class="custom-control-label" for="randomType1">Numeric</label>
+									<label class="custom-control-label" for="randomType1">Numeric characters</label>
 								</div>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" class="custom-control-input" value="alphaNumeric" ng-model="CommonForm.randomType" ng-required="CommonForm.sgtintype == 'random'" name="randomType" id="randomType2">
-									<label class="custom-control-label" for="randomType2">AlphaNumeric</label>
+									<label class="custom-control-label" for="randomType2">URL-safe characters</label>
 								</div>
 								<div class="custom-control custom-radio custom-control-inline">
 									<input type="radio" class="custom-control-input" value="alphaNumericwithSpecial" ng-model="CommonForm.randomType" ng-required="CommonForm.sgtintype == 'random'" name="randomType" id="randomType3">
-									<label class="custom-control-label" for="randomType3">AlphaNumeric with Special Characters</label>
+									<label class="custom-control-label" for="randomType3">All permitted characters</label>
 								</div>
 							</span>	
 						</div>

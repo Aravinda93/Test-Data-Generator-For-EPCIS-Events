@@ -5,16 +5,15 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	$scope.formdata				=	{eventtype1:''};
 	
 	//Onclick of the button show the Modal for formdata
-	$scope.ShowFormDataModal	=	function(event){
-		
+	$scope.ShowFormDataModal	=	function(event){		
 		//Common
 		$scope.formdata								=	{eventtype1:'', ElementssyntaxType:'urn', VocabSyntaxType:'urn'};
 		$scope.AddExtensionForm						=	{};
 		$scope.EditExtensionForm					=	{};
-		$scope.EventTypeRowSpan						= 	6;
+		$scope.EventTypeRowSpan						= 	5;
 		$scope.rowspanWHAT							=	1;
 		$scope.rowspanWHY							=	4;
-		$scope.OEQuantities							=	1;
+		$scope.OtherFields							=	2;
 		$scope.CommonExtensionsList					=	[];
 		$scope.CommonExtensionsID					=	0;
 		$scope.BusinessTransactionList				=	[];
@@ -80,20 +79,13 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	
 	//Based on Event type selection create fields for the WHAT dimention
 	$scope.EventTypeChange = function() {
-		if($scope.formdata.eventtype1 == 'ObjectEvent' || $scope.formdata.eventtype1 == 'AggregationEvent' || $scope.formdata.eventtype1 == 'TransactionEvent')
-		{
-			$scope.EventTypeRowSpan 		= 	7;
-		}
-		else
-		{
-			$scope.EventTypeRowSpan 		= 	6;
-		}
 		
 		//Add Number of rows to tabled based on Event Selection
 		if($scope.formdata.eventtype1 == 'ObjectEvent')
 		{
 			$scope.rowspanWHAT 					= 	2;
-			$scope.rowspanWHY					=	7;
+			$scope.rowspanWHY					=	6;
+			$scope.OtherFields					=	4;
 			
 			$scope.ObjectEventEpcsURI			=	[];
 			$scope.AggregationEventParentURI	=	[];			
@@ -104,6 +96,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		{
 			$scope.rowspanWHAT 					= 	3;
 			$scope.rowspanWHY					=	6;
+			$scope.OtherFields					=	3;
 			
 			$scope.ObjectEventEpcsURI			=	[];
 			$scope.AggregationEventParentURI	=	[];	
@@ -115,6 +108,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		{
 			$scope.rowspanWHAT 						= 	3;
 			$scope.rowspanWHY						=	6;
+			$scope.OtherFields						=	3;
 			
 			$scope.TransactionEventParent			=	true;
 			$scope.TransactionEventEPCSbutton		=	true;
@@ -122,8 +116,9 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		}
 		else if($scope.formdata.eventtype1 == 'TransformationEvent')
 		{
-			$scope.rowspanWHAT 									= 	5;
-			$scope.rowspanWHY									=	5;
+			$scope.rowspanWHAT 									= 	4;
+			$scope.rowspanWHY									=	4;
+			$scope.OtherFields									=	4;
 			
 			$scope.TransformInputEPCsButton						=	true;
 			$scope.TransformOutputEPCsButton					=	true;
@@ -134,6 +129,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		{
 			$scope.rowspanWHAT 								= 	3;
 			$scope.rowspanWHY								=	6;
+			$scope.OtherFields								=	3;
 			
 			$scope.AssociationEventParentButton				=	true;
 			$scope.AssociationEventChildEPCSButton			=	true;
@@ -145,10 +141,17 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	
 	//Show Modal for adding the Object Event EPCs
 	$scope.ObjectEventEPCsAdd	=	function(){
-		angular.element('#EventModalForm').modal('hide');
-		angular.element('#ParentTypeModal').modal('show');
-		$scope.ObjectEventAddEPCsFlag	=	true;
-		$scope.CommonForm				=	{AggregationEventParentID: ''}
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add EPCs");
+		}
+		else
+		{
+			angular.element('#EventModalForm').modal('hide');
+			angular.element('#ParentTypeModal').modal('show');
+			$scope.ObjectEventAddEPCsFlag	=	true;
+			$scope.CommonForm				=	{AggregationEventParentID: ''}
+		}		
 	}
 	
 	//Delete the Object Event EPCS on Delete Button Click
@@ -191,10 +194,17 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	
 	//Aggregation Event Child EPCS
 	$scope.AggregationEventChildEPCs	=	function(){
-		angular.element('#EventModalForm').modal('hide');
-		angular.element('#ParentTypeModal').modal('show');
-		$scope.AEChildEPCSFlage		=	true;
-		$scope.CommonForm			=	{AggregationEventParentID: ''}
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Child EPCs");
+		}
+		else
+		{
+			angular.element('#EventModalForm').modal('hide');
+			angular.element('#ParentTypeModal').modal('show');
+			$scope.AEChildEPCSFlage		=	true;
+			$scope.CommonForm			=	{AggregationEventParentID: ''}
+		}		
 	}
 	
 	//Delete Aggregation Event Child EPCS on click
@@ -242,10 +252,17 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	
 	//Add the Transaction Event Child EPCS
 	$scope.TransactionEventEPCS	=	function(){
-		angular.element('#EventModalForm').modal('hide');
-		angular.element('#ParentTypeModal').modal('show');
-		$scope.TransactionEventChildEPCS	=	true;
-		$scope.CommonForm			=	{AggregationEventParentID: ''}
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Child EPCs");
+		}
+		else
+		{
+			angular.element('#EventModalForm').modal('hide');
+			angular.element('#ParentTypeModal').modal('show');
+			$scope.TransactionEventChildEPCS	=	true;
+			$scope.CommonForm					=	{AggregationEventParentID: ''}
+		}
 	}
 	
 	//Delete CHILD EPCS from Transaction Event on Delete Button click
@@ -276,10 +293,17 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	
 	//TRANSFORMATION EVENT Show modal for adding the INPUT EPCS
 	$scope.TransformationEventInputEPCs	=	function(){
-		angular.element('#EventModalForm').modal('hide');
-		angular.element('#ParentTypeModal').modal('show');
-		$scope.TransformationEventInputEPCsFlag	=	true;
-		$scope.CommonForm			=	{AggregationEventParentID: ''}
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Input EPCs");
+		}
+		else
+		{
+			angular.element('#EventModalForm').modal('hide');
+			angular.element('#ParentTypeModal').modal('show');
+			$scope.TransformationEventInputEPCsFlag	=	true;
+			$scope.CommonForm			=	{AggregationEventParentID: ''}
+		}
 	}
 	
 	//Transformation Event Delete corresponding Input EPCS 
@@ -306,10 +330,17 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	
 	//Transformation Event show modal for adding Output EPCS
 	$scope.TransformationEventOutputEPCs	=	function(){
-		angular.element('#EventModalForm').modal('hide');
-		angular.element('#ParentTypeModal').modal('show');
-		$scope.TransformationEventOutputEPCsFlag	=	true;
-		$scope.CommonForm			=	{AggregationEventParentID: ''}
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Output EPCs");
+		}
+		else
+		{
+			angular.element('#EventModalForm').modal('hide');
+			angular.element('#ParentTypeModal').modal('show');
+			$scope.TransformationEventOutputEPCsFlag	=	true;
+			$scope.CommonForm			=	{AggregationEventParentID: ''}
+		}
 	}
 	
 	//Transformation Event Delete Output EPCS on Delete button click
@@ -386,155 +417,205 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		var data 				=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues, formdata:$scope.formdata});
 		angular.element('#ParentTypeModal').modal('hide');
 		angular.element('#EventModalForm').modal('show');
-		$http({
-		url: "/CreateAggregationEventURI",
-		method: "POST",
-		headers: {'Content-Type': 'application/json'},
-		data:	data
-		}).success(function(response) {
-			
-			//If Object Event EPCS has been clicked
-			if($scope.ObjectEventAddEPCsFlag)
-			{
-				$scope.ObjectEventEpcsURI.push(response);
-				$scope.ObjectEventAddEPCsFlag	=	false;
-				$scope.ObjectEventEPCSbutton	=	false;
-			}
-			
-			//Aggregation Event PARENT ID has been clicked				
-			if($scope.AEParentEPCsFlag)
-			{
-				$scope.AggregationEventParentURI.push(response);
-				$scope.AEParentEPCsFlag		=	false;
-				$scope.ParentButton			=	false;
-			}
-			
-			//Aggregation Event Child EPCS has been clicked
-			if($scope.AEChildEPCSFlage)
-			{				
-				$scope.AggregationEventChildEPCsURI.push(response);
-				$scope.AEChildEPCSFlage				=	false;
-				$scope.AEChildEPCButton				=	false;
-			}
-			
-			//Transaction Event Parent has been clicked
-			if($scope.TransactionEventParentIDFlag)
-			{
-				$scope.TransactionEventParentIDURI.push(response);
-				$scope.TransactionEventParentIDFlag		=	false;
-				$scope.TransactionEventParent			=	false;
-			}
-			
-			//Transaction Event EPCs
-			if($scope.TransactionEventChildEPCS)
-			{				
-				$scope.TransactionEventEPCsURI.push(response);
-				$scope.TransactionEventChildEPCS	=	false;
-				$scope.TransactionEventEPCSbutton	=	false
-			}
-			
-			//Transformation Event Input EPCS
-			if($scope.TransformationEventInputEPCsFlag)
-			{				
-				$scope.TransformationEventInputEPCsURI.push(response);
-				$scope.TransformationEventInputEPCsFlag	=	false;
-				$scope.TransformInputEPCsButton			=	false;
-			}
-			
-			//Transformation Event Output EPCs
-			if($scope.TransformationEventOutputEPCsFlag)
-			{				
-				$scope.TransformationEventOutputEPCSURI.push(response);
-				$scope.TransformationEventOutputEPCsFlag 	= 	false;
-				$scope.TransformOutputEPCsButton			=	false;
-			}
-			
-			//AssociationEvent Parent
-			if($scope.AssociationEventParentFlag)
-			{
-				$scope.AssociationEventParentURI.push(response);
-				$scope.AssociationEventParentButton 	= 	false;
-				$scope.AssociationEventParentFlag		=	false;
-			}
-			
-			//Association Event Child EPCs
-			if($scope.AssociationEventChildEPCSFlag)
-			{
-				$scope.AssociationEventChildEPCsURI.push(response);
-				$scope.AssociationEventChildEPCSButton	=	false;
-				$scope.AssociationEventChildEPCSFlag	=	false;
-			}
-			
-		}).error(function(error) {
-			console.log(error)
-		});
+		var ItemCount			=	0;
+		
+		//Loop through the Event count to create random EPCs
+		for(var eventEPC=0; eventEPC<$scope.formdata.eventcount; eventEPC++)
+		{
+			$http({
+				url		: 	"/CreateAggregationEventURI",
+				method	: 	"POST",
+				headers	: 	{'Content-Type': 'application/json'},
+				data	:	data
+			}).success(function(response) {
+				//Parent Section				
+				if($scope.AEParentEPCsFlag || $scope.TransactionEventParentIDFlag || $scope.AssociationEventParentFlag)
+				{
+					//Aggregation Event PARENT ID has been clicked				
+					if($scope.AEParentEPCsFlag)
+					{
+						$scope.AggregationEventParentURI.push(response);
+						$scope.AEParentEPCsFlag		=	false;
+						$scope.ParentButton			=	false;	
+					}
+					
+					//Transaction Event Parent has been clicked
+					if($scope.TransactionEventParentIDFlag)
+					{
+						$scope.TransactionEventParentIDURI.push(response);
+						$scope.TransactionEventParentIDFlag	=	false;
+						$scope.TransactionEventParent		=	false;
+					}
+					
+					//AssociationEvent Parent
+					if($scope.AssociationEventParentFlag)
+					{
+						$scope.AssociationEventParentURI.push(response);
+						$scope.AssociationEventParentButton = 	false;
+						$scope.AssociationEventParentFlag	=	false;	
+					}	
+				}
+				else
+				{
+					//Check for the loop completion
+					ItemCount	=	ItemCount+1;
+					
+					//If Object Event EPCS has been clicked
+					if($scope.ObjectEventAddEPCsFlag)
+					{
+						$scope.ObjectEventEpcsURI.push(response);
+					}					
+					
+					//Aggregation Event Child EPCS has been clicked
+					if($scope.AEChildEPCSFlage)
+					{				
+						$scope.AggregationEventChildEPCsURI.push(response);
+					}
+					
+					//Transaction Event EPCs
+					if($scope.TransactionEventChildEPCS)
+					{				
+						$scope.TransactionEventEPCsURI.push(response);
+					}
+					
+					//Transformation Event Input EPCS
+					if($scope.TransformationEventInputEPCsFlag)
+					{				
+						$scope.TransformationEventInputEPCsURI.push(response);
+						
+						//After the loop set all values of the button and flag to false
+						if(ItemCount == $scope.formdata.eventcount)
+						{
+							$scope.TransformationEventInputEPCsFlag		=	false;
+							$scope.TransformInputEPCsButton				=	false;	
+						}
+					}
+					
+					//Transformation Event Output EPCs
+					if($scope.TransformationEventOutputEPCsFlag)
+					{				
+						$scope.TransformationEventOutputEPCSURI.push(response);
+						
+						//After the loop set all values of the button and flag to false
+						if(ItemCount == $scope.formdata.eventcount)
+						{
+							$scope.TransformationEventOutputEPCsFlag 	= 	false;
+							$scope.TransformOutputEPCsButton			=	false;
+						}
+					}
+					
+					//Association Event Child EPCs
+					if($scope.AssociationEventChildEPCSFlag)
+					{
+						$scope.AssociationEventChildEPCsURI.push(response);
+					}
+					
+					//After the loop set all values of the button and flag to false								
+					if(ItemCount == $scope.formdata.eventcount)
+					{	
+						console.log($scope.ObjectEventEpcsURI);
+						$scope.ObjectEventAddEPCsFlag				=	false;
+						$scope.ObjectEventEPCSbutton				=	false;						
+						$scope.AEChildEPCSFlage						=	false;
+						$scope.AEChildEPCButton						=	false;				
+						$scope.TransactionEventChildEPCS			=	false;
+						$scope.TransactionEventEPCSbutton			=	false;												
+						$scope.AssociationEventChildEPCSButton		=	false;
+						$scope.AssociationEventChildEPCSFlag		=	false;
+					}
+				}		
+			}).error(function(error) {
+				console.log(error)
+			});
+		}		
 	}
 	
 	//Object Event Quantities Submit call the URI function
 	$scope.CommonEventQuantities	=	function(){
 		
-		var data 				=	JSON.stringify({input:$scope.CommonFormQuantity, formdata:$scope.formdata});			
+		var data 				=	JSON.stringify({input:$scope.CommonFormQuantity, formdata:$scope.formdata});
+		var ItemCount			=	0;		
 		angular.element('#ChildTypeModal').modal('hide');
 		angular.element('#EventModalForm').modal('show');
-		$http({
-		url: "/CreateObjectEventQuantities",
-		method: "POST",
-		headers: {'Content-Type': 'application/json'},
-		data:data
-		}).success(function(response) {			
-			
-			//IF OBJECT EVENT QUANTITIES CLICKED
-			if($scope.OEQuantitiesFlag)
-			{
-				$scope.ObjectEventQuantitiesURI.push(response);
-				$scope.OEQuantitiesFlag			=	false;
-				$scope.OEAddQuantitiesButton	=	false;
-			}
-			
-			//If AGGREGATION EVENT CHILD QUANTITIES CLICKED
-			if($scope.AEChildQuantitiesFlag)
-			{
-				$scope.AggregationEventChildQuantitiesURI.push(response);
-				$scope.AEChildQuantitiesFlag	= false;
-				$scope.AEChildQuantitiesButton	= false;
-			}
-			
-			//Transaction Event Quantities
-			if($scope.TransactionEventQuantitiesFlag)
-			{
-				$scope.TransactionEventQuantitiesURI.push(response);
-				$scope.TransactionEventQuantitiesFlag 	=	false;
-				$scope.TransactionEventQuantitiesButton	=	false;	
+		
+		for(var eventEPC=0; eventEPC<$scope.formdata.eventcount; eventEPC++)
+		{
+			$http({
+				url: "/CreateObjectEventQuantities",
+				method: "POST",
+				headers: {'Content-Type': 'application/json'},
+				data:data
+			}).success(function(response) {
 				
-			}
+				//IF OBJECT EVENT QUANTITIES CLICKED
+				if($scope.OEQuantitiesFlag)
+				{
+					$scope.ObjectEventQuantitiesURI.push(response);					
+				}
+				
+				//If AGGREGATION EVENT CHILD QUANTITIES CLICKED
+				if($scope.AEChildQuantitiesFlag)
+				{
+					$scope.AggregationEventChildQuantitiesURI.push(response);
+				}
+				
+				//Transaction Event Quantities
+				if($scope.TransactionEventQuantitiesFlag)
+				{
+					$scope.TransactionEventQuantitiesURI.push(response);					
+				}
+				
+				//Transformation Event Input Quantities
+				if($scope.TransformationEventInputQuantitiesFlag)
+				{
+					$scope.TransformationEventInputQuantityURI.push(response);
+				}
+				
+				//Transformation Output Quantities
+				if($scope.TransformationEventOutputQuantitiesFlag)
+				{				
+					$scope.TransformationEventOutputQuantityURI.push(response);
+				}
+				
+				//Association Event Child Quantities
+				if($scope.AssociationEventChildQuantitiesFlag)
+				{
+					$scope.AssociationEventChildQuantitiesURI.push(response);
+				}
+				
+				//Check for the loop completion
+				ItemCount	=	ItemCount+1;
+				
+				//After the loop set all values of the button and flag to false
+				if(ItemCount == $scope.formdata.eventcount)
+				{
+					$scope.OEQuantitiesFlag							=	false;
+					$scope.OEAddQuantitiesButton					=	false;					
+							
+					$scope.AEChildQuantitiesFlag					= 	false;
+					$scope.AEChildQuantitiesButton					= 	false;					
+							
+					$scope.TransactionEventQuantitiesFlag 			=	false;
+					$scope.TransactionEventQuantitiesButton			=	false;
+					
+					
+					$scope.TransformationEventInputQuantitiesFlag	=	false;
+					$scope.TransformationEventInputQuantitiesButton	=	false;
+					
+					
+					$scope.TransformationEventOutputQuantitiesFlag	=	false;
+					$scope.TransformationEventOutputQuantitiesButton=	false;
+					
+					
+					$scope.AssociationEventChildQuantitiesFlag		=	false;
+					$scope.AssociationEventChildQuantitiesButton	=	false;				
+				}
+			}).error(function(error) {
+				console.log(error)
+			});
 			
-			//Transformation Event Input Quantities
-			if($scope.TransformationEventInputQuantitiesFlag)
-			{
-				$scope.TransformationEventInputQuantityURI.push(response);
-				$scope.TransformationEventInputQuantitiesFlag	=	false;
-				$scope.TransformationEventInputQuantitiesButton	=	false;
-			}
-			
-			//Transformation Output Quantities
-			if($scope.TransformationEventOutputQuantitiesFlag)
-			{				
-				$scope.TransformationEventOutputQuantityURI.push(response);
-				$scope.TransformationEventOutputQuantitiesFlag		=	false;
-				$scope.TransformationEventOutputQuantitiesButton	=	false;
-			}
-			
-			//Association Event Child Quantities
-			if($scope.AssociationEventChildQuantitiesFlag)
-			{
-				$scope.AssociationEventChildQuantitiesURI.push(response);
-				$scope.AssociationEventChildQuantitiesFlag		=	false;
-				$scope.AssociationEventChildQuantitiesButton	=	false;
-			}
-			
-		}).error(function(error) {
-			console.log(error)
-		});
+		}
+		
 	}	
 	
 	/* ALL EVENT EXTENSIONS LIST STARTS*/
@@ -1143,10 +1224,13 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		
 		//Add the Labels to the Particular Event
 		var diagram 			= 	angular.element("#diagram").ejDiagram("instance");		
-		var label 				= 	{name: "label", 	text:EventTypeLabel, 				offset: { x: 0.5, y: 0.6}};
-		var label2 				= 	{name: "label2", 	text: $scope.formdata.businessStep, offset: { x: 0.5, y: 0.8}};
-		diagram.addLabel($scope.NodeEventId, label,2);
-		diagram.addLabel($scope.NodeEventId, label2,2);		
+		var label1				= 	{name: "label1", 	text: EventTypeLabel, 									offset: { x: 0.5, y: 0.55}};
+		var label2				=	{name: "label2",	text: "No. of events: "+ $scope.formdata.eventcount,	offset:	{ x: 0.5, y: 0.65}};
+		var label3 				= 	{name: "label3", 	text: $scope.formdata.businessStep, 					offset: { x: 0.5, y: 0.75}};
+		
+		diagram.addLabel($scope.NodeEventId, label1,2);
+		diagram.addLabel($scope.NodeEventId, label2,2);
+		diagram.addLabel($scope.NodeEventId, label3,2);		
 	}
 	
 	//Go BACK and display the input fields again
@@ -1161,7 +1245,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	//Aggregation Event PARENT ID Change
 	$scope.AggregationEventParentChange		=	function(){
 		
-		$scope.RandomRange = $scope.NoneValuesShow = $scope.AEPCompanyDisp = $scope.AEPSGTINDisp	 = $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp =  false;
+		$scope.NoneValuesText = $scope.RandomRange = $scope.NoneValuesShow = $scope.AEPCompanyDisp = $scope.AEPSGTINDisp	 = $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp = $scope.AEPSSGLNDisp =  false;
 		
 		//Check if Multiple values are required
 		if($scope.ObjectEventAddEPCsFlag || $scope.AEChildEPCSFlage || $scope.TransactionEventChildEPCS || $scope.TransformationEventInputEPCsFlag || $scope.TransformationEventOutputEPCsFlag || $scope.AssociationEventChildEPCSFlag)
@@ -1182,14 +1266,12 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		{
 			$scope.AEPSGTINDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			$scope.NoneValuesShow	=	true;
+			$scope.NoneValuesText	=	true;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'SSCC (Al 00)')
 		{
 			$scope.AEPSSCCDisp		= 	true;
 			$scope.RandomRange		=	true;
-			$scope.AEPCompanyDisp	=	false;
-			$scope.NoneValuesShow	=	false;
 			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;			
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'SGLN (Al 414 + Al 254)')
@@ -1202,102 +1284,107 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		{
 			$scope.AEPGRAIDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			$scope.NoneValuesShow	=	true;
+			$scope.NoneValuesText	=	true;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GIAI (Al 8004)')
 		{
 			$scope.AEPGIAIDisp		=	true;
-			$scope.NoneValuesShow	=	true;			
-			$scope.AEPCompanyDisp	=	false;
+			$scope.NoneValuesText	=	true;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GSRN (Al 8018)')
 		{
 			$scope.AEPGSRNDisp		=	true;
 			$scope.RandomRange		=	true;
-			$scope.NoneValuesShow	=  $scope.AEPCompanyDisp = $scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;	
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GSRNP (Al 8017)')
 		{
 			$scope.AEPGSRNPDisp		=	true;
 			$scope.RandomRange		=	true;
-			$scope.NoneValuesShow	=   $scope.AEPCompanyDisp = $scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;	
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GDTI (Al 253)')
 		{
 			$scope.AEPGDTIDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			$scope.NoneValuesShow	=	false;
+			$scope.NoneValuesText	=	true;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GCN (Al 255)')
 		{
 			$scope.AEPGSNDisp		=	true;
 			$scope.RandomRange		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			$scope.NoneValuesShow	=  $scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;	
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'CPI (Al 8010 8011)')
 		{
 			$scope.AEPCPIDisp		=	true;
 			$scope.AEPCompanyDisp	=	true;
 			$scope.RandomRange		=	true;
-			$scope.NoneValuesShow	=  $scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;	
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GINC (Al 401)')
 		{
 			$scope.AECGINCDisp		=	true;
-			$scope.NoneValuesShow	=  	true;
+			$scope.NoneValuesText	=  	true;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GSIN (Al 402)')
 		{
 			$scope.AEPGSINDISP		=	true;
 			$scope.RandomRange		=	true;
-			$scope.NoneValuesShow	=  $scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;	
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;	
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'ITIP (Al 8006 + Al 21)')
 		{
 			$scope.AEPITIPDISP		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			$scope.NoneValuesShow	=	true;
+			$scope.NoneValuesText	=	true;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'UPI_UI (Al 01 + Al 235)')
 		{
 			$scope.AEPUPIUIDISP		=	true;
 			$scope.AEPCompanyDisp	=	true;
-			$scope.NoneValuesShow	=	true;
+			$scope.NoneValuesText	=	true;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'GID')
 		{
 			$scope.AEPGIDDisp		=	true;
 			$scope.RandomRange		=	true;
-			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'USDoD')
 		{
 			$scope.AEPDSDODDisp		=	true;
 			$scope.RandomRange		=	true;
-			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'ADI')
 		{
 			$scope.AEPADIDisp		=	true;
 			$scope.RandomRange		=	true;
-			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'BIC')
 		{
 			$scope.AEPBICDisp		=	true;
-			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'IMOVN')
 		{
 			$scope.AEPIMOVNDisp		=	true; 
 			$scope.RandomRange		=	true;
-			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'Enter a URI Manually')
 		{
 			$scope.AEPManualURIDisp	=	true; 
-			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
+		}
+		
+		//If WEB URI is choosen then dont show Company Prefix Field
+		if($scope.formdata.ElementssyntaxType == 'webURI')
+		{
+			$scope.AEPCompanyDisp	=	false;
 		}
 	}
 	
@@ -1369,6 +1456,12 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			
 			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired =	$scope.MultiValues = $scope.NoneValuesShow = false;
 			$scope.OEQuantityCompanyPrefixDisplay = $scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityITIPDisplay	 = $scope.OEQuantityUPUIDisplay = false;
+		}
+		
+		//If WEB URI is choosen then dont show Company Prefix Field
+		if($scope.formdata.ElementssyntaxType == 'webURI')
+		{
+			$scope.OEQuantityCompanyPrefixDisplay	=	false;
 		}
 	}
 	

@@ -628,7 +628,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				var BTT 					=	Query.BTT[b];
 				var BTTObj					=	new Object();
 				BTTObj['type']				=	'urn:epcglobal:cbv:btt:'+BTT.BTT.Type;
-				BTTObj['bizTransaction']	=	BTT.BTT.Value;				
+				BTTObj['bizTransaction']	=	'urn:epcglobal:cbv:bt:'+BTT.BTT.Value;				
 				BTTArray.push(BTTObj)
 			}
 			ObjectEvent['bizTransactionList']		=	BTTArray;			
@@ -656,19 +656,19 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					//If PGLN then directly append
 					if(input.SourceLNType == 'pgln')
 					{						
-						ObjectEvent.sourceList['source']	=	FormattedSource;
+						ObjectEvent.sourceList['source']	=	'urn:epc:id:pgln:'+FormattedSource;
 											
 					}
 					else if(input.SourceLNType == 'sgln')
 					{
-						FormattedSource						=	FormattedSource + '.' + input.SourceGLNExtension;
+						FormattedSource						=	'urn:epc:id:sgln:'+ FormattedSource + '.' + input.SourceGLNExtension;
 						ObjectEvent.sourceList['source']	=	FormattedSource;							
 					}
 				}
 
 				if(input.sourcesType == 'location')
 				{
-					FormattedSource						=	FormattedSource + '.' + input.SourceGLNExtension;
+					FormattedSource						=	'urn:epc:id:sgln:'+ FormattedSource + '.' + input.SourceGLNExtension;
 					ObjectEvent.sourceList['source']	=	FormattedSource;
 				}
 			}
@@ -701,13 +701,13 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					if(input.DestinationLNType == 'pgln')
 					{
 						ObjectEvent.destinationList['type']			=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
-						ObjectEvent.destinationList['destination']	=	FormattedDestination								
+						ObjectEvent.destinationList['destination']	=	'urn:epc:id:pgln:' + FormattedDestination								
 					}
 					else if(input.DestinationLNType == 'sgln')
 					{
 						ObjectEvent.destinationList['type']			=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
 						FormattedDestination						=	FormattedDestination + '.' + input.DestinationGLNExtension;
-						ObjectEvent.destinationList['destination']	=	FormattedDestination							
+						ObjectEvent.destinationList['destination']	=	'urn:epc:id:pgln:' + FormattedDestination							
 					}	
 				}
 				
@@ -715,7 +715,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				{
 					ObjectEvent.destinationList['type']				=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
 					FormattedDestination							=	FormattedDestination + '.' + input.DestinationGLNExtension;
-					ObjectEvent.destinationList['destination']		=	FormattedDestination						
+					ObjectEvent.destinationList['destination']		=	'urn:epc:id:pgln:' + FormattedDestination						
 				}
 					
 			}
