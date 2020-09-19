@@ -7,7 +7,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	//Onclick of the button show the Modal for formdata
 	$scope.ShowFormDataModal	=	function(event){		
 		//Common
-		$scope.formdata								=	{eventtype1:'', ElementssyntaxType:'urn', VocabSyntaxType:'urn'};
+		$scope.formdata								=	{eventtype1:'', ElementssyntaxType:'urn', VocabSyntaxType:'urn', EventIDOption:'no', EventIDType: 'uuid'};
 		$scope.AddExtensionForm						=	{};
 		$scope.EditExtensionForm					=	{};
 		$scope.EventTypeRowSpan						= 	5;
@@ -63,6 +63,14 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		var node 									= 	diagram.selectionList[0];
 		$scope.NodeEventId							=	node.name;
 		angular.element('#EventModalForm').modal('show');
+		
+		//Add Label to the Node to display relevent information
+		var label1				= 	{name: "label1", 	text: "", 	offset: {x: 0.5, y: 0.55}};
+		var label2				=	{name: "label2",	text: "",	offset:	{x: 0.5, y: 0.65}};
+		var label3 				= 	{name: "label3", 	text: "", 	offset: {x: 0.5, y: 0.75}};
+		diagram.addLabel($scope.NodeEventId, label1,2);
+		diagram.addLabel($scope.NodeEventId, label2,2);
+		diagram.addLabel($scope.NodeEventId, label3,2);
 		
 		//If the event already exists in the rootarray then delete it useful when they come back and make changes to any event
 		for(var del=0; del<$rootScope.AllEventsArray.length; del++)
@@ -484,7 +492,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 						$scope.TransformationEventInputEPCsURI.push(response);
 						
 						//After the loop set all values of the button and flag to false
-						if(ItemCount == $scope.formdata.eventcount)
+						if(ItemCount == parseInt($scope.formdata.eventcount, 10))
 						{
 							$scope.TransformationEventInputEPCsFlag		=	false;
 							$scope.TransformInputEPCsButton				=	false;	
@@ -497,7 +505,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 						$scope.TransformationEventOutputEPCSURI.push(response);
 						
 						//After the loop set all values of the button and flag to false
-						if(ItemCount == $scope.formdata.eventcount)
+						if(ItemCount == parseInt($scope.formdata.eventcount, 10))
 						{
 							$scope.TransformationEventOutputEPCsFlag 	= 	false;
 							$scope.TransformOutputEPCsButton			=	false;
@@ -537,7 +545,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		var ItemCount			=	0;		
 		angular.element('#ChildTypeModal').modal('hide');
 		angular.element('#EventModalForm').modal('show');
-		
+
 		for(var eventEPC=0; eventEPC<$scope.formdata.eventcount; eventEPC++)
 		{
 			$http({
@@ -546,6 +554,9 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				headers: {'Content-Type': 'application/json'},
 				data:data
 			}).success(function(response) {
+				
+				//Check if Output quantities filled as per Event count
+				ItemCount	=	ItemCount+1;
 				
 				//IF OBJECT EVENT QUANTITIES CLICKED
 				if($scope.OEQuantitiesFlag)
@@ -569,12 +580,26 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				if($scope.TransformationEventInputQuantitiesFlag)
 				{
 					$scope.TransformationEventInputQuantityURI.push(response);
+					
+					//Check if input quantities filled as per Event count
+					if(ItemCount == parseInt($scope.formdata.eventcount, 10))
+					{
+						$scope.TransformationEventInputQuantitiesFlag	=	false;
+						$scope.TransformationEventInputQuantitiesButton	=	false;
+					}
 				}
 				
 				//Transformation Output Quantities
 				if($scope.TransformationEventOutputQuantitiesFlag)
 				{				
 					$scope.TransformationEventOutputQuantityURI.push(response);
+					
+					//Check if Output quantities filled as per Event count
+					if(ItemCount == parseInt($scope.formdata.eventcount, 10))
+					{
+						$scope.TransformationEventOutputQuantitiesFlag	=	false;
+						$scope.TransformationEventOutputQuantitiesButton=	false;
+					}
 				}
 				
 				//Association Event Child Quantities
@@ -582,9 +607,6 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				{
 					$scope.AssociationEventChildQuantitiesURI.push(response);
 				}
-				
-				//Check for the loop completion
-				ItemCount	=	ItemCount+1;
 				
 				//After the loop set all values of the button and flag to false
 				if(ItemCount == $scope.formdata.eventcount)
@@ -596,26 +618,15 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 					$scope.AEChildQuantitiesButton					= 	false;					
 							
 					$scope.TransactionEventQuantitiesFlag 			=	false;
-					$scope.TransactionEventQuantitiesButton			=	false;
-					
-					
-					$scope.TransformationEventInputQuantitiesFlag	=	false;
-					$scope.TransformationEventInputQuantitiesButton	=	false;
-					
-					
-					$scope.TransformationEventOutputQuantitiesFlag	=	false;
-					$scope.TransformationEventOutputQuantitiesButton=	false;
-					
+					$scope.TransactionEventQuantitiesButton			=	false;					
 					
 					$scope.AssociationEventChildQuantitiesFlag		=	false;
 					$scope.AssociationEventChildQuantitiesButton	=	false;				
 				}
 			}).error(function(error) {
 				console.log(error)
-			});
-			
+			});			
 		}
-		
 	}	
 	
 	/* ALL EVENT EXTENSIONS LIST STARTS*/
@@ -1222,15 +1233,12 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		}		
 		angular.element('#EventModalForm').modal('hide');
 		
-		//Add the Labels to the Particular Event
-		var diagram 			= 	angular.element("#diagram").ejDiagram("instance");		
-		var label1				= 	{name: "label1", 	text: EventTypeLabel, 									offset: { x: 0.5, y: 0.55}};
-		var label2				=	{name: "label2",	text: "No. of events: "+ $scope.formdata.eventcount,	offset:	{ x: 0.5, y: 0.65}};
-		var label3 				= 	{name: "label3", 	text: $scope.formdata.businessStep, 					offset: { x: 0.5, y: 0.75}};
-		
-		diagram.addLabel($scope.NodeEventId, label1,2);
-		diagram.addLabel($scope.NodeEventId, label2,2);
-		diagram.addLabel($scope.NodeEventId, label3,2);		
+		//Update the Labels to the Particular Event with relevent information
+		var diagram 			= 	angular.element("#diagram").ejDiagram("instance");	
+		var selectedObject 		= 	diagram.model.selectedItems.children[0];
+		diagram.updateLabel(selectedObject.name, selectedObject.labels[1], { text: EventTypeLabel});
+		diagram.updateLabel(selectedObject.name, selectedObject.labels[2], { text: "No. of events: "+ $scope.formdata.eventcount});
+		diagram.updateLabel(selectedObject.name, selectedObject.labels[3], { text: $scope.formdata.businessStep});		
 	}
 	
 	//Go BACK and display the input fields again

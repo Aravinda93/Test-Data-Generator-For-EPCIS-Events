@@ -1,16 +1,9 @@
 var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 var xml_json_functions	=	require('./XML_JSON_Functions');
-var currentTime 		=	moment().format();
 
 exports.createJSONData	=	function(Query,JSONHeader,callback){
 	var input				=	Query.input;
-	var today 				= 	new Date();
-	let date 				= 	today.toISOString().slice(0, 10).replace(/-/g,"_");
-	var time 				= 	(today.getHours()+1) + ":" + today.getMinutes() + ":" + today.getSeconds();
-		time				= 	time.replace(/:/g,"_");
-	var now 				=	date+"T"+time;
-	var offset				=	today.getTimezoneOffset()/60+':00';
 	var data				=	{};
 	var jsonData			=	[];
 	var EpcLists			=	[];
@@ -18,7 +11,11 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 	var itemProcessed 		=	0;
 	var RecordTimeArray		=	[];	
 	var EventTimeArray		=	[];
+	var EventIDArray		=	[];
 	var MainArray			=	[];
+	var currentTime 		=	moment().format();
+	var SyntaxType			=	input.VocabSyntaxType;
+	var Domain				=	'https://gs1.org/';
 	
 	if(Query.XMLElement == 'Single')
 	{
@@ -35,16 +32,15 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 	else
 	{
 		var JSONschemaParse		=	JSONHeader;
-	}
-	
-	var MainObject 			=	JSONschemaParse.epcisBody['EventList'] = {};	
+	}	
 
 	//Loop through the event count and create append to JSON data
-	for(var count=1; count<=input.eventcount; count++)
+	for(var count=0; count<input.eventcount; count++)
 	{
-		var ObjectEvent	=	{};
+		var ObjectEvent		=	{};
 		
-		//var ObjectEvent = JSONschemaParse.epcisBody.EventList[input.eventtype1] = {};
+		//Type of event
+		ObjectEvent['isA']	=	input.eventtype1;
 		
 		//Check what type of EVENT TIME is required and fill the values accordingly
 		if(input.EventTimeSelector != "" && input.EventTimeSelector != null && typeof input.EventTimeSelector != undefined)
@@ -52,7 +48,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			//If Specific Event time has been selected
 			if(input.EventTimeSelector == 'SpecificTime')
 			{
-				ObjectEvent['eventTime']			=	input.eventtimeSpecific+input.EventTimeZone;
+				ObjectEvent['eventTime']			=	input.eventtimeSpecific + "Z";
 				ObjectEvent['eventTimeZoneOffset']	=	input.EventTimeZone;
 			}
 			else if(input.EventTimeSelector == 'TimeRange')
@@ -61,7 +57,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				var To				=	input.EventTimeTo;
 				var EventCount		=	input.eventcount;
 				
-				if(count == 1)
+				if(count == 0)
 				{
 					EventTimeArray	=	[];
 					xml_json_functions.RandomEventTimeGenerator(From,To,EventCount,File,function(ReturnEventTime){
@@ -69,7 +65,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					});
 				}
 				
-				ObjectEvent['eventTime']			=	EventTimeArray[count-1]+input.EventTimeZone;
+				ObjectEvent['eventTime']			=	EventTimeArray[count]+input.EventTimeZone;
 				ObjectEvent['eventTimeZoneOffset']	=	input.EventTimeZone;
 			}
 
@@ -86,7 +82,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				{
 					if(input.EventTimeSelector == 'TimeRange')
 					{
-						ObjectEvent['recordTime'] 	=		EventTimeArray[count-1]+input.EventTimeZone;
+						ObjectEvent['recordTime'] 	=		EventTimeArray[count]+input.EventTimeZone;
 					}
 					else if(input.EventTimeSelector == 'SpecificTime')
 					{
@@ -102,29 +98,34 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		}
 
 		//If error declaration has been set then add the below tags
-		if(input.eventtype2 == 'errordeclaration' || input.EventId != "")
+		if(input.eventtype2 == 'errordeclaration' || input.EventIDOption == "yes")
 		{
 			//Add the EVENT ID if its populated
-			if(input.EventId != "" && input.EventId != null && typeof input.EventId != undefined)
-			{
-				ObjectEvent['baseExtension']			=	{};
-				ObjectEvent.baseExtension['eventID']	=	input.EventId;
+			if(input.EventIDOption == "yes")
+			{				
+				if(count == 0)
+				{
+					EventIDArray	=	[];
+					xml_json_functions.RandomEventIDGenerator(File,input.eventcount,input.EventIDType,function(ReturnEventIDArray){
+						EventIDArray	= ReturnEventIDArray;
+					});	
+				}
+				
+				ObjectEvent['eventID']	=	EventIDArray[count];
 			}
 
 			//Add the error declaration if its populated
 			if(input.eventtype2 == 'errordeclaration')
-			{
-				ObjectEvent['baseExtension']			=	{};
-				var ErrorValue = ObjectEvent.baseExtension['errorDeclaration']	=	{};
+			{		
+				ObjectEvent['errorDeclaration']	=	{};
 				
-								//Check what type of error declaration has been choosen
+				//Check what type of error declaration has been choosen
 				if(input.ErrorDeclarationTimeSelector != '')
 				{
 					if(input.ErrorDeclarationTimeSelector == 'SpecificTime')
 					{
 						//Add Error Declaration Time
-						input.ErrorDeclarationTime	=	moment(input.ErrorDeclarationTime).format();
-						ObjectEvent.baseExtension.errorDeclaration['declarationTime']		=	input.ErrorDeclarationTime+input.ErrorTimeZone;
+						ObjectEvent.errorDeclaration['declarationTime']		=	input.ErrorDeclarationTime+input.ErrorTimeZone;
 					}
 					else if(input.ErrorDeclarationTimeSelector == 'TimeRange')
 					{
@@ -133,7 +134,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 						var EventCount		=	input.eventcount;
 						
 						//Call the random function to generate the random date
-						if(count == 1)
+						if(count == 0)
 						{
 							ErrorTimeArray	=	[];
 							xml_json_functions.RandomEventTimeGenerator(From,To,EventCount,File,function(RandomErrorTime){
@@ -141,7 +142,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 							});	
 						}
 						
-						ObjectEvent.baseExtension.errorDeclaration['declarationTime']		=	ErrorTimeArray[count-1]+input.ErrorTimeZone;	
+						ObjectEvent.errorDeclaration['declarationTime']		=	ErrorTimeArray[count]+input.ErrorTimeZone;	
 					}
 				}
 
@@ -150,25 +151,31 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				{
 					if(input.ErrorReasonType == 'Other')
 					{
-						ObjectEvent.baseExtension.errorDeclaration['reason']	=	input.ErrorReasonOther;
+						ObjectEvent.errorDeclaration['reason']	=	input.ErrorReasonOther;
 					}
 					else
 					{
-						ObjectEvent.baseExtension.errorDeclaration['reason']	=	'urn:epcglobal:cbv:er:'+input.ErrorReasonType;
+						if(SyntaxType == 'urn')
+						{
+							ObjectEvent.errorDeclaration['reason']	=	'urn:epcglobal:cbv:er:'+input.ErrorReasonType;
+						}
+						else if(SyntaxType == 'webURI')
+						{
+							ObjectEvent.errorDeclaration['reason']	=	Domain+'voc/ER-'+input.ErrorReasonType;
+						}
+						
 					}
 				}				
 				
 				//Loop and add the Corrective Event Ids
 				if(Query.ErrorCorrection.length > 0)
 				{
-						ObjectEvent.baseExtension.errorDeclaration['correctiveEventIDs']	=	{};
-						var CorrectionText			=	[];
-						for(var e=0; e<Query.ErrorCorrection.length; e++)
-						{
-							CorrectionText.push(Query.ErrorCorrection[e].CorrectiveText);
-						}
-
-						ObjectEvent.baseExtension.errorDeclaration.correctiveEventIDs['correctiveEventID']	=	CorrectionText;
+					ObjectEvent.errorDeclaration['correctiveEventIDs']	=	[];
+					
+					for(var e=0; e<Query.ErrorCorrection.length; e++)
+					{
+						ObjectEvent.errorDeclaration["correctiveEventIDs"].push(Query.ErrorCorrection[e].CorrectiveText);
+					}
 				}
 
 				//Loop and add the Extension for Error and Add the Error Extension
@@ -204,16 +211,12 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			if(Query.EPCs.length > 0)
 			{
 				var NewEPCS		=	 [];
+				var OEEPCS		=	Query.EPCs[count];
 
-				for(var o=0; o<Query.EPCs.length; o++)
+				for(var e=0; e<OEEPCS.length; e++)
 				{
-					var OEEPCS	=	Query.EPCs[o];
-
-					for(var e=0; e<OEEPCS.length; e++)
-					{
-						NewEPCS.push(OEEPCS[e]);
-					}
-				}
+					NewEPCS.push(OEEPCS[e]);
+				}			
 
 				ObjectEvent['epcList'] = NewEPCS;
 			}
@@ -221,26 +224,20 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		else if(input.eventtype1 == "AggregationEvent")
 		{
 			//Add the parent of AggregationEvent
-			if(Query.ParentID != null)
+			if(Query.ParentID.length > 0)
 			{
 				ObjectEvent['parentID']	=	Query.ParentID[0];
 			}
 			//Add the CHILD EPCS of AggregationEvent
-			if(Query.EPCs != null)
+			if(Query.EPCs.length > 0)
 			{
-				ObjectEvent['childEPCs']	=	  {};
-				var ChildEPCSURI	=	Query.EPCs;
-				var AllChildEpcs	=	[];
+				ObjectEvent['childEPCs']	=	[];
+				var ChildEPCSURI			=	Query.EPCs[count];
 				
 				for(var o=0; o<ChildEPCSURI.length; o++)
-				{
-					for(var c=0; c<ChildEPCSURI[o].length; c++)
-					{
-						AllChildEpcs.push(ChildEPCSURI[o][c]);
-					}
+				{					
+					ObjectEvent['childEPCs'].push(ChildEPCSURI[o]);					
 				}
-				
-				ObjectEvent.childEPCs['epc']	=	AllChildEpcs;
 			}	
 		}
 		else if(input.eventtype1 == "TransactionEvent")
@@ -255,15 +252,12 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			if(Query.EPCs.length > 0)
 			{
 				ObjectEvent['epcList']	=	{};
-				var EPCs				=	Query.EPCs;
+				var EPCs				=	Query.EPCs[count];
 				var AllChildEpcs		=	[];
 				
 				for(var o=0; o<EPCs.length; o++)
 				{
-					for(var e=0; e<EPCs[o].length; e++)
-					{
-						AllChildEpcs.push(EPCs[o][e]);
-					}
+					AllChildEpcs.push(EPCs[o]);					
 				}
 
 				ObjectEvent.epcList['epc']	=	AllChildEpcs;					
@@ -274,165 +268,119 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			//Transformation Event Input EPCs
 			if(Query.EPCs.length > 0)
 			{
-				ObjectEvent['inputEPCList']		=	{};
-				var InputEPCs					=	[];
+				ObjectEvent['inputEPCList']	=	[];
+				var InputQueryEPCs			=	Query.EPCs[count];				
 				
-				for(var o=0; o<Query.EPCs.length; o++)
+				for(var i=0; i<InputQueryEPCs.length; i++)
 				{
-					for(var i=0; i<Query.EPCs[o].length; i++)
-					{
-						InputEPCs.push(Query.EPCs[o][i]);
-					}
+					ObjectEvent['inputEPCList'].push(InputQueryEPCs[i]);
 				}
-				
-				ObjectEvent.inputEPCList['epc']		=	InputEPCs;
 			}
 			
 			//Transformation Event Input Quantities
 			if(Query.Quantities.length > 0)
 			{
-				ObjectEvent['inputQuantityList']	=	{};
-				var QuantityArray					=	[];
-				
-				for(var i=0; i<Query.Quantities.length; i++)
-				{					
-					var InputQuantities		=	Query.Quantities[i];
+				ObjectEvent['inputQuantityList']	=	[];
+				var InputQuantities					=	Query.Quantities[count];									
 					
-					for(var q=0; q<InputQuantities.length; q++)
-					{	
-						var obj 			= 	new Object();
-						obj.epcClass		=	InputQuantities[q].URI;						
-						
-						if(InputQuantities[q].QuantityType == 'Fixed Measure Quantity')
-						{
-							obj.quantity	=	InputQuantities[q].Quantity;
-							QuantityArray.push(obj);
-						}
-						else if(InputQuantities[q].QuantityType == 'Variable Measure Quantity')
-						{
-							obj.quantity	=	InputQuantities[q].Quantity;
-							obj.uom			=	InputQuantities[q].QuantityUOM;
-							QuantityArray.push(obj);
-						}
-						else
-						{
-							QuantityArray.push(obj);
-						}
+				for(var q=0; q<InputQuantities.length; q++)
+				{	
+					var obj 			= 	new Object();
+					obj["epcClass"]		=	InputQuantities[q].URI;						
+					
+					if(InputQuantities[q].QuantityType == 'Fixed Measure Quantity')
+					{
+						obj["quantity"]	=	InputQuantities[q].Quantity;
 					}
-				}				
-				ObjectEvent.inputQuantityList['quantityElement']	=	QuantityArray;
+					else if(InputQuantities[q].QuantityType == 'Variable Measure Quantity')
+					{
+						obj["quantity"]	=	InputQuantities[q].Quantity;
+						obj["uom"]		=	InputQuantities[q].QuantityUOM;
+					}
+					
+					ObjectEvent['inputQuantityList'].push(obj);
+				}
 			}
 			
 			//Transformation Event output EPCS
 			if(Query.OutputEPCs.length > 0)
 			{
-				ObjectEvent['outputEPCList']	=	{};
-				var OutputEPCsArray					=	[];
+				ObjectEvent['outputEPCList']	=	[];
+				var outputEPCs					=	Query.OutputEPCs[count];
 				
-				for(var o=0; o<Query.OutputEPCs.length; o++)
-				{
-					for(var i=0; i<Query.OutputEPCs[o].length; i++)
-					{		
-						OutputEPCsArray.push(Query.OutputEPCs[o][i]);
-					}
-				}	
-				ObjectEvent.outputEPCList['epc']		=	OutputEPCsArray;
+				for(var i=0; i<outputEPCs.length; i++)
+				{		
+					ObjectEvent['outputEPCList'].push(outputEPCs[i]);
+				}
 			}
 			
 			//Transformation Event Output Quantities
 			if(Query.OutputQuantities.length > 0)
 			{
-				ObjectEvent['outputQuantityList']	=	{};
-				var OutputQuantitiesArray			=	[];				
-				
-				for(var o=0; o<Query.OutputQuantities.length; o++)
-				{
-					var OutputQuantities	=	Query.OutputQuantities[o];
+				ObjectEvent['outputQuantityList']	=	[];
+				var OutputQuantities				=	Query.OutputQuantities[count];				
 					
-					for(var q=0; q<OutputQuantities.length; q++)
-					{	
-						var obj 			= 	new Object();
-						obj.epcClass		=	OutputQuantities[q].URI;	
-						
-						if(OutputQuantities[q].QuantityType == 'Fixed Measure Quantity')
-						{
-							obj.quantity	=	OutputQuantities[q].Quantity;
-							OutputQuantitiesArray.push(obj);
-						}
-						else if(OutputQuantities[q].QuantityType == 'Variable Measure Quantity')
-						{
-							obj.quantity	=	OutputQuantities[q].Quantity;
-							obj.uom			=	OutputQuantities[q].QuantityUOM;
-							OutputQuantitiesArray.push(obj);
-						}
-						else
-						{
-							OutputQuantitiesArray.push(obj);
-						}
-					}	
+				for(var q=0; q<OutputQuantities.length; q++)
+				{	
+					var obj 			= 	new Object();
+					obj["epcClass"]		=	OutputQuantities[q].URI;	
+					
+					if(OutputQuantities[q].QuantityType == 'Fixed Measure Quantity')
+					{
+						obj["quantity"]	=	OutputQuantities[q].Quantity;
+					}
+					else if(OutputQuantities[q].QuantityType == 'Variable Measure Quantity')
+					{
+						obj["quantity"]	=	OutputQuantities[q].Quantity;
+						obj["uom"]		=	OutputQuantities[q].QuantityUOM;
+					}
+					
+					ObjectEvent['outputQuantityList'].push(obj);
 				}
-				
-				ObjectEvent.outputQuantityList['quantityElement']	=	OutputQuantitiesArray;
 			}
 		}
 		else if(input.eventtype1 == "AssociationEvent")
 		{
 			//Add the Parent for Association Event
-			if(Query.ParentID != null)
+			if(Query.ParentID.length > 0)
 			{
 				ObjectEvent['parentID']	=	Query.ParentID[0];
 			}
 			
 			//Add the CHILD EPCS of AssociationEvent
-			if(Query.EPCs != null)
+			if(Query.EPCs.length > 0)
 			{
-				var ChildEPCSURI			=	Query.EPCs;
-				ObjectEvent['childEPCs']	=	  {};
-				var AllChildEpcs			=	[];
+				var ChildEPCSURI			=	Query.EPCs[count];
+				ObjectEvent['childEPCs']	=	[];
 				
-				for(var o=0; o<ChildEPCSURI.length; o++)
+				for(var c=0; c<ChildEPCSURI.length; c++)
 				{
-					for(var c=0; c<ChildEPCSURI[o].length; c++)
-					{
-						AllChildEpcs.push(ChildEPCSURI[o][c]);
-					}
+					ObjectEvent['childEPCs'].push(ChildEPCSURI[c]);
 				}
-				
-				ObjectEvent.childEPCs['epc']	=	AllChildEpcs;
 			}
 			
-			//Add the Child Quan of Association Event
+			//AGGREGATION EVENT CHILD Quantities			
 			if(Query.Quantities.length > 0)
 			{
-				var QuantityEPCs	=	[];				
-				
-				for(var o=0; o<Query.Quantities.length; o++)
-				{
-					var ChildQuantitiesURI	=	Query.Quantities[o];
+				ObjectEvent['childQuantityList']	=	[];
+				var ChildQuantitiesURI		=	Query.Quantities[count];									
 					
-					for(c=0; c<ChildQuantitiesURI.length;c++)
+				for(c=0; c<ChildQuantitiesURI.length;c++)
+				{
+					var obj 			= 	new Object();
+					obj["epcClass"]		=	ChildQuantitiesURI[c].URI;
+					
+					if(ChildQuantitiesURI[c].QuantityType == 'Fixed Measure Quantity')
 					{
-						var obj 			= 	new Object();
-						obj.epcClass		=	ChildQuantitiesURI[c].URI;
-						
-						if(ChildQuantitiesURI[c].QuantityType == 'Fixed Measure Quantity')
-						{
-							obj.quantity	=	ChildQuantitiesURI[c].Quantity;
-							QuantityEPCs.push(obj);
-						}
-						else if(ChildQuantitiesURI[c].QuantityType == 'Variable Measure Quantity')
-						{
-							obj.quantity	=	ChildQuantitiesURI[c].Quantity;
-							obj.uom			=	ChildQuantitiesURI[c].QuantityUOM;
-							QuantityEPCs.push(obj);
-						}
-						else
-						{
-							QuantityEPCs.push(obj);
-						}
-					}	
+						obj["quantity"]	=	ChildQuantitiesURI[c].Quantity;
+					}
+					else if(ChildQuantitiesURI[c].QuantityType == 'Variable Measure Quantity')
+					{
+						obj["quantity"]	=	ChildQuantitiesURI[c].Quantity;
+						obj["uom"]		=	ChildQuantitiesURI[c].QuantityUOM;
+					}
+					ObjectEvent['childQuantityList'].push(obj);
 				}
-				ObjectEvent['quantityList']	=	QuantityEPCs;
 			}
 		}
 
@@ -442,7 +390,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			ObjectEvent['action']	=	input.action;
 		}
 
-				//Check for BUSINESS STEP
+		//Check for BUSINESS STEP
 		if(input.businessStep != '' && input.businessStep != null && typeof input.businessStep != undefined)
 		{
 			if(input.businessStep == 'BusinessStepEnter')
@@ -451,7 +399,14 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			}
 			else
 			{
-				ObjectEvent['bizStep']  = 'urn:epcglobal:cbv:bizstep:'+input.businessStep;
+				if(SyntaxType == 'urn')
+				{
+					ObjectEvent['bizStep']  =	'urn:epcglobal:cbv:bizstep:'+input.businessStep;
+				}
+				else if(SyntaxType == 'webURI')
+				{
+					ObjectEvent['bizStep']  =	Domain+'voc/Bizstep-'+input.businessStep;
+				}				
 			}
 		}
 
@@ -464,123 +419,116 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			}
 			else
 			{
-				ObjectEvent['disposition']	=	'urn:epcglobal:cbv:disp:'+input.disposition;
+				if(SyntaxType == 'urn')
+				{
+					ObjectEvent['disposition']	=	'urn:epcglobal:cbv:disp:'+input.disposition;
+				}
+				else if(SyntaxType == 'webURI')
+				{
+					ObjectEvent['disposition'] 	=	Domain+'voc/Disp-'+input.disposition;
+				}	
 			}
 		}
 
-		//Check and create the readpoint and Busimess Location
+		//Check and create the READPOINT
 		if(input.readpointselector != '' && input.readpointselector != null && typeof input.readpointselector != undefined)
 		{
 			if(input.readpointselector == 'manually')
-			{
-					ObjectEvent["readPoint"]		=	{};
-					var readPoint 							= 	input.readpoint;
-					ObjectEvent.readPoint['id']	=	readPoint;
+			{					
+				ObjectEvent["readPoint"]	=	input.readpoint;
 			}
 			else if(input.readpointselector == 'sgln')
 			{
+				if(SyntaxType == 'urn')
+				{
 					xml_json_functions.ReadPointFormatter(input,File,function(data){
-						ObjectEvent["readPoint"]		=	{};
-						var readPoint 					= 	'urn:epc:id:sgln:'+data;
-						ObjectEvent.readPoint['id']	=	readPoint;
+						ObjectEvent["readPoint"]		=	'urn:epc:id:sgln:'+data;
 					});
+				}
+				else if(SyntaxType == 'webURI')
+				{
+					ObjectEvent["readPoint"]			=	'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2;
+				}					
 			}
 		}
 
 		//Check for the Business Location and set the Business Location
 		if(input.businesslocationselector != '' && input.businesslocationselector != null && typeof input.businesslocationselector != undefined)
 		{
-			ObjectEvent['bizLocation']		=	{};
-
 			if(input.businesslocationselector == 'manually')
 			{
-				var businesslocation			= 	input.businesslocation
-				ObjectEvent.bizLocation['id'] 	=	businesslocation;
+				ObjectEvent['bizLocation']	 	=	input.businesslocation;
 			}
 			else if(input.businesslocationselector == 'sgln')
 			{
-				xml_json_functions.BusinessLocationFormatter(input,File,function(data)
+				if(SyntaxType == 'urn')
 				{
-					var businesslocation			= 	'urn:epc:id:sgln:'+data
-					ObjectEvent.bizLocation['id'] 	=	businesslocation;
-				});
+					xml_json_functions.BusinessLocationFormatter(input,File,function(data)
+					{ 	
+						ObjectEvent['bizLocation'] 	=	'urn:epc:id:sgln:'+data;
+					});
+				}
+				else if(SyntaxType == 'webURI')
+				{
+					ObjectEvent['bizLocation'] 		=	'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2;
+				}
+				
 			}
 		}
 
 
-		//Check for the Quantity element and add it to the JSON
-		var extension		=	ObjectEvent['extension']  	= 	{};
-		
+		//Check for the Quantity element and add it to the JSON		
 		if(input.eventtype1 == "ObjectEvent")
 		{	
 			//OBJECT EVENT CHILD Quantities
 			if(Query.Quantities.length > 0)
 			{				
-				var QuantitiesURIs	=	Query.Quantities;
-				var QuantityArray	=	[];
+				var QuantitiesURIs			=	Query.Quantities[count];
+				ObjectEvent["quantityList"]	=	[];
 
-				for(var o=0; o<QuantitiesURIs.length; o++)
+				for(var q=0; q<QuantitiesURIs.length; q++)
 				{
-					for(var q=0; q<QuantitiesURIs[o].length; q++)
-					{
-						var obj 			= 	new Object();
-						obj.epcClass		=	QuantitiesURIs[o][q].URI;
+					var obj 			= 	new Object();
+					obj["epcClass"]		=	QuantitiesURIs[q].URI;
 
-						if(QuantitiesURIs[o][q].QuantityType == 'Fixed Measure Quantity')
-						{
-							obj.quantity	=	QuantitiesURIs[o][q].Quantity;
-							QuantityArray.push(obj);
-						}
-						else if(QuantitiesURIs[o][q].QuantityType == 'Variable Measure Quantity')
-						{
-							obj.quantity	=	QuantitiesURIs[o][q].Quantity;
-							obj.uom			=	QuantitiesURIs[o][q].QuantityUOM;
-							QuantityArray.push(obj);
-						}
-						else
-						{
-							QuantityArray.push(obj);
-						}
+					if(QuantitiesURIs[q].QuantityType == 'Fixed Measure Quantity')
+					{
+						obj["quantity"]	=	QuantitiesURIs[q].Quantity;
 					}
+					else if(QuantitiesURIs[q].QuantityType == 'Variable Measure Quantity')
+					{
+						obj["quantity"]	=	QuantitiesURIs[q].Quantity;
+						obj["uom"]		=	QuantitiesURIs[q].QuantityUOM;
+					}
+					
+					ObjectEvent["quantityList"].push(obj);
 				}
-				ObjectEvent.extension['quantityList']	=	QuantityArray;
 			}
 		}
-		else if(input.eventtype1 == "AggregationEvent")
+		else if(input.eventtype1 == "AggregationEvent" || input.eventtype1 == "AssociationEvent")
 		{
 			//AGGREGATION EVENT CHILD Quantities			
 			if(Query.Quantities.length > 0)
 			{
-				var QuantityEPCs	=	[];
-				
-				for(var o=0; o<Query.Quantities.length; o++)
-				{
-					var ChildQuantitiesURI	=	Query.Quantities[o];
+				ObjectEvent['childQuantityList']	=	[];
+				var ChildQuantitiesURI		=	Query.Quantities[count];									
 					
-					for(c=0; c<ChildQuantitiesURI.length;c++)
+				for(c=0; c<ChildQuantitiesURI.length;c++)
+				{
+					var obj 			= 	new Object();
+					obj["epcClass"]		=	ChildQuantitiesURI[c].URI;
+					
+					if(ChildQuantitiesURI[c].QuantityType == 'Fixed Measure Quantity')
 					{
-						var obj 			= 	new Object();
-						obj.epcClass		=	ChildQuantitiesURI[c].URI;
-						
-						if(ChildQuantitiesURI[c].QuantityType == 'Fixed Measure Quantity')
-						{
-							obj.quantity	=	ChildQuantitiesURI[c].Quantity;
-							QuantityEPCs.push(obj);
-						}
-						else if(ChildQuantitiesURI[c].QuantityType == 'Variable Measure Quantity')
-						{
-							obj.quantity	=	ChildQuantitiesURI[c].Quantity;
-							obj.uom			=	ChildQuantitiesURI[c].QuantityUOM;
-							QuantityEPCs.push(obj);
-						}
-						else
-						{
-							QuantityEPCs.push(obj);
-						}
-					}	
+						obj["quantity"]	=	ChildQuantitiesURI[c].Quantity;
+					}
+					else if(ChildQuantitiesURI[c].QuantityType == 'Variable Measure Quantity')
+					{
+						obj["quantity"]	=	ChildQuantitiesURI[c].Quantity;
+						obj["uom"]		=	ChildQuantitiesURI[c].QuantityUOM;
+					}
+					ObjectEvent['childQuantityList'].push(obj);
 				}
-				
-				ObjectEvent.extension['quantityList']	=	QuantityEPCs;
 			}
 		}
 		else if(input.eventtype1 == "TransactionEvent")
@@ -588,34 +536,26 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			//TRANSACTION EVENT CHILD QUANTITIES
 			if(Query.Quantities.length >0)
 			{
-				var QuantityEPCs	=	[];
-				
-				for(var o=0; o<Query.Quantities.length; o++)
+				ObjectEvent["quantityList"]		=	[];
+				var Quantities 					=	Query.Quantities[count];
+			
+				for(q=0; q<Quantities.length; q++)
 				{
-					var Quantities 		=	Query.Quantities[o];
-				
-					for(q=0; q<Quantities.length; q++)
+					var obj 			= 	new Object();
+					obj["epcClass"]		=	Quantities[q].URI;
+					
+					if(Quantities[q].QuantityType == 'Fixed Measure Quantity')
 					{
-						var obj 			= 	new Object();
-						obj.epcClass		=	Quantities[q].URI;
-						
-						if(Quantities[q].QuantityType == 'Fixed Measure Quantity')
-						{
-							obj.quantity	=	Quantities[q].Quantity;
-						}
-						else if(Quantities[q].QuantityType == 'Variable Measure Quantity')
-						{
-							obj.quantity	=	Quantities[q].Quantity;
-							obj.uom			=	Quantities[q].QuantityUOM;
-							QuantityEPCs.push(obj);
-						}
-						else
-						{
-							QuantityEPCs.push(obj);
-						}
+						obj["quantity"]		=	Quantities[q].Quantity;
 					}
+					else if(Quantities[q].QuantityType == 'Variable Measure Quantity')
+					{
+						obj["quantity"]		=	Quantities[q].Quantity;
+						obj["uom"]			=	Quantities[q].QuantityUOM;
+					}
+					
+					ObjectEvent["quantityList"].push(obj);
 				}				
-				ObjectEvent.extension['quantityList']	=	QuantityEPCs;				
 			}
 		}
 		
@@ -627,8 +567,18 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			{
 				var BTT 					=	Query.BTT[b];
 				var BTTObj					=	new Object();
-				BTTObj['type']				=	'urn:epcglobal:cbv:btt:'+BTT.BTT.Type;
-				BTTObj['bizTransaction']	=	'urn:epcglobal:cbv:bt:'+BTT.BTT.Value;				
+				
+				if(SyntaxType == 'urn')
+				{	
+					BTTObj['type']				=	"urn:epcglobal:cbv:btt:"+BTT.BTT.Type;
+					BTTObj['bizTransaction']	=	'urn:epcglobal:cbv:bt:'+BTT.BTT.Value;	
+				}
+				else if(SyntaxType == 'webURI')
+				{
+					BTTObj['type']				=	Domain+'BTT-'+BTT.BTT.Type;
+					BTTObj['bizTransaction']	=	Domain+'BT-'+BTT.BTT.Value;
+				}				
+				
 				BTTArray.push(BTTObj)
 			}
 			ObjectEvent['bizTransactionList']		=	BTTArray;			
@@ -636,60 +586,88 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 
 		//Check for the Source and Source type
 		if(input.sourcesType != '' && input.sourcesType != null && input.sourcesType != undefined)
-		{
-			ObjectEvent['sourceList']		=	{};
+		{				
+			ObjectEvent['sourceList']		=	[];
+			var SourceListObj				=	new Object();
+			var Domain2						=	'https://id.gs1.org/';				
+			var SourceGLN					=	input.SourceGLN;
+			var SourceCompanyPrefix			=	input.SourcesCompanyPrefix;
+			var FormattedSource;
 			
 			if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party' || input.sourcesType == 'location')
-			{
-				ObjectEvent.sourceList['type']	=	'urn:epcglobal:cbv:sdt:'+input.sourcesType;
-				var SourceGLN			=	input.SourceGLN;
-				var SourceCompanyPrefix	=	input.SourcesCompanyPrefix;
-				var FormattedSource;
-				
+			{			
 				xml_json_functions.SourceDestinationFormatter(SourceGLN,SourceCompanyPrefix,function(data)
 				{	
 					FormattedSource	=	data;
-				});
+				});				
 				
 				if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party')
 				{
 					//If PGLN then directly append
 					if(input.SourceLNType == 'pgln')
-					{						
-						ObjectEvent.sourceList['source']	=	'urn:epc:id:pgln:'+FormattedSource;
-											
+					{
+						if(SyntaxType == 'urn')
+						{
+							SourceListObj['type']		=	'urn:epcglobal:cbv:sdt:'+input.sourcesType;
+							SourceListObj['source']		=	'urn:epc:id:pgln:'+FormattedSource;
+						}
+						else if(SyntaxType == 'webURI')
+						{
+							SourceListObj['type']		=	Domain+'voc/SDT-'+input.sourcesType;
+							SourceListObj['source']		=	Domain2+'417/'+input.SourceGLN;
+						}
 					}
 					else if(input.SourceLNType == 'sgln')
 					{
-						FormattedSource						=	'urn:epc:id:sgln:'+ FormattedSource + '.' + input.SourceGLNExtension;
-						ObjectEvent.sourceList['source']	=	FormattedSource;							
+						if(SyntaxType == 'urn')
+						{
+							SourceListObj['type']		=	'urn:epcglobal:cbv:sdt:'+input.sourcesType;
+							SourceListObj['source']		=	'urn:epc:id:sgln:'+ FormattedSource + '.' + input.SourceGLNExtension;
+						}
+						else if(SyntaxType == 'webURI')
+						{
+							SourceListObj['type']		=	Domain+'voc/SDT-'+input.sourcesType;
+							SourceListObj['source']		=	Domain2+'414/'+input.SourceGLN+'/254/'+input.SourceGLNExtension;
+						}												
 					}
 				}
 
 				if(input.sourcesType == 'location')
 				{
-					FormattedSource						=	'urn:epc:id:sgln:'+ FormattedSource + '.' + input.SourceGLNExtension;
-					ObjectEvent.sourceList['source']	=	FormattedSource;
+					FormattedSource							=	FormattedSource + '.' + input.SourceGLNExtension;
+					
+					if(SyntaxType == 'urn')
+					{
+						SourceListObj['type']		=	'urn:epcglobal:cbv:sdt:'+input.sourcesType;
+						SourceListObj['source']		=	'urn:epc:id:sgln:'+FormattedSource;
+					}
+					else if(SyntaxType == 'webURI')
+					{
+						SourceListObj['type']		=	Domain+'voc/SDT-'+input.sourcesType;
+						SourceListObj['source']		=	Domain2+'414/'+input.SourceGLN+'/254/'+input.SourceGLNExtension;
+					}
 				}
 			}
 			else if(input.sourcesType == 'other')
 			{
-				ObjectEvent.sourceList['type']		=	input.OtherSourceURI1;
-				ObjectEvent.sourceList['source']	=	input.OtherSourceURI2;
+				SourceListObj['type']		=	input.OtherSourceURI1;
+				SourceListObj['source']		=	input.OtherSourceURI2;
 			}
+			
+			ObjectEvent['sourceList'].push(SourceListObj)
 		}
 
 		//Check for the Destination and Destination type
 		if(input.destinationsType != '' && input.destinationsType != null && input.destinationsType != undefined)
 		{
-			ObjectEvent['destinationList']		=	{};
+			ObjectEvent['destinationList']		=	[];
+			var destinationListObj				=	new Object();
+			var destinationGLN					=	input.DestinationGLN;
+			var destinationCompanyPrefix		=	input.DestinationCompanyPrefix;
+			var FormattedDestination;
 
 			if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party' || input.destinationsType == 'location')
-			{
-				var destinationGLN				=	input.DestinationGLN;
-				var destinationCompanyPrefix	=	input.DestinationCompanyPrefix;
-				var FormattedDestination;
-				
+			{				
 				xml_json_functions.SourceDestinationFormatter(destinationGLN,destinationCompanyPrefix,function(data)
 				{
 					FormattedDestination	=	data;
@@ -700,29 +678,137 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					//If PGLN then directly append
 					if(input.DestinationLNType == 'pgln')
 					{
-						ObjectEvent.destinationList['type']			=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
-						ObjectEvent.destinationList['destination']	=	'urn:epc:id:pgln:' + FormattedDestination								
+						destinationListObj['type']			=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
+						destinationListObj['destination']	=	'urn:epc:id:pgln:' + FormattedDestination								
 					}
 					else if(input.DestinationLNType == 'sgln')
 					{
-						ObjectEvent.destinationList['type']			=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
-						FormattedDestination						=	FormattedDestination + '.' + input.DestinationGLNExtension;
-						ObjectEvent.destinationList['destination']	=	'urn:epc:id:pgln:' + FormattedDestination							
+						FormattedDestination				=	FormattedDestination + '.' + input.DestinationGLNExtension;
+						destinationListObj['type']			=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
+						destinationListObj['destination']	=	'urn:epc:id:pgln:' + FormattedDestination							
 					}	
 				}
 				
 				if(input.destinationsType == 'location')
 				{
-					ObjectEvent.destinationList['type']				=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
-					FormattedDestination							=	FormattedDestination + '.' + input.DestinationGLNExtension;
-					ObjectEvent.destinationList['destination']		=	'urn:epc:id:pgln:' + FormattedDestination						
+					FormattedDestination					=	FormattedDestination + '.' + input.DestinationGLNExtension;
+					destinationListObj['type']				=	'urn:epcglobal:cbv:sdt:'+input.destinationsType;
+					destinationListObj['destination']		=	'urn:epc:id:pgln:' + FormattedDestination						
 				}
 					
 			}
 			else if(input.destinationsType == 'other')
 			{
-				ObjectEvent.destinationList['type']			=	input.OtherDestinationURI1;
-				ObjectEvent.destinationList['destination']	=	input.OtherDestinationURI2;
+				destinationListObj['type']			=	input.OtherDestinationURI1;
+				destinationListObj['destination']	=	input.OtherDestinationURI2;
+			}
+			
+			ObjectEvent['destinationList'].push(destinationListObj);
+		}
+		
+		//Check for the PERSISTENT DISPOSITION
+		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
+		{
+			ObjectEvent['persistentDisposition']	=	{};	
+			
+			if(input.PersistentDisposition == 'DispositionEnter')
+			{
+				ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	input.EnterPersistentDispositionText;	
+			}
+			else
+			{
+				if(SyntaxType == 'urn')
+				{
+					ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	'urn:epcglobal:cbv:disp:'+input.PersistentDisposition;
+				}
+				else if(SyntaxType == 'webURI')
+				{
+					ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	Domain+'voc/Disp-'+input.PersistentDisposition;
+				}
+			}
+		}
+		
+				//Sensor Information
+		if(Query.SensorForm.length > 0)
+		{				
+			var SensorForm							=	Query.SensorForm;
+			ObjectEvent['sensorElementList']		=	[];	
+			
+			//Loop through the SensorForm and find the number of elements
+			for(var sf=0; sf<SensorForm.length; sf++)
+			{	
+				var SensorMetaOuterObj		=	new Object();
+				
+				//Loop through Each sensor Element
+				for(var t=0; t<SensorForm[sf].length; t++)
+				{
+					var SensorMetadatObj	=	new Object();
+					
+					//Add the Sensor Metadata information if its populated
+					SensorChecker(SensorForm[sf][t].Time,'time',SensorMetadatObj)
+					SensorChecker(SensorForm[sf][t].StartTime,'startTime',SensorMetadatObj)
+					SensorChecker(SensorForm[sf][t].EndTime,'endTime',SensorMetadatObj)
+					SensorChecker(SensorForm[sf][t].DeviceID,'deviceID',SensorMetadatObj)
+					SensorChecker(SensorForm[sf][t].DeviceMetadata,'deviceMetaData',SensorMetadatObj)
+					SensorChecker(SensorForm[sf][t].RawData,'rawData',SensorMetadatObj)
+					SensorChecker(SensorForm[sf][t].DataProcessingMethod,'dataProcessingMethod',SensorMetadatObj)
+					SensorChecker(SensorForm[sf][t].BusinessRules,'bizRules',SensorMetadatObj)
+					
+					SensorMetaOuterObj["sensorMetaData"]	=	SensorMetadatObj;
+					
+					var SensorElements		=	SensorForm[sf][t].SensorElements;
+					
+					if(SensorElements.length > 0)
+					{
+						SensorMetaOuterObj["sensorReport"]		=	[];
+						
+						for(var e=0;e<SensorElements.length;e++)
+						{
+							var SensorReportElement	=	new Object();
+							var SensorType			=	SensorElements[e].SensorFields.Type;
+							
+							SensorChecker(SensorElements[e].SensorFields.Time,'time',SensorReportElement)
+							
+							if(SensorType != '' && SensorType != null && SensorType != undefined){
+								SensorReportElement['type']	=	'gs1:'+SensorType;
+							}
+							
+							//Check if the field is populated and add it to the sensor element list
+							SensorChecker(SensorElements[e].SensorFields.DeviceID,'deviceID',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.DeviceMetaData,'deviceMetaData',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.RawData,'rawData',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.DataProcessingMethod,'dataProcessingMethod',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.Time,'time',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.Microorganism,'microorganism',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.ChemicalSubstance,'chemicalSubstance',SensorReportElement)							
+							SensorChecker(SensorElements[e].SensorFields.Value,'value',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.Component,'component',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.StringValue,'stringValue',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.BooleanValue,'booleanValue',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.HexBinaryValue,'hexBinaryValue',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.URIValue,'uriValue',SensorReportElement)		
+							SensorChecker(SensorElements[e].SensorFields.MaxValue,'maxValue',SensorReportElement)							
+							SensorChecker(SensorElements[e].SensorFields.MinValue,'minValue',SensorReportElement)							
+							SensorChecker(SensorElements[e].SensorFields.MeanValue,'meanValue',SensorReportElement)						
+							SensorChecker(SensorElements[e].SensorFields.StandardDeviation,'sDev',SensorReportElement)	
+							SensorChecker(SensorElements[e].SensorFields.PercRank,'percRank',SensorReportElement)	
+							SensorChecker(SensorElements[e].SensorFields.PercValue,'percValue',SensorReportElement)								
+							SensorChecker(SensorElements[e].SensorFields.UOM,'uom',SensorReportElement)
+							
+							SensorMetaOuterObj["sensorReport"].push(SensorReportElement);
+						}
+					}
+				}
+				
+				ObjectEvent['sensorElementList'].push(SensorMetaOuterObj);				
+			}		
+		}
+		
+		//Function to check if the field is populated for sensor elements
+		function SensorChecker(field, attValue, SensorMetadatObj){
+			if(field != '' && field != null && field != undefined)
+			{
+				SensorMetadatObj[attValue]	=	field;
 			}
 		}
 
@@ -755,70 +841,6 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			}
 		}
 		
-		
-		
-		//Check for sensor Elements and populate the data
-		if(Query.SensorForm.length > 0)
-		{
-			var SensorForm				=	Query.SensorForm;
-			var SensorElementList		=	[];
-			
-			//Loop through the SensorForm and find the number of elements
-			for(var sf=0; sf<SensorForm.length; sf++)
-			{
-				var SensorElementObj				=	new Object();				
-				SensorElementObj.sensorElement		=	{};
-				//Loop through Each sensor Element
-				for(var t=0; t<SensorForm[sf].length; t++)
-				{
-					var SensorReportArray								=	[];									
-					//Add the Sensor Metadata information
-					if(SensorForm[sf][t].CheckBox){
-						SensorElementObj.sensorElement.sensorMetaData			=	{};	
-						SensorElementObj.sensorElement.sensorMetaData.time		=	moment(SensorForm[sf][t].Time).format()
-						SensorElementObj.sensorElement.sensorMetaData.startTime	=	moment(SensorForm[sf][t].StartTime).format()
-						SensorElementObj.sensorElement.sensorMetaData.endTime	=	moment(SensorForm[sf][t].EndTime).format()
-					}
-					
-					var SensorElements		=	SensorForm[sf][t].SENSORELEMENTS;
-					
-					//Loop through Each Sensor Report Data
-					if(SensorElements != undefined)
-					{
-						for(var e=0;e<SensorElements.length;e++)
-						{
-							
-							var SensorReportObj	=	new Object();
-							
-							var SensorType		=	SensorElements[e].SensorFields.Type;
-							var SensorValue		=	SensorElements[e].SensorFields.Value;
-							var SensorUOM		=	SensorElements[e].SensorFields.UOM;
-							
-							if(SensorType != '' && SensorType != null && SensorType != undefined){							
-								SensorReportObj.type 	= 	'gs1:'+SensorType;
-							}
-							
-							if(SensorValue != '' && SensorValue != null && SensorValue != undefined){
-								SensorReportObj.value	=	'gs1:'+SensorValue;
-							}
-								
-							if(SensorUOM != '' && SensorUOM != null && SensorUOM != undefined){
-								SensorReportObj.uom	=	'gs1:'+SensorUOM;
-							}
-							SensorReportArray.push(SensorReportObj);
-						}
-					}
-						
-					if(SensorReportArray.length > 0)
-					{
-						SensorElementObj.sensorElement.sensorReport	= SensorReportArray;
-					}
-					SensorElementList.push(SensorElementObj);					
-				}
-			}
-			extension['sensorElementList']	=	SensorElementList;
-		}
-		
 		//Check if the extension field is filled and add the JSON
 		var Extension			=	Query.Extension;
 		if(Extension.length > 0)
@@ -847,39 +869,11 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 
 		//Increment the count and push the each event to an array
 		itemProcessed++;
-		if(input.eventtype1 == "ObjectEvent")
-		{
-			MainArray.push({'ObjectEvent':ObjectEvent});
-		}
-		else if(input.eventtype1 == "AggregationEvent")
-		{
-			MainArray.push({'AggregationEvent':ObjectEvent});
-		}
-		else if(input.eventtype1 == "TransactionEvent")
-		{
-			MainArray.push({'TransactionEvent':ObjectEvent});
-		}
-		else if(input.eventtype1 == "TransformationEvent")
-		{
-			MainArray.push({'TransformationEvent':ObjectEvent});
-		}
-		else if(input.eventtype1 == "AssociationEvent")
-		{
-			MainArray.push({'AssociationEvent':ObjectEvent});
-		}
 	
 		if(itemProcessed == input.eventcount)
 		{
-			if(input.eventtype1 == "AssociationEvent")
-			{
-				JSONschemaParse.epcisBody.EventList['extension']			=	{};
-				JSONschemaParse.epcisBody.EventList.extension['extension']	=	MainArray;
-			}
-			else
-			{
-				JSONschemaParse.epcisBody['EventList']	=	MainArray
-			}
-			
+			JSONschemaParse.epcisBody['eventList'] = [];
+			JSONschemaParse.epcisBody['eventList'].push(ObjectEvent);
 			callback(JSON.stringify(JSONschemaParse));
 		}
 	}

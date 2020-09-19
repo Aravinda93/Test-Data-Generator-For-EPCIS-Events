@@ -2,21 +2,15 @@ var builder 			=	require('xmlbuilder');
 var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 var xml_json_functions	=	require('./XML_JSON_Functions');
-var rootCounter			=	0;
 								
 exports.createXMLData	=	function(Query,Root,callback){
 	var input			=	Query.input;
-	var today 			= 	new Date();
-	let date 			= 	today.toISOString().slice(0, 10).replace(/-/g,"-");
-	var time 			= 	(today.getHours()+1) + ":" + today.getMinutes() + ":" + today.getSeconds()+'Z';
-		time			= 	time.replace(/:/g,"_");
-	var now 			=	date+"T"+time;
-	var offset			= 	today.getTimezoneOffset()/60+':00';
 	var itemProcessed 	=	0;
 	var File 			= 	'XML';
 	var RecordTimeArray	=	[];
 	var EventTimeArray	=	[];
 	var ErrorTimeArray	=	[];
+	var EventIDArray	=	[];
 	var Domain			=	'https://gs1.org/';
 	var SyntaxType		=	input.VocabSyntaxType;
 
@@ -116,13 +110,22 @@ exports.createXMLData	=	function(Query,Root,callback){
 		}
 		
 		//If error declaration has been set then add the below tags
-		if(input.eventtype2 == 'errordeclaration' || input.EventId != "")
+		if(input.eventtype2 == 'errordeclaration' || input.EventIDOption == "yes")
 		{
 			//Add the error declaration if its populated
-			if(input.EventId != "" && input.EventId != null && typeof input.EventId != undefined)
+			if(input.EventIDOption == "yes")
 			{
 				baseExtension		=	ObjectEvent.ele('baseExtension')
-				baseExtension.ele('eventID',input.EventId)
+				
+				if(count == 0)
+				{
+					EventIDArray	=	[];
+					xml_json_functions.RandomEventIDGenerator(File,input.eventcount,input.EventIDType,function(ReturnEventIDArray){
+						EventIDArray	= ReturnEventIDArray;
+					});	
+				}
+				
+				baseExtension.ele('eventID',EventIDArray[count])
 			}	
 			
 			//Add the error declaration if its populated
@@ -326,27 +329,22 @@ exports.createXMLData	=	function(Query,Root,callback){
 			{
 				var outputQuantityList	=	ObjectEvent.ele('outputQuantityList')
 				var quantityElement		=	outputQuantityList.ele('quantityElement')
-				
-				
-				for(var o=0; o<Query.OutputQuantities.length; o++)
-				{
-					var OutputQuantities	=	Query.OutputQuantities[o];
+				var OutputQuantities	=	Query.OutputQuantities[count];					
 					
-					for(var q=0; q<OutputQuantities.length; q++)
-					{	
-						quantityElement.ele('epcClass',OutputQuantities[q].URI).up()
-						
-						if(OutputQuantities[q].QuantityType == 'Fixed Measure Quantity')
-						{
-							quantityElement.ele('quantity',OutputQuantities[q].Quantity).up()
-						}
-						else if(OutputQuantities[q].QuantityType == 'Variable Measure Quantity')
-						{
-							quantityElement.ele('quantity',OutputQuantities[q].Quantity).up()
-							quantityElement.ele('uom',OutputQuantities[q].QuantityUOM).up()
-						}
-					}	
-				}				
+				for(var q=0; q<OutputQuantities.length; q++)
+				{	
+					quantityElement.ele('epcClass',OutputQuantities[q].URI).up()
+					
+					if(OutputQuantities[q].QuantityType == 'Fixed Measure Quantity')
+					{
+						quantityElement.ele('quantity',OutputQuantities[q].Quantity).up()
+					}
+					else if(OutputQuantities[q].QuantityType == 'Variable Measure Quantity')
+					{
+						quantityElement.ele('quantity',OutputQuantities[q].Quantity).up()
+						quantityElement.ele('uom',OutputQuantities[q].QuantityUOM).up()
+					}
+				}								
 			}
 		}
 		else if(input.eventtype1 == "AssociationEvent")
@@ -437,38 +435,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 					ObjectEvent.ele('disposition',Domain+'voc/Disp-'+input.disposition)
 				}
 			}
-		}
-		
-		//Check for the PERSISTENT DISPOSITION
-		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
-		{
-			if(OuterExtension == undefined || OuterExtension == ""){
-				if(input.eventtype1 != "AssociationEvent"){
-					OuterExtension	=	ObjectEvent.ele('extension')
-				}else{
-					OuterExtension	=	ObjectEvent;
-				}				
-			}
-			
-			var persistentDisposition	=	OuterExtension.ele('persistentDisposition')
-			
-			if(input.PersistentDisposition == 'DispositionEnter')
-			{
-				persistentDisposition.ele(input.PersistentDispositionType,input.EnterPersistentDispositionText)
-			}
-			else
-			{
-				if(SyntaxType == 'urn')
-				{
-					persistentDisposition.ele(input.PersistentDispositionType,'urn:epcglobal:cbv:disp:'+input.PersistentDisposition)
-				}
-				else if(SyntaxType == 'webURI')
-				{
-					persistentDisposition.ele(input.PersistentDispositionType,Domain+'voc/Disp-'+input.PersistentDisposition)
-				}
-			}
-		}
-		
+		}		
 		
 		//Check for ReadPoint and based on that set the Readpoint 
 		if(input.readpointselector != '' && input.readpointselector != null && typeof input.readpointselector != undefined)
@@ -620,12 +587,12 @@ exports.createXMLData	=	function(Query,Root,callback){
 				
 				if(SyntaxType == 'urn')
 				{
-					var bizTransaction 	=	bizTransactionList.ele('bizTransaction',BTT.BTT.Value)
+					var bizTransaction 	=	bizTransactionList.ele('bizTransaction','urn:epcglobal:cbv:bt:'+BTT.BTT.Value)
 					bizTransaction.att('type','urn:epcglobal:cbv:btt:'+BTT.BTT.Type)
 				}
 				else if(SyntaxType == 'webURI')
 				{
-					var bizTransaction 	=	bizTransactionList.ele('bizTransaction',BTT.BTT.Value)
+					var bizTransaction 	=	bizTransactionList.ele('bizTransaction',Domain+'BT-'+BTT.BTT.Value)
 					bizTransaction.att('type',Domain+'BTT-'+BTT.BTT.Type)
 				}
 			}			
@@ -795,22 +762,64 @@ exports.createXMLData	=	function(Query,Root,callback){
 				var destinations 		=	destinationList.ele('destination', input.OtherDestinationURI2)
 				destinations.att('type',input.OtherDestinationURI1)
 			}
-		}		
-		
-		//Sensor Information
-		if(Query.SensorForm.length > 0)
+		}
+
+		//Check for the PERSISTENT DISPOSITION
+		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
 		{
 			if(OuterExtension == undefined || OuterExtension == ""){
 				if(input.eventtype1 != "AssociationEvent"){
 					OuterExtension	=	ObjectEvent.ele('extension')
-					extension		= 	OuterExtension.ele('extension')
+					extension		=	OuterExtension.ele('extension')
 				}else{
 					extension		=	ObjectEvent;
 				}				
 			}
 			else
 			{
-				extension		=	ObjectEvent;
+				extension		=	OuterExtension.ele('extension')
+			}
+			
+			var persistentDisposition	=	extension.ele('persistentDisposition')
+			
+			if(input.PersistentDisposition == 'DispositionEnter')
+			{
+				persistentDisposition.ele(input.PersistentDispositionType,input.EnterPersistentDispositionText)
+			}
+			else
+			{
+				if(SyntaxType == 'urn')
+				{
+					persistentDisposition.ele(input.PersistentDispositionType,'urn:epcglobal:cbv:disp:'+input.PersistentDisposition)
+				}
+				else if(SyntaxType == 'webURI')
+				{
+					persistentDisposition.ele(input.PersistentDispositionType,Domain+'voc/Disp-'+input.PersistentDisposition)
+				}
+			}
+		}
+		
+		//Sensor Information
+		if(Query.SensorForm.length > 0)
+		{
+			if(OuterExtension == "")
+			{
+				if(input.eventtype1 != "AssociationEvent")
+				{
+					OuterExtension	=	ObjectEvent.ele('extension')
+					extension		= 	OuterExtension.ele('extension')
+				}
+				else
+				{
+					extension		=	ObjectEvent;
+				}				
+			}
+			else
+			{
+				if(extension == "")
+				{
+					extension		= 	OuterExtension.ele('extension')
+				}				
 			}
 				
 			var SensorForm			=	Query.SensorForm;

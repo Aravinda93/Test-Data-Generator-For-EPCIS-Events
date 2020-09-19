@@ -1,8 +1,10 @@
 var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
+var uuid 				= 	require('uuid');
 var randomArray 		= 	[];
 var RecordTimeArray		=	[];
 var EventTimeArray		=	[];
+var EventIDArray		=	[];
 
 //Format the readpoint
 exports.ReadPointFormatter	=	function(input,File,callback){
@@ -70,5 +72,28 @@ exports.RandomEventTimeGenerator	=	function(DateFrom,DateTo,Count,File,callback)
 	{
 		callback(EventTimeArray);
 	}	
+}
+
+//Random EventID generator based on the count of event
+exports.RandomEventIDGenerator		=	function(File,Count,Type,callback){
 	
+	if(File == 'XML')
+	{
+		EventIDArray	=	[];
+		
+		if(Type == 'uuid')
+		{
+			for(var re=0; re<Count; re++)
+			{
+				var RandomUUID 	=	uuid.v4(); 
+					RandomUUID	=	'urn:uuid:'+RandomUUID;
+				EventIDArray.push(RandomUUID);
+			}
+		}		
+		callback(EventIDArray);
+	}
+	else if(File == 'JSON')
+	{
+		callback(EventIDArray);
+	}
 }

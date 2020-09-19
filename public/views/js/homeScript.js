@@ -2,7 +2,7 @@ var app = angular.module('myApp', ['CopyToClipboard'], function() {});
 
 app.controller('AppController', function($scope,$http,$location,$anchorScroll,$copyToClipboard,$rootScope){
 	//Common
-	$scope.formdata								=	{eventtype1:'', ElementssyntaxType:'urn', VocabSyntaxType:'urn'};
+	$scope.formdata								=	{eventtype1:'', ElementssyntaxType:'urn', VocabSyntaxType:'urn', EventIDOption:'no', EventIDType: 'uuid'};
 	$scope.SensorForm							=	{Temperature:''};
 	$scope.AddExtensionForm						=	{};
 	$scope.EditExtensionForm					=	{};
@@ -453,8 +453,8 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 						$scope.TransformationEventInputEPCsURI.push(response);
 						
 						//After the loop set all values of the button and flag to false
-						if(ItemCount == $scope.formdata.eventcount)
-						{
+						if(ItemCount == parseInt($scope.formdata.eventcount, 10))
+						{					
 							$scope.TransformationEventInputEPCsFlag		=	false;
 							$scope.TransformInputEPCsButton				=	false;	
 						}
@@ -466,7 +466,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 						$scope.TransformationEventOutputEPCSURI.push(response);
 						
 						//After the loop set all values of the button and flag to false
-						if(ItemCount == $scope.formdata.eventcount)
+						if(ItemCount == parseInt($scope.formdata.eventcount, 10))
 						{
 							$scope.TransformationEventOutputEPCsFlag 	= 	false;
 							$scope.TransformOutputEPCsButton			=	false;
@@ -480,14 +480,17 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 					}
 					
 					//After the loop set all values of the button and flag to false								
-					if(ItemCount == $scope.formdata.eventcount)
-					{	
+					if(ItemCount == parseInt($scope.formdata.eventcount, 10))
+					{
 						$scope.ObjectEventAddEPCsFlag				=	false;
 						$scope.ObjectEventEPCSbutton				=	false;						
+						
 						$scope.AEChildEPCSFlage						=	false;
 						$scope.AEChildEPCButton						=	false;				
+						
 						$scope.TransactionEventChildEPCS			=	false;
-						$scope.TransactionEventEPCSbutton			=	false;												
+						$scope.TransactionEventEPCSbutton			=	false;
+						
 						$scope.AssociationEventChildEPCSButton		=	false;
 						$scope.AssociationEventChildEPCSFlag		=	false;
 					}
@@ -515,6 +518,9 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 				data:data
 			}).success(function(response) {
 				
+				//Check if Output quantities filled as per Event count
+				ItemCount	=	ItemCount+1;
+				
 				//IF OBJECT EVENT QUANTITIES CLICKED
 				if($scope.OEQuantitiesFlag)
 				{
@@ -537,12 +543,26 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 				if($scope.TransformationEventInputQuantitiesFlag)
 				{
 					$scope.TransformationEventInputQuantityURI.push(response);
+					
+					//Check if input quantities filled as per Event count
+					if(ItemCount == parseInt($scope.formdata.eventcount, 10))
+					{
+						$scope.TransformationEventInputQuantitiesFlag	=	false;
+						$scope.TransformationEventInputQuantitiesButton	=	false;
+					}
 				}
 				
 				//Transformation Output Quantities
 				if($scope.TransformationEventOutputQuantitiesFlag)
 				{				
 					$scope.TransformationEventOutputQuantityURI.push(response);
+					
+					//Check if Output quantities filled as per Event count
+					if(ItemCount == parseInt($scope.formdata.eventcount, 10))
+					{
+						$scope.TransformationEventOutputQuantitiesFlag	=	false;
+						$scope.TransformationEventOutputQuantitiesButton=	false;
+					}
 				}
 				
 				//Association Event Child Quantities
@@ -551,13 +571,9 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 					$scope.AssociationEventChildQuantitiesURI.push(response);
 				}
 				
-				//Check for the loop completion
-				ItemCount	=	ItemCount+1;
-				
 				//After the loop set all values of the button and flag to false
 				if(ItemCount == $scope.formdata.eventcount)
 				{
-					console.log($scope.ObjectEventQuantitiesURI)
 					$scope.OEQuantitiesFlag							=	false;
 					$scope.OEAddQuantitiesButton					=	false;					
 							
@@ -565,16 +581,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 					$scope.AEChildQuantitiesButton					= 	false;					
 							
 					$scope.TransactionEventQuantitiesFlag 			=	false;
-					$scope.TransactionEventQuantitiesButton			=	false;
-					
-					
-					$scope.TransformationEventInputQuantitiesFlag	=	false;
-					$scope.TransformationEventInputQuantitiesButton	=	false;
-					
-					
-					$scope.TransformationEventOutputQuantitiesFlag	=	false;
-					$scope.TransformationEventOutputQuantitiesButton=	false;
-					
+					$scope.TransactionEventQuantitiesButton			=	false;					
 					
 					$scope.AssociationEventChildQuantitiesFlag		=	false;
 					$scope.AssociationEventChildQuantitiesButton	=	false;				
@@ -1020,7 +1027,6 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		BTTObj['BTT']	=	{};
 		$scope.BusinessTransactionList.push(BTTObj);
 		$scope.BusinessTransactionCount++;
-		console.log($scope.BusinessTransactionList);
 	}
 	
 	//Add the information into the BTT Array
@@ -1034,7 +1040,6 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 				break;
 			}
 		}
-		console.log($scope.BusinessTransactionList);
 	}
 	
 	//Remove the element from the BTT array

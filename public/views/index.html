@@ -104,7 +104,7 @@
 									
 									<!-- Provide an option for user defined Web URI-->
 									<td ng-show="formdata.ElementssyntaxType == 'webURI' ">
-										<input ng-model="formdata.UserDefinedURI" placeholder="Web URI (Optional)" type="text" class="form-control"></input>
+										<input ng-model="formdata.UserDefinedURI" placeholder="Custom Domain (Optional)" type="text" class="form-control"></input>
 									</td>
 								</tr>
 								
@@ -490,7 +490,7 @@
 									
 									<td class="form-inline">
 										<select ng-model="formdata.PersistentDispositionType" id="PersistentDispositionType" class="form-control">
-											<option class="dropdown-item" value="" selected disabled> Choose Type </option>
+											<option class="dropdown-item" value="" selected disabled> Choose </option>
 											<option class="dropdown-item" value="set"> Set </option>
 											<option class="dropdown-item" value="unset"> Unset </option>
 										</select>&ensp;
@@ -621,11 +621,31 @@
 								<!-- OTHER FIELDS START -->
 								<tr>
 									<td rowspan="{{ OtherFields }}" style="background-color: #F2F3F4;">Other</td>
-									<td class="column2"> Event ID </td>
-									<td>
-										<input type="text" class="form-control" id="EventId" ng-model="formdata.EventId" placeholder="Enter the Event Id"></input>
-									</td>									
-								</tr>
+									<td> Event ID </td>
+									<td class="form-inline" style="display: block;margin: auto;">
+										<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" class="custom-control-input" value="yes" ng-model="formdata.EventIDOption" name="EventIDOption" id="EventIDOption1">
+											<label class="custom-control-label" for="EventIDOption1">Yes</label>
+										</div>
+										
+										<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" class="custom-control-input" value="no" ng-model="formdata.EventIDOption" name="EventIDOption" id="EventIDOption2">
+											<label class="custom-control-label" for="EventIDOption2">No</label>
+										</div>
+									</td>
+									
+									<td ng-show="formdata.EventIDOption == 'yes'" class="form-inline" style="display: block;margin: auto;">
+										<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" class="custom-control-input" value="uuid" ng-model="formdata.EventIDType" name="EventIDType" id="EventIDType1">
+											<label class="custom-control-label" for="EventIDType1">UUID</label>
+										</div>
+										
+										<div class="custom-control custom-radio custom-control-inline">
+											<input type="radio" class="custom-control-input" value="sha256" ng-model="formdata.EventIDType" name="EventIDType" id="EventIDType2">
+											<label class="custom-control-label" for="EventIDType2">SHA-256</label>
+										</div>
+									</td>
+								</tr>	
 								
 								<!-- SECOND ELEMENT of OTHER FIELDS -->
 								<tr ng-show="formdata.eventtype1 == 'ObjectEvent' || formdata.eventtype1 == 'TransformationEvent' ">
