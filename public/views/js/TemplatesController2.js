@@ -422,7 +422,6 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	//Aggregation Event Parent Creation
 	$scope.CommonEventFormat	=	function(){
 		//Call the function to create the URI and Display it
-		var data 				=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues, formdata:$scope.formdata});
 		angular.element('#ParentTypeModal').modal('hide');
 		angular.element('#EventModalForm').modal('show');
 		var ItemCount			=	0;
@@ -430,38 +429,53 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		//Loop through the Event count to create random EPCs
 		for(var eventEPC=0; eventEPC<$scope.formdata.eventcount; eventEPC++)
 		{
+			var data 			=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues, formdata:$scope.formdata, EventCount:eventEPC});
+					
 			$http({
 				url		: 	"/CreateAggregationEventURI",
 				method	: 	"POST",
 				headers	: 	{'Content-Type': 'application/json'},
 				data	:	data
-			}).success(function(response) {
-				//Parent Section				
+			}).success(function(response){
+				
 				if($scope.AEParentEPCsFlag || $scope.TransactionEventParentIDFlag || $scope.AssociationEventParentFlag)
 				{
+					//Check for the loop completion
+					ItemCount	=	ItemCount+1;
+					
 					//Aggregation Event PARENT ID has been clicked				
 					if($scope.AEParentEPCsFlag)
 					{
 						$scope.AggregationEventParentURI.push(response);
-						$scope.AEParentEPCsFlag		=	false;
-						$scope.ParentButton			=	false;	
 					}
 					
 					//Transaction Event Parent has been clicked
 					if($scope.TransactionEventParentIDFlag)
 					{
 						$scope.TransactionEventParentIDURI.push(response);
-						$scope.TransactionEventParentIDFlag	=	false;
-						$scope.TransactionEventParent		=	false;
 					}
 					
 					//AssociationEvent Parent
 					if($scope.AssociationEventParentFlag)
 					{
-						$scope.AssociationEventParentURI.push(response);
+						$scope.AssociationEventParentURI.push(response);	
+					}
+					
+					//After the loop set all values of the button and flag to false
+					if(ItemCount == parseInt($scope.formdata.eventcount, 10))
+					{						
+						//Aggregation Event Parent ID
+						$scope.AEParentEPCsFlag				=	false;
+						$scope.ParentButton					=	false;						
+						
+						//Transaction Event Parent ID
+						$scope.TransactionEventParentIDFlag	=	false;
+						$scope.TransactionEventParent		=	false;						
+						
+						//Association Event Parent ID
 						$scope.AssociationEventParentButton = 	false;
-						$scope.AssociationEventParentFlag	=	false;	
-					}	
+						$scope.AssociationEventParentFlag	=	false;
+					}					
 				}
 				else
 				{
@@ -493,7 +507,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 						
 						//After the loop set all values of the button and flag to false
 						if(ItemCount == parseInt($scope.formdata.eventcount, 10))
-						{
+						{					
 							$scope.TransformationEventInputEPCsFlag		=	false;
 							$scope.TransformInputEPCsButton				=	false;	
 						}
@@ -519,23 +533,27 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 					}
 					
 					//After the loop set all values of the button and flag to false								
-					if(ItemCount == $scope.formdata.eventcount)
-					{	
-						console.log($scope.ObjectEventEpcsURI);
+					if(ItemCount == parseInt($scope.formdata.eventcount, 10))
+					{
+						//EPCs and Child EPCs section
 						$scope.ObjectEventAddEPCsFlag				=	false;
 						$scope.ObjectEventEPCSbutton				=	false;						
+						
 						$scope.AEChildEPCSFlage						=	false;
 						$scope.AEChildEPCButton						=	false;				
+						
 						$scope.TransactionEventChildEPCS			=	false;
-						$scope.TransactionEventEPCSbutton			=	false;												
+						$scope.TransactionEventEPCSbutton			=	false;
+						
 						$scope.AssociationEventChildEPCSButton		=	false;
 						$scope.AssociationEventChildEPCSFlag		=	false;
-					}
-				}		
-			}).error(function(error) {
+					}					
+				}	
+					
+			}).error(function(error){
 				console.log(error)
 			});
-		}		
+		}
 	}
 	
 	//Object Event Quantities Submit call the URI function
@@ -1250,24 +1268,21 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		$scope.isDisabled 			= 	false;
 	}
 	
-	//Aggregation Event PARENT ID Change
+	//Parent ID and EPCS change event
 	$scope.AggregationEventParentChange		=	function(){
 		
-		$scope.NoneValuesText = $scope.RandomRange = $scope.NoneValuesShow = $scope.AEPCompanyDisp = $scope.AEPSGTINDisp	 = $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp = $scope.AEPSSGLNDisp =  false;
+		$scope.NoneValuesText 	=	$scope.RandomRange 			= 	$scope.NoneValuesShow = $scope.AEPCompanyDisp = $scope.AEPSGTINDisp	 = $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp = $scope.AEPSSGLNDisp =  false;
+		$scope.AutoGenerate		=	$scope.AutoGenerateRequired =	true;	
 		
 		//Check if Multiple values are required
 		if($scope.ObjectEventAddEPCsFlag || $scope.AEChildEPCSFlage || $scope.TransactionEventChildEPCS || $scope.TransformationEventInputEPCsFlag || $scope.TransformationEventOutputEPCsFlag || $scope.AssociationEventChildEPCSFlag)
 		{
-			$scope.AutoGenerate	= $scope.AutoGenerateRequired =	$scope.MultiValues = true;
-			$scope.RequiredValues	=	true;
-			$scope.SingleValue		=	false;
+			$scope.MultiValues 		= 	true;
 		}
 		
 		if($scope.AEParentEPCsFlag || $scope.TransactionEventParentIDFlag || $scope.AssociationEventParentFlag)
 		{
-			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false;
-			$scope.SingleValue		=	true;
-			$scope.RequiredValues	=	false;
+			$scope.MultiValues 		= 	false;
 		}
 			
 		if($scope.CommonForm.AggregationEventParentID == 'SGTIN (Al 01 + Al 21)')
@@ -1358,35 +1373,35 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		{
 			$scope.AEPGIDDisp		=	true;
 			$scope.RandomRange		=	true;
-			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
+			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'USDoD')
 		{
 			$scope.AEPDSDODDisp		=	true;
 			$scope.RandomRange		=	true;
-			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
+			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'ADI')
 		{
 			$scope.AEPADIDisp		=	true;
 			$scope.RandomRange		=	true;
-			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
+			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'BIC')
 		{
 			$scope.AEPBICDisp		=	true;
-			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
+			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'IMOVN')
 		{
 			$scope.AEPIMOVNDisp		=	true; 
 			$scope.RandomRange		=	true;
-			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
+			$scope.NoneValuesShow	=  	$scope.AutoGenerate	= 	$scope.AutoGenerateRequired	=	false;
 		}
 		else if($scope.CommonForm.AggregationEventParentID == 'Enter a URI Manually')
 		{
 			$scope.AEPManualURIDisp	=	true; 
-			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired	=	false;
+			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false
 		}
 		
 		//If WEB URI is choosen then dont show Company Prefix Field

@@ -384,45 +384,59 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	//Aggregation Event Parent Creation
 	$scope.CommonEventFormat	=	function(){
 		//Call the function to create the URI and Display it
-		var data 				=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues, formdata:$scope.formdata});
 		angular.element('#ParentTypeModal').modal('hide');
 		var ItemCount			=	0;
 		
 		//Loop through the Event count to create random EPCs
 		for(var eventEPC=0; eventEPC<$scope.formdata.eventcount; eventEPC++)
-		{			
+		{
+			var data 				=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues, formdata:$scope.formdata, EventCount:eventEPC});
+					
 			$http({
 				url		: 	"/CreateAggregationEventURI",
 				method	: 	"POST",
 				headers	: 	{'Content-Type': 'application/json'},
 				data	:	data
 			}).success(function(response){
-				//Parent Section				
+				
 				if($scope.AEParentEPCsFlag || $scope.TransactionEventParentIDFlag || $scope.AssociationEventParentFlag)
 				{
+					//Check for the loop completion
+					ItemCount	=	ItemCount+1;
+					
 					//Aggregation Event PARENT ID has been clicked				
 					if($scope.AEParentEPCsFlag)
 					{
 						$scope.AggregationEventParentURI.push(response);
-						$scope.AEParentEPCsFlag		=	false;
-						$scope.ParentButton			=	false;	
 					}
 					
 					//Transaction Event Parent has been clicked
 					if($scope.TransactionEventParentIDFlag)
 					{
 						$scope.TransactionEventParentIDURI.push(response);
-						$scope.TransactionEventParentIDFlag	=	false;
-						$scope.TransactionEventParent		=	false;
 					}
 					
 					//AssociationEvent Parent
 					if($scope.AssociationEventParentFlag)
 					{
-						$scope.AssociationEventParentURI.push(response);
+						$scope.AssociationEventParentURI.push(response);	
+					}
+					
+					//After the loop set all values of the button and flag to false
+					if(ItemCount == parseInt($scope.formdata.eventcount, 10))
+					{						
+						//Aggregation Event Parent ID
+						$scope.AEParentEPCsFlag				=	false;
+						$scope.ParentButton					=	false;						
+						
+						//Transaction Event Parent ID
+						$scope.TransactionEventParentIDFlag	=	false;
+						$scope.TransactionEventParent		=	false;						
+						
+						//Association Event Parent ID
 						$scope.AssociationEventParentButton = 	false;
-						$scope.AssociationEventParentFlag	=	false;	
-					}	
+						$scope.AssociationEventParentFlag	=	false;
+					}					
 				}
 				else
 				{
@@ -482,6 +496,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 					//After the loop set all values of the button and flag to false								
 					if(ItemCount == parseInt($scope.formdata.eventcount, 10))
 					{
+						//EPCs and Child EPCs section
 						$scope.ObjectEventAddEPCsFlag				=	false;
 						$scope.ObjectEventEPCSbutton				=	false;						
 						
@@ -493,9 +508,10 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 						
 						$scope.AssociationEventChildEPCSButton		=	false;
 						$scope.AssociationEventChildEPCSFlag		=	false;
-					}
-				}		
-			}).error(function(error) {
+					}					
+				}	
+					
+			}).error(function(error){
 				console.log(error)
 			});
 		}
@@ -1044,7 +1060,6 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Remove the element from the BTT array
 	$scope.DeleteBTT	=	function(Delete_BTT_ID){
-		console.log(Delete_BTT_ID);
 		for(var b=0; b<$scope.BusinessTransactionList.length; b++)
 		{
 			if($scope.BusinessTransactionList[b].ID == Delete_BTT_ID)
@@ -1053,7 +1068,6 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 				break;
 			}
 		}
-		console.log($scope.BusinessTransactionList);
 	}
 	
 	
@@ -1218,24 +1232,21 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		$scope.ResetButtonDisplay	=	true;
 	}
 	
-	//Aggregation Event PARENT ID Change
+	//Parent ID and EPCS change event
 	$scope.AggregationEventParentChange		=	function(){
 		
-		$scope.NoneValuesText = $scope.RandomRange = $scope.NoneValuesShow = $scope.AEPCompanyDisp = $scope.AEPSGTINDisp	 = $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp = $scope.AEPSSGLNDisp =  false;
+		$scope.NoneValuesText 	=	$scope.RandomRange 			= 	$scope.NoneValuesShow = $scope.AEPCompanyDisp = $scope.AEPSGTINDisp	 = $scope.AEPSSCCDisp = $scope.AEPGRAIDisp = $scope.AEPGIAIDisp = $scope.AEPGSRNDisp = $scope.AEPGSRNPDisp = $scope.AEPGDTIDisp = $scope.AEPGSNDisp = $scope.AEPCPIDisp = $scope.AECGINCDisp  = $scope.AEPGSINDISP = $scope.AEPITIPDISP = $scope.AEPUPIUIDISP = $scope.AEPGIDDisp = $scope.AEPDSDODDisp = $scope.AEPADIDisp = $scope.AEPBICDisp = $scope.AEPIMOVNDisp = $scope.AEPManualURIDisp = $scope.AEPSSGLNDisp =  false;
+		$scope.AutoGenerate		=	$scope.AutoGenerateRequired =	true;	
 		
 		//Check if Multiple values are required
 		if($scope.ObjectEventAddEPCsFlag || $scope.AEChildEPCSFlage || $scope.TransactionEventChildEPCS || $scope.TransformationEventInputEPCsFlag || $scope.TransformationEventOutputEPCsFlag || $scope.AssociationEventChildEPCSFlag)
 		{
-			$scope.AutoGenerate	= $scope.AutoGenerateRequired =	$scope.MultiValues = true;
-			$scope.RequiredValues	=	true;
-			$scope.SingleValue		=	false;
+			$scope.MultiValues 		= 	true;
 		}
 		
 		if($scope.AEParentEPCsFlag || $scope.TransactionEventParentIDFlag || $scope.AssociationEventParentFlag)
 		{
-			$scope.AutoGenerate	= $scope.AutoGenerateRequired = $scope.MultiValues = false;
-			$scope.SingleValue		=	true;
-			$scope.RequiredValues	=	false;
+			$scope.MultiValues 		= 	false;
 		}
 			
 		if($scope.CommonForm.AggregationEventParentID == 'SGTIN (Al 01 + Al 21)')
@@ -1364,7 +1375,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		}
 	}
 	
-	//Function to check for the changes based on the OBJECT EVENT QUANTITIES
+	//Function to check for the changes based on the EVENT QUANTITIES
 	$scope.ObjectEventQuantityChange	=	function()
 	{
 		$scope.AutoGenerate		= 	$scope.AutoGenerateRequired =	$scope.MultiValues = $scope.NoneValuesShow = true;

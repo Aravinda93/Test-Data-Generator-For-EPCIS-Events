@@ -11,6 +11,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 		if(Query.formdata.UserDefinedURI != "" && Query.formdata.UserDefinedURI != null && typeof Query.formdata.UserDefinedURI != undefined)
 		{
 			Domain 	=	Query.formdata.UserDefinedURI;
+			Domain	=	Domain.replace(/\/$/, "");
 		}
 		else
 		{

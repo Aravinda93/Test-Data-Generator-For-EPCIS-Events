@@ -239,7 +239,8 @@ exports.createXMLData	=	function(Query,Root,callback){
 			//Add the parent of AggregationEvent
 			if(Query.ParentID.length > 0)
 			{
-				ObjectEvent.ele('parentID',Query.ParentID[0]).up()
+				var AEParentID		=	Query.ParentID[count];
+				ObjectEvent.ele('parentID',AEParentID[0]).up()				
 			}
 			
 			//Add the CHILD EPCS of AggregationEvent
@@ -259,7 +260,8 @@ exports.createXMLData	=	function(Query,Root,callback){
 			//TransactionEvent Parent ID
 			if(Query.ParentID.length >0)
 			{
-				ObjectEvent.ele('parentID',Query.ParentID[0]).up()
+				var TEParentID		=	Query.ParentID[count];
+				ObjectEvent.ele('parentID',TEParentID[0]).up()
 			}
 			//TransactionEvent EPCS
 			if(Query.EPCs.length > 0)
@@ -348,11 +350,13 @@ exports.createXMLData	=	function(Query,Root,callback){
 			}
 		}
 		else if(input.eventtype1 == "AssociationEvent")
-		{
+		{	
+			console.log(Query.ParentID);
 			//Add the Parent for Association Event
 			if(Query.ParentID.length > 0)
 			{
-				ObjectEvent.ele('parentID',Query.ParentID[0]).up()
+				var AEParentIDs		=	Query.ParentID[count];
+				ObjectEvent.ele('parentID',AEParentIDs[0]).up()
 			}
 			
 			//Add the CHILD EPCS of AssociationEvent

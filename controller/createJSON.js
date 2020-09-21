@@ -226,7 +226,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			//Add the parent of AggregationEvent
 			if(Query.ParentID.length > 0)
 			{
-				ObjectEvent['parentID']	=	Query.ParentID[0];
+				var AEParentID			=	Query.ParentID[count];
+				ObjectEvent['parentID']	=	AEParentID[0];
 			}
 			//Add the CHILD EPCS of AggregationEvent
 			if(Query.EPCs.length > 0)
@@ -245,7 +246,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			//TransactionEvent Parent ID
 			if(Query.ParentID.length >0)
 			{
-				ObjectEvent['parentID']		=	Query.ParentID[0];
+				var TEParentID				=	Query.ParentID[count];
+				ObjectEvent['parentID']		=	TEParentID[0];
 			}
 			
 			//TransactionEvent EPCS
@@ -866,14 +868,16 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				}
 			}
 		}
-
+		
+		MainArray.push(ObjectEvent)
+		
 		//Increment the count and push the each event to an array
 		itemProcessed++;
 	
 		if(itemProcessed == input.eventcount)
 		{
-			JSONschemaParse.epcisBody['eventList'] = [];
-			JSONschemaParse.epcisBody['eventList'].push(ObjectEvent);
+			JSONschemaParse.epcisBody['eventList'] 	= 	[];
+			JSONschemaParse.epcisBody['eventList']	=	MainArray;
 			callback(JSON.stringify(JSONschemaParse));
 		}
 	}
