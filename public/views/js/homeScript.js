@@ -2,7 +2,7 @@ var app = angular.module('myApp', ['CopyToClipboard'], function() {});
 
 app.controller('AppController', function($scope,$http,$location,$anchorScroll,$copyToClipboard,$rootScope){
 	//Common
-	$scope.formdata								=	{eventtype1:'', ElementssyntaxType:'urn', VocabSyntaxType:'urn', EventIDOption:'no', EventIDType: 'uuid'};
+	$scope.formdata								=	{eventtype1:'', ElementssyntaxType:'urn', VocabSyntaxType:'urn', EventIDOption:'no', EventIDType: 'uuid', readpointsgln2:"0"};
 	$scope.SensorForm							=	{Temperature:''};
 	$scope.AddExtensionForm						=	{};
 	$scope.EditExtensionForm					=	{};
@@ -424,7 +424,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 					
 					//After the loop set all values of the button and flag to false
 					if(ItemCount == parseInt($scope.formdata.eventcount, 10))
-					{						
+					{	
 						//Aggregation Event Parent ID
 						$scope.AEParentEPCsFlag				=	false;
 						$scope.ParentButton					=	false;						
@@ -1069,15 +1069,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			}
 		}
 	}
-	
-	
 	/* BUSINESS TRANSACTION TYPE ENDS */
-	
-	
-	/* SENSOR INFORMATION STARTS */
-	
-	
-	/* SENSOR INFORMATION ENDS */
 	
 	//On load of the page populate the drop-downs
 	$scope.init = function () {
@@ -1378,71 +1370,54 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	//Function to check for the changes based on the EVENT QUANTITIES
 	$scope.ObjectEventQuantityChange	=	function()
 	{
+		$scope.OEQuantityCPIDisplay	 = $scope.OEQuantityManualURIDisplay = $scope.OEQuantityCompanyPrefixDisplay = $scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityITIPDisplay	 = $scope.OEQuantityUPUIDisplay = false;
+		
 		$scope.AutoGenerate		= 	$scope.AutoGenerateRequired =	$scope.MultiValues = $scope.NoneValuesShow = true;
 		
 		if($scope.CommonFormQuantity.ObjectEventquantities == 'LGTIN (Al 01 + Al 10)')
 		{
 			$scope.OEQuantityLGTINDisplay			=	true;
 			$scope.OEQuantityCompanyPrefixDisplay	=	true;
-			
-			$scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay	= $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityCPIDisplay = $scope.OEQuantityManualURIDisplay = false;
 		}
 		else if($scope.CommonFormQuantity.ObjectEventquantities == 'GTIN, no serial (Al 01)')
-		{
-			
+		{			
 			$scope.OEQuantityGTINDisplay			=	true;
 			$scope.OEQuantityCompanyPrefixDisplay	=	true;
-			
-			$scope.OEQuantityLGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityCPIDisplay = $scope.OEQuantityITIPDisplay = $scope.OEQuantityUPUIDisplay = $scope.OEQuantityManualURIDisplay = false;
 		}
 		else if($scope.CommonFormQuantity.ObjectEventquantities == 'GRAI, no serial (Al 8003)')
 		{
 			$scope.OEQuantityGRAIDisplay			=	true;
 			$scope.OEQuantityCompanyPrefixDisplay	=	true;
-			
-			$scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGDTIDisplay	= $scope.OEQuantityGCNDisplay = $scope.OEQuantityCPIDisplay = $scope.OEQuantityITIPDisplay = $scope.OEQuantityUPUIDisplay = $scope.OEQuantityManualURIDisplay = false;
 		}
 		else if($scope.CommonFormQuantity.ObjectEventquantities == 'GDTI, no serial (Al 253)')
 		{
 			$scope.OEQuantityGDTIDisplay			=	true;
 			$scope.OEQuantityCompanyPrefixDisplay	=	true;
-			
-			$scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityCPIDisplay = $scope.OEQuantityITIPDisplay = $scope.OEQuantityUPUIDisplay = $scope.OEQuantityManualURIDisplay = false;
 		}
 		else if($scope.CommonFormQuantity.ObjectEventquantities == 'GCN, no serial (Al 255)')
 		{
 			$scope.OEQuantityGCNDisplay				=	true;
 			$scope.OEQuantityCompanyPrefixDisplay	=	true;
-			
-			$scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityCPIDisplay = $scope.OEQuantityITIPDisplay = $scope.OEQuantityUPUIDisplay = $scope.OEQuantityManualURIDisplay = false;
 		}
 		else if($scope.CommonFormQuantity.ObjectEventquantities == 'CPI, no serial (Al 801 0)')
 		{
 			$scope.OEQuantityCPIDisplay				=	true;
 			$scope.OEQuantityCompanyPrefixDisplay	=	true;
-			
-			$scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityITIPDisplay = $scope.OEQuantityUPUIDisplay = $scope.OEQuantityManualURIDisplay = false;
 		}
 		else if($scope.CommonFormQuantity.ObjectEventquantities == 'ITIP, no serial (Al 8006)')
 		{
 			$scope.OEQuantityITIPDisplay			=	true;
 			$scope.OEQuantityCompanyPrefixDisplay	=	true;
-			
-			$scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityUPUIDisplay = $scope.OEQuantityManualURIDisplay = false;
 		}
 		else if($scope.CommonFormQuantity.ObjectEventquantities == 'UPUI, no TPX (Al 01)')
 		{
 			$scope.OEQuantityUPUIDisplay			=	true;
 			$scope.OEQuantityCompanyPrefixDisplay	=	true;
-			
-			$scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityITIPDisplay	 = $scope.OEQuantityManualURIDisplay = false;
 		}
 		else if($scope.CommonFormQuantity.ObjectEventquantities == 'Enter a URI Manually')
 		{
-			$scope.OEQuantityManualURIDisplay		=	true;
-			
+			$scope.OEQuantityManualURIDisplay		=	true;			
 			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired =	$scope.MultiValues = $scope.NoneValuesShow = false;
-			$scope.OEQuantityCompanyPrefixDisplay = $scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityITIPDisplay	 = $scope.OEQuantityUPUIDisplay = false;
 		}
 		
 		//If WEB URI is choosen then dont show Company Prefix Field

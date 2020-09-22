@@ -387,7 +387,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		}
 
 		//Check for action element and add it
-		if(input.action != "" && input.action != null && typeof input.action != undefined)
+		if(input.action != "" && input.action != null && typeof input.action != undefined && input.eventtype1 != "TransformationEvent")
 		{
 			ObjectEvent['action']	=	input.action;
 		}

@@ -331,7 +331,7 @@
 									<td style="background-color: #eedded;"  class="column2"> Event Time </td>
 									
 									<td>
-										<select ng-model="formdata.EventTimeSelector" class="form-control">
+										<select ng-model="formdata.EventTimeSelector" class="form-control" required>
 											<option class="dropdown-item" value="" selected> Choose </option>
 											<option class="dropdown-item" value="SpecificTime"> Specific Time </option>
 											<option class="dropdown-item" value="TimeRange"> Time Range </option>
@@ -405,9 +405,9 @@
 
 									<td ng-show="formdata.readpointselector == 'sgln'" class="form-inline form-control">
 										<span> (414) </span>&ensp;
-										<input type="text" class="form-control" id="readpointsgln1" ng-model="formdata.readpointsgln1" pattern="[0-9]{13,13}" maxlength="13" oninput="this.value=this.value.replace(/[^0-9]/g,'');" title="GLN must be 13 digits"></input>&ensp;
+										<input type="text" class="form-control" id="readpointsgln1" ng-model="formdata.readpointsgln1" pattern="[0-9]{13,13}" maxlength="13" oninput="this.value=this.value.replace(/[^0-9]/g,'');" title="GLN must be 13 digits" placeholder="13 digits GLN"></input>&ensp;
 										<span> (254) </span>&ensp;
-										<input type="text" class="form-control" id="readpointsgln2" ng-model="formdata.readpointsgln2"></input>&ensp;
+										<input type="text" class="form-control" id="readpointsgln2" ng-model="formdata.readpointsgln2" placeholder="Extension"></input>&ensp;
 										<span ng-show="formdata.VocabSyntaxType == 'urn' ">
 											<span> GS1 Company Prefix Length </span> &ensp;
 											<select ng-model="formdata.ReadPointCompanyPrefix" id="ReadPointCompanyPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs" ng-required="formdata.readpointselector == 'sgln' && formdata.VocabSyntaxType == 'urn'">
@@ -704,7 +704,7 @@
 								<tr ng-cloak ng-show="formdata.eventtype1 == 'ObjectEvent' || formdata.eventtype1 == 'AggregationEvent' || formdata.eventtype1 == 'TransactionEvent' || formdata.eventtype1 == 'AssociationEvent' ">
 									<td class="column2">Action</td>
 									<td>
-										<select ng-model="formdata.action" class="form-control">
+										<select ng-model="formdata.action" class="form-control" ng-required="formdata.eventtype1 == 'ObjectEvent' || formdata.eventtype1 == 'AggregationEvent' || formdata.eventtype1 == 'TransactionEvent' || formdata.eventtype1 == 'AssociationEvent' ">
 											<option class="dropdown-item" value="" selected> Choose </option>
 											<option class="dropdown-item" value="ADD"> ADD </option>
 											<option class="dropdown-item" value="OBSERVE"> OBSERVE </option>

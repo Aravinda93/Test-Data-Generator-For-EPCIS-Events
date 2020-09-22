@@ -181,7 +181,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 	else if(input.ObjectEventquantities == 'GRAI, no serial (Al 8003)')
 	{
 		//If the selected OBJECT EVENT Quantity is GRAI, no serial (Al 8003)
-		var OEQuantityInput			=	input.OEQGRAI;
+		var OEQuantityInput			=	'0'+input.OEQGRAI;
 		var OEQuantityPreifxPoint	=	input.OEQuantityCompanyPrefix;
 		var OEQuantityInputURN		=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);
 			OEQuantityInputURN		=	OEQuantityInputURN.substring(0,13)
@@ -194,7 +194,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 			}
 			else if(syntaxType == 'webURI')
 			{
-				var QuantityId		=	Domain+'/grai/'+OEQuantityInput+input.singleObjectId;
+				var QuantityId		=	Domain+'/8003/'+OEQuantityInput+input.singleObjectId;
 			}			
 			var obj 			= 	new Object();
 			obj.URI				=	QuantityId;
@@ -214,7 +214,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var QuantityId		=	Domain+'/grai/'+OEQuantityInput+id;
+					var QuantityId		=	Domain+'/8003/'+OEQuantityInput+id;
 				}	
 				
 				var obj 				= 	new Object();
@@ -244,7 +244,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var QuantityId		=	Domain+'/grai/'+OEQuantityInput+data[arrCount];
+					var QuantityId		=	Domain+'/8003/'+OEQuantityInput+data[arrCount];
 				}				
 				
 				var obj 				= 	new Object();

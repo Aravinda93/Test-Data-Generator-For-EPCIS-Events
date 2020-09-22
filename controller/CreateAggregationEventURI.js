@@ -273,8 +273,8 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			if(syntaxType 	== 'urn')
 			{
-				var companyPrefixInput		=	input.AEPGRAI.toString();
-				var companyPrefixPoint		=	input.AEPCompanyPrefix;			
+				var companyPrefixInput		=	'0'+input.AEPGRAI.toString();
+				var companyPrefixPoint		=	parseInt(input.AEPCompanyPrefix, 10);			
 					companyPrefixInput		=	companyPrefixNormal(companyPrefixInput,companyPrefixPoint);
 					companyPrefixInput		=	companyPrefixInput.substring(0, 13)+'.'+companyPrefixInput.substring(14);
 					
@@ -1413,8 +1413,8 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		}
 		else if(input.AggregationEventParentID === 'GRAI (Al 8003)')
 		{
-			var companyPrefixInput		=	input.AEPGRAI.toString();
-			var companyPrefixPoint		=	input.AEPCompanyPrefix;
+			var companyPrefixInput		=	'0'+input.AEPGRAI.toString();
+			var companyPrefixPoint		=	parseInt(input.AEPCompanyPrefix, 10);
 			var companyPrefixInputURN	=	companyPrefixNormal(companyPrefixInput,companyPrefixPoint);
 				companyPrefixInputURN	=	companyPrefixInputURN.substring(0, 13)+'.'+companyPrefixInputURN.substring(14);
 			var epcID					=	"";

@@ -29,36 +29,61 @@ exports.createXML	=	function(AllData,callback){
 							}
 	
 	//Create the header for XML	
-	var root			= 	builder.create('epcis:EPCISDocument')
+	var root		= 	builder.create('epcis:EPCISDocument')
 								root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
-								root.att('xmlns:gs1', "https://gs1.de")
 								root.att('schemaVersion', "2.0")
-								root.att('creationDate', currentTime)
+								root.att('creationDate', moment().format())
+								root.att('xmlns:xsi', "http://www.w3.org/2001/XMLSchema-instance")
+								root.att('xsi:schemaLocation',"urn:epcglobal:epcis:xsd:1 EPCglobal-epcis-2_0.xsd")
+	root			=	root.ele('EPCISBody')
+	root			=	root.ele('EventList')
 	
 	//Main loop based on the number of events/nodes in drag and drop
 	for(var parent=0; parent<AllEventsArray.length; parent++)
 	{
 		var LastCounter			=	0;
 		var QuantityLastCount	=	0;
+		var LastParentCount		=	0;
 		var EPCsArray			=	[];
 		var QuantityArray		=	[];
 		var ParentIDArray		=	[];
+		var ChildParentIDarray	=	[];
 		var ParentData			=	AllEventsArray[parent];
 		var OuterParentName		=	ParentData.NodeName;
 		var ParentEventType		=	AllEventsArray[parent].FormData.input.eventtype1;
 		var ParentEPCs			=	[];
-		var ParentQuantitiy		=	[];
+		var ParentQuantitiy		=	[];	
+		var ParentDataAllEPCs	=	[];
+		var QuantitiesDataAll	=	[];
 		
-		//Merge all the EPCs into single array list
-		for(var merge=0; merge<ParentData.FormData.EPCs.length; merge++)
+		//For TransformationEvent chose the Output Quantities and EPCs and main element
+		if(ParentEventType == 'TransformationEvent')
 		{
-			ParentEPCs	=	ParentEPCs.concat(ParentData.FormData.EPCs[merge]);
-		}		
+			//Merge all the EPCs into single array list
+			for(var merge=0; merge<ParentData.FormData.OutputEPCs.length; merge++)
+			{
+				ParentEPCs	=	ParentEPCs.concat(ParentData.FormData.OutputEPCs[merge]);
+			}
 			
-		//Merge all the Quantities into a single Array
-		for(var mergeQ=0;mergeQ<ParentData.FormData.Quantities.length; mergeQ++)
+			//Merge all the Quantities into a single Array
+			for(var mergeQ=0;mergeQ<ParentData.FormData.OutputQuantities.length; mergeQ++)
+			{
+				ParentQuantitiy	=	ParentQuantitiy.concat(ParentData.FormData.OutputQuantities[mergeQ]);
+			}
+		}
+		else
 		{
-			ParentQuantitiy	=	ParentQuantitiy.concat(ParentData.FormData.Quantities[mergeQ]);
+			//Merge all the EPCs into single array list
+			for(var merge=0; merge<ParentData.FormData.EPCs.length; merge++)
+			{
+				ParentEPCs	=	ParentEPCs.concat(ParentData.FormData.EPCs[merge]);
+			}
+			
+			//Merge all the Quantities into a single Array
+			for(var mergeQ=0;mergeQ<ParentData.FormData.Quantities.length; mergeQ++)
+			{
+				ParentQuantitiy	=	ParentQuantitiy.concat(ParentData.FormData.Quantities[mergeQ]);
+			}
 		}
 		
 		//Loop through child and split the EPCs and Quantities
@@ -127,7 +152,6 @@ exports.createXML	=	function(AllData,callback){
 				{
 					EventArray	=	QuantityArray.slice(EventStart, EventStart + EndQuantityCount);
 					EventStart	=	EventStart	+ EndQuantityCount;
-					console.log(EventArray)
 					ChildData.FormData.Quantities.push(EventArray);
 					
 					//Write the respective children data into the parent of same node
@@ -152,40 +176,49 @@ exports.createXML	=	function(AllData,callback){
 			
 			//Check if ParentID of Child EPCS is empty for Association,Aggreagation and Transaction event
 			if(ChildEventType == 'AggregationEvent' || ChildEventType == 'TransactionEvent' || ChildEventType == 'AssociationEvent')
-			{
+			{			
+		
+				//Merge all the Parent ID into a single Array
+				for(var mergeP=0;mergeP<ParentData.FormData.ParentID.length; mergeP++)
+				{
+					ParentIDArray	=	ParentIDArray.concat(ParentData.FormData.ParentID[mergeP]);
+				}
+		
 				//Check if the parent of the Event is Association,Aggreagation and Transaction event
 				if(ParentEventType == 'AggregationEvent' || ParentEventType == 'TransactionEvent' || ParentEventType == 'AssociationEvent')
 				{
 					//Check if child Parent ID value is 0
 					if(ChildData.FormData.ParentID.length == 0 && ParentData.FormData.ParentID.length != 0)
 					{	
-						ParentIDArray	=	ParentData.FormData.ParentID[0];
-						ChildData.FormData.ParentID.push(ParentIDArray);
 						
-						//find the parent of the respective child and write the data into the same
-						for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
+						//Obtain the complete list of ParentIDs belonging to particular Child EPCS
+						ChildParentIDarray	=	ParentIDArray.slice(LastParentCount,LastParentCount+EventCount);
+						LastParentCount		=	LastParentCount + EventCount;
+
+						for(var event=0; event<EventCount; event++)
 						{
-							var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
+							var ParentIDChildArray	=	[];
+							ParentIDChildArray.push(ChildParentIDarray[event]);
 							
-							if(ChildNodeName	==	ParentNodeName)
+							//Push the Parent ID into the child Parent ID
+							ChildData.FormData.ParentID.push(ParentIDChildArray);
+							
+							//find the parent of the respective child and write the data into the same
+							for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
 							{
-								if(AllEventsArray[ParentNode].FormData.ParentID.length == 0)
+								var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
+								
+								if(ChildNodeName	==	ParentNodeName)
 								{
-									AllEventsArray[ParentNode].FormData.ParentID.push(ParentIDArray);
-								}
-								else
-								{
-									AllEventsArray[ParentNode].FormData.ParentID[0].push.apply(AllEventsArray[ParentNode].FormData.ParentID[0],ParentIDArray);
-								}							
-							}					
-						}
+									AllEventsArray[ParentNode].FormData.ParentID.push(ParentIDChildArray);							
+								}					
+							}
+						}						
 					}
 				}			
 			}
 		}
 	}
-	
-	
 	
 	//Loop through the the created array and create the XML
 	for(var parent=0; parent<AllEventsArray.length; parent++)

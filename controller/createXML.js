@@ -23,15 +23,14 @@ exports.createXMLData	=	function(Query,Root,callback){
 								root.att('creationDate', moment().format())
 								root.att('xmlns:xsi', "http://www.w3.org/2001/XMLSchema-instance")
 								root.att('xsi:schemaLocation',"urn:epcglobal:epcis:xsd:1 EPCglobal-epcis-2_0.xsd")
+		root			=	root.ele('EPCISBody')
+		root			=	root.ele('EventList')
 	}
 	else
 	{
 		var root		=	Root;
 	
 	}
-	
-	root			=	root.ele('EPCISBody')
-	root			=	root.ele('EventList')
 	
 	for(var count=0; count<input.eventcount; count++)
 	{
@@ -235,13 +234,14 @@ exports.createXMLData	=	function(Query,Root,callback){
 			}
 		}
 		else if(input.eventtype1 == "AggregationEvent")
-		{
+		{				
 			//Add the parent of AggregationEvent
 			if(Query.ParentID.length > 0)
 			{
 				var AEParentID		=	Query.ParentID[count];
 				ObjectEvent.ele('parentID',AEParentID[0]).up()				
 			}
+			
 			
 			//Add the CHILD EPCS of AggregationEvent
 			if(Query.EPCs.length > 0)
@@ -351,7 +351,6 @@ exports.createXMLData	=	function(Query,Root,callback){
 		}
 		else if(input.eventtype1 == "AssociationEvent")
 		{	
-			console.log(Query.ParentID);
 			//Add the Parent for Association Event
 			if(Query.ParentID.length > 0)
 			{
@@ -396,7 +395,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 		}
 		
 		//Âdd the action value if populated
-		if(input.action != "" && input.action != null && typeof input.action != undefined)
+		if(input.action != "" && input.action != null && typeof input.action != undefined && input.eventtype1 != "TransformationEvent")
 		{
 			ObjectEvent.ele('action', input.action)
 		}
