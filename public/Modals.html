@@ -342,7 +342,7 @@
 						
 						<span ng-show="OEQuantityCPIDisplay">
 							<span>(8010)</span>&nbsp;
-							<input type="text" ng-required="OEQuantityCPIDisplay" id="OEQCPI" ng-model="CommonFormQuantity.OEQCPI" maxlength="30" pattern="([0-9]{7,30})$" oninvalid="this.setCustomValidity('CPI must be between 7 and 30 digits')" placeholder="Enter CPI" class="form-control" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="OEQuantityCPIDisplay" id="OEQCPI" ng-model="CommonFormQuantity.OEQCPI" maxlength="30" pattern="^.{7,30}$" oninvalid="this.setCustomValidity('CPI must be between 7 and 30 digits')" placeholder="Enter CPI" class="form-control" oninput="setCustomValidity('');" style="width: 200px;">&nbsp;
 						</span>
 						
 						<span ng-show="OEQuantityITIPDisplay">
@@ -370,9 +370,15 @@
 							<input type="number" class="form-control" ng-model="CommonFormQuantity.QuantityrandomCount" min="1" placeholder="Number of Objects" title="Enter the Number of Objects" ng-required="CommonFormQuantity.Quantitysgtintype == 'random'"></input>&nbsp;
 						</span>
 						
-						<span ng-show="CommonFormQuantity.Quantitysgtintype == 'none' && NoneValuesShow">
-							<input type="text" ng-required="CommonFormQuantity.sgtintype == 'none' && NoneValuesShow"  id="QuantitysingleObjectId" ng-model="CommonFormQuantity.singleObjectId" oninput="this.value=this.value.replace(/[^0-9]/g,'');" oninvalid="this.setCustomValidity('Missing serial')" maxwidth="17" class="form-control" placeholder="Enter Object Id" title="Enter the Object Id"></input>&nbsp;
-						</span>		
+						<span ng-show="CommonFormQuantity.Quantitysgtintype == 'none'">
+							<input type="text" ng-required="CommonFormQuantity.sgtintype == 'none' && NoneValuesShow"  	ng-show="NoneValuesShow"			ng-model="CommonFormQuantity.singleObjectId" 		 oninput="this.value=this.value.replace(/[^0-9]/g,'');" oninvalid="this.setCustomValidity('Missing serial')" maxlength="20" class="form-control" placeholder="Serial ref. number" title="Enter serial number"></input>&nbsp;
+							<input type="text" ng-required="CommonForm.sgtintype == 'none' && QuantitiesNoneValuesText"	ng-show="QuantitiesNoneValuesText"  ng-model="CommonFormQuantity.singleObjectIdText"	 oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Enter valid serial number')" 			 maxlength="20" class="form-control" placeholder="Serial ref. number" title="Enter serial number"></input>&nbsp;
+						</span>	
+
+						<!-- Count Number !-->
+						<span ng-show="QuantitiesCount">
+							<input type="number" class="form-control" ng-model="CommonFormQuantity.QuantitiesCountNumber" min="1" placeholder="Quantity count" title="Enter the Number of quantities" ng-required="QuantitiesCount" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Enter valid count')" ></input>&nbsp;
+						</span>
 						
 						<span ng-show="OEQuantityCompanyPrefixDisplay">
 							 &ensp;<span> GS1 Company Prefix Length</span>&nbsp;
@@ -422,12 +428,12 @@
 							<br/>
 							<div class="custom-control-inline">
 								<label class="custom-control-label" for="QuantityradomMinLength">Min. Length: </label>
-								<input id="QuantityradomMinLength"  ng-model="CommonFormQuantity.QuantityradomMinLength"  type="number" min="1" max="16" class="form-control" placeholder="Ex: 2"  title="Please Enter a Number between 1 and 16" style="width:80px;"/>
+								<input id="QuantityradomMinLength"  ng-model="CommonFormQuantity.QuantityradomMinLength"  type="number" min="1" max="20" class="form-control" placeholder="Ex: 2"  title="Please Enter a Number between 1 and 16" style="width:80px;"/>
 							</div>
 							
 							<div class="custom-control-inline">
 								<label class="custom-control-label" for="QuantityrandomMaxLength">Max. Length: </label>
-								<input id="QuantityrandomMaxLength" ng-model="CommonFormQuantity.QuantityrandomMaxLength" type="number" min="2" max="16" class="form-control" placeholder="Ex: 10" title="Please Enter a Number between 2 and 16" style="width:80px;"/>
+								<input id="QuantityrandomMaxLength" ng-model="CommonFormQuantity.QuantityrandomMaxLength" type="number" min="2" max="20" class="form-control" placeholder="Ex: 10" title="Please Enter a Number between 2 and 16" style="width:80px;"/>
 							</div>									
 						</div>
 					</div>							
@@ -710,8 +716,8 @@
 						</span>
 						
 						<span ng-show="CommonForm.sgtintype == 'none' ">
-							<input type="text" ng-show="NoneValuesShow" ng-required="CommonForm.sgtintype == 'none' && NoneValuesShow" id="singleObjectId" 		ng-model="CommonForm.singleObjectId" 		oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Missing Serial')" maxwidth="17" class="form-control" placeholder="Serial ref. number" title="Enter serial number"></input>&nbsp;
-							<input type="text" pattern="[a-zA-Z0-9-]+" ng-show="NoneValuesText" ng-required="CommonForm.sgtintype == 'none' && NoneValuesText" id="singleObjectIdText"	ng-model="CommonForm.singleObjectIdText"	oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('Enter valid serial number')" maxwidth="17" class="form-control" placeholder="Serial ref. number" title="Enter serial number"></input>&nbsp;
+							<input type="text" ng-show="NoneValuesShow" ng-required="CommonForm.sgtintype == 'none' && NoneValuesShow" ng-model="CommonForm.singleObjectId" 		oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');" oninvalid="this.setCustomValidity('Missing Serial')"			 maxlength="20" class="form-control" placeholder="Serial ref. number" title="Enter serial number"></input>&nbsp;
+							<input type="text" ng-show="NoneValuesText" ng-required="CommonForm.sgtintype == 'none' && NoneValuesText" ng-model="CommonForm.singleObjectIdText"		oninput="setCustomValidity('');" 											 oninvalid="this.setCustomValidity('Enter valid serial number')" maxlength="20" class="form-control" placeholder="Serial ref. number" title="Enter serial number"></input>&nbsp;
 						</span>	
 						
 						<!-- Aggregation Event Parent Id Company Prefix -->

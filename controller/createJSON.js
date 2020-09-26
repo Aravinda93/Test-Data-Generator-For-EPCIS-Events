@@ -819,7 +819,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		{
 			if(Query.ILMD.length > 0)
 			{
-				var ilmd 		= 	ObjectEvent.extension['ilmd']	=	{};
+				var ilmd 		= 	ObjectEvent['ilmd']	=	{};
 				var ilmdList	=	Query.ILMD;
 
 				for(var i=0; i<Query.ILMD.length; i++)
@@ -876,9 +876,17 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 	
 		if(itemProcessed == input.eventcount)
 		{
-			JSONschemaParse.epcisBody['eventList'] 	= 	[];
-			JSONschemaParse.epcisBody['eventList']	=	MainArray;
-			callback(JSON.stringify(JSONschemaParse));
+			if(Query.XMLElement == 'Single')
+			{
+				JSONschemaParse.epcisBody['eventList'] 	= 	[];
+				JSONschemaParse.epcisBody['eventList']	=	MainArray;
+				callback(JSON.stringify(JSONschemaParse));
+			}
+			else
+			{
+				JSONschemaParse.epcisBody['eventList'] = JSONschemaParse.epcisBody['eventList'].concat(MainArray);
+				callback(JSON.stringify(JSONschemaParse));
+			}
 		}
 	}
 };

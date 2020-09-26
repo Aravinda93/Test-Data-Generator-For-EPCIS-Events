@@ -424,79 +424,27 @@ exports.QuantitiesURI	=	function(Query,callback){
 		//If the selected OBJECT EVENT Quantity is CPI, no serial (Al 801 0)
 		var OEQuantityInput			=	input.OEQCPI;
 		var OEQuantityPreifxPoint	=	input.OEQuantityCompanyPrefix;
-		var OEQuantityInputURN		=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);		
+		var OEQuantityInputURN		=	companyPrefixNormal(OEQuantityInput, OEQuantityPreifxPoint);
+		var count					=	input.QuantitiesCountNumber;
 		
-		if(input.Quantitysgtintype == 'none')
-		{
+		for(var id=1; id<=count; id++)
+		{	
 			if(syntaxType 	== 'urn')
 			{
-				var QuantityId		=	'urn:epc:idpat:cpi:'+OEQuantityInputURN+"."+input.singleObjectId;
+				var QuantityId		=	'urn:epc:idpat:cpi:'+OEQuantityInputURN+'.*';
 			}
 			else if(syntaxType == 'webURI')
 			{
-				var QuantityId		=	Domain+'/cpi/'+OEQuantityInput+input.singleObjectId;
+				var QuantityId		=	Domain+'/8010/'+OEQuantityInput+'*';
 			}
-				
-			var obj 			= 	new Object();
-			obj.URI				=	QuantityId;
-			obj.QuantityType	=	input.ObjectEventQuantityType;
-			obj.Quantity		=	input.ObjectEventQuantityQuantity;
-			obj.QuantityUOM		=	input.ObjectEventQuantityQuantityUOM;
+			var obj 				= 	new Object();
+				obj.URI				=	QuantityId;
+				obj.QuantityType	=	input.ObjectEventQuantityType;
+				obj.Quantity		=	input.ObjectEventQuantityQuantity;
+				obj.QuantityUOM		=	input.ObjectEventQuantityQuantityUOM;
 			EpcLists.push(obj);
-			callback(EpcLists);
 		}
-		if(input.Quantitysgtintype == 'range')
-		{
-			for(var id=input.QuantitysgtnGTINFrom; id<=input.QuantitysgtnGTINTo; id++)
-			{	
-				if(syntaxType 	== 'urn')
-				{
-					var QuantityId		=	'urn:epc:idpat:cpi:'+OEQuantityInputURN+'.'+id;
-				}
-				else if(syntaxType == 'webURI')
-				{
-					var QuantityId		=	Domain+'/cpi/'+OEQuantityInput+id;
-				}
-				var obj 				= 	new Object();
-					obj.URI				=	QuantityId;
-					obj.QuantityType	=	input.ObjectEventQuantityType;
-					obj.Quantity		=	input.ObjectEventQuantityQuantity;
-					obj.QuantityUOM		=	input.ObjectEventQuantityQuantityUOM;
-				EpcLists.push(obj);
-			}
-			callback(EpcLists);
-		}
-		else if(input.Quantitysgtintype == 'random')
-		{
-			console.log(syntaxType)
-			var min_Length	=	parseInt(input.QuantityradomMinLength, 10);
-			var max_Length	=	parseInt(input.QuantityrandomMaxLength, 10);
-			var randomType	=	input.QuantityrandomType;
-			var randomCount	=	parseInt(input.QuantityrandomCount, 10);
-			
-			//Call the function to generate the Random numbers then create XML elements
-			var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
-			
-			for(var arrCount=0; arrCount<data.length; arrCount++)
-			{	
-				if(syntaxType 	== 'urn')
-				{
-					var QuantityId		=	'urn:epc:idpat:cpi:'+OEQuantityInputURN+"."+data[arrCount];
-				}
-				else if(syntaxType == 'webURI')
-				{
-					var QuantityId		=	Domain+'/cpi/'+OEQuantityInput+data[arrCount];
-				}
-				console.log(QuantityId)
-				var obj 				= 	new Object();
-					obj.URI				=	QuantityId;
-					obj.QuantityType	=	input.ObjectEventQuantityType;
-					obj.Quantity		=	input.ObjectEventQuantityQuantity;
-					obj.QuantityUOM		=	input.ObjectEventQuantityQuantityUOM;
-				EpcLists.push(obj);	
-			}
-			callback(EpcLists);
-		}	
+		callback(EpcLists);	
 	}
 	else if(input.ObjectEventquantities == 'ITIP, no serial (Al 8006)')
 	{

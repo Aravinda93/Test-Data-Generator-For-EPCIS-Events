@@ -28,6 +28,8 @@ exports.createXML	=	function(AllData,callback){
 								"epcisBody"		:	{}
 							}
 	
+	JSONHeader.epcisBody['eventList'] 	= 	[];
+	
 	//Create the header for XML	
 	var root		= 	builder.create('epcis:EPCISDocument')
 								root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
@@ -177,16 +179,15 @@ exports.createXML	=	function(AllData,callback){
 			//Check if ParentID of Child EPCS is empty for Association,Aggreagation and Transaction event
 			if(ChildEventType == 'AggregationEvent' || ChildEventType == 'TransactionEvent' || ChildEventType == 'AssociationEvent')
 			{			
-		
-				//Merge all the Parent ID into a single Array
-				for(var mergeP=0;mergeP<ParentData.FormData.ParentID.length; mergeP++)
-				{
-					ParentIDArray	=	ParentIDArray.concat(ParentData.FormData.ParentID[mergeP]);
-				}
-		
 				//Check if the parent of the Event is Association,Aggreagation and Transaction event
 				if(ParentEventType == 'AggregationEvent' || ParentEventType == 'TransactionEvent' || ParentEventType == 'AssociationEvent')
 				{
+					//Merge all the Parent ID into a single Array
+					for(var mergeP=0;mergeP<ParentData.FormData.ParentID.length; mergeP++)
+					{
+						ParentIDArray	=	ParentIDArray.concat(ParentData.FormData.ParentID[mergeP]);
+					}
+				
 					//Check if child Parent ID value is 0
 					if(ChildData.FormData.ParentID.length == 0 && ParentData.FormData.ParentID.length != 0)
 					{	
@@ -222,9 +223,7 @@ exports.createXML	=	function(AllData,callback){
 	
 	//Loop through the the created array and create the XML
 	for(var parent=0; parent<AllEventsArray.length; parent++)
-	{
-		//console.log(AllData.AllEventFinalArray[parent].Childrens[0].FormData.EPCs);
-		
+	{		
 		XMLCreator(AllData, parent, 'Parent');
 	
 		//Loop through children for(var child=0; child<)
@@ -289,7 +288,7 @@ exports.createXML	=	function(AllData,callback){
 		
 		//Call createJSON function to create JSON
 		createJSON.createJSONData(Query,JSONHeader,function(JSONdata){
-			FinalJSON	=	FinalJSON.concat(JSONdata);
+			FinalJSON	=	JSONdata;
 			//FinalJSON = JSONdata;
 		});
 	}

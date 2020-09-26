@@ -1,14 +1,14 @@
-const 	express 		= 	require('express');
-const   bodyParser 		= 	require('body-parser');
-const 	path 			= 	require('path');
-const 	fs				=	require('fs');
-const	multer  		= 	require('multer');
+const 	express 					= 	require('express');
+const   bodyParser 					= 	require('body-parser');
+const 	path 						= 	require('path');
+const 	fs							=	require('fs');
+const	multer  					= 	require('multer');
 
 //To get the HTML page
-const	port			= 	3000;
-const 	reqPath 		= 	__dirname;
-const 	app 			= 	express();
-var 	upload 			= 	multer({ dest: 'uploads/' });
+const	port						= 	3000;
+const 	reqPath 					= 	__dirname;
+const 	app 						= 	express();
+var 	upload 						= 	multer({ dest: 'uploads/' });
 
 const 	populateFields				=	require("./controller/populateFields");
 const 	QuantitiesURI				=	require("./controller/QuantitiesURI");
@@ -23,10 +23,10 @@ const 	DataExporter				=	require("./controller/DataExporter");
 //Create an XML and JSON document based on the user inputs
 
 
-app.set('views', reqPath + "\\public\\views");
+app.set('views', reqPath + "\\public");
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'html');
-app.use(express.static(path.join(reqPath, '/public/views')));
+app.use(express.static(path.join(reqPath, '/public')));
 //app.use(bodyParser.json()); 
 //app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -112,6 +112,7 @@ app.post('/ExportData',function(req,res){
 		res.send(data);
 	});
 })
+
 
 //Make NodeJS to Listen to a particular Port in Localhost
 app.listen(port,'0.0.0.0', function(){

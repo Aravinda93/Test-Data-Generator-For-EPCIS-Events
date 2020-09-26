@@ -617,6 +617,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	{
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddExtensionsFlag		=	true;
+		$scope.AddExtensionForm			=	{};
 	}
 	
 	//On submission of the Modal Add Extensions or ILMD OR ERROR Declaration
@@ -833,6 +834,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	{
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddILMDFlag		=	true;
+		$scope.AddExtensionForm	=	{};
 	}
 	
 	//Delete the ILMD for Object Event on Delete Button Click
@@ -978,7 +980,8 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	$scope.ErrorExtensionAddModal	=	function()
 	{
 		angular.element('#AddExtensionModal').modal('show');
-		$scope.AddErrorExtensionFlag		=	true;
+		$scope.AddErrorExtensionFlag	=	true;
+		$scope.AddExtensionForm			=	{};
 	}
 	
 	//Delete the Error Exntension on click of Delete button
@@ -1099,6 +1102,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			$scope.SensorReportDatas	=	response.SensorReportDatas;
 			$scope.TimeZones			=	response.TimeZones;
 		}).error(function(error) {
+			console.log("Something went wrong in init")
 			console.log(error);
 		});
 	};
@@ -1370,7 +1374,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	//Function to check for the changes based on the EVENT QUANTITIES
 	$scope.ObjectEventQuantityChange	=	function()
 	{
-		$scope.OEQuantityCPIDisplay	 = $scope.OEQuantityManualURIDisplay = $scope.OEQuantityCompanyPrefixDisplay = $scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityITIPDisplay	 = $scope.OEQuantityUPUIDisplay = false;
+		$scope.QuantitiesCount = $scope.OEQuantityCPIDisplay	 = $scope.OEQuantityManualURIDisplay = $scope.OEQuantityCompanyPrefixDisplay = $scope.OEQuantityLGTINDisplay = $scope.OEQuantityGTINDisplay = $scope.OEQuantityGRAIDisplay = $scope.OEQuantityGDTIDisplay = $scope.OEQuantityGCNDisplay = $scope.OEQuantityITIPDisplay	 = $scope.OEQuantityUPUIDisplay = false;
 		
 		$scope.AutoGenerate		= 	$scope.AutoGenerateRequired =	$scope.MultiValues = $scope.NoneValuesShow = true;
 		
@@ -1403,6 +1407,9 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		{
 			$scope.OEQuantityCPIDisplay				=	true;
 			$scope.OEQuantityCompanyPrefixDisplay	=	true;
+			$scope.QuantitiesCount					=	true;
+			
+			$scope.AutoGenerate		= 	$scope.AutoGenerateRequired =	$scope.MultiValues = $scope.NoneValuesShow = false;
 		}
 		else if($scope.CommonFormQuantity.ObjectEventquantities == 'ITIP, no serial (Al 8006)')
 		{

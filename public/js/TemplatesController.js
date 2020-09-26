@@ -219,7 +219,10 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 			data	:	data
 		}).success(function(response) {
 			$scope.xmldata 		=	response[0].XML;			
-			$scope.jsondata 	= 	response[1].JSON;			
+			//$scope.jsondata 	= 	response[1].JSON;
+			var obj = JSON.parse(response[1].JSON);
+			var pretty = JSON.stringify(obj, undefined, 4);
+			$scope.jsondata 	= 	pretty;
 		}).error(function(error) {
 			console.log(error);
 		});		
