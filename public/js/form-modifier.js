@@ -144,45 +144,48 @@ app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$
 		angular.element('#SensorInformation').modal('hide');		
 		var TemporaryArray				=	[];
 		var MetaDataItem				=	{};
-		
-		if($scope.SensorForm.SelectReqMetaData.includes('Time'))
+		console.log($scope.SensorForm)
+		if($scope.SensorForm.SelectReqMetaData != undefined)
 		{
-			MetaDataItem["Time"]		=	$scope.SensorForm.MetaDataDateTime;
-		}
-		
-		if($scope.SensorForm.SelectReqMetaData.includes('Start Time'))
-		{
-			MetaDataItem["StartTime"]	=	$scope.SensorForm.MetaDataStartTime;
-		}
-		
-		if($scope.SensorForm.SelectReqMetaData.includes('End Time'))
-		{
-			MetaDataItem["EndTime"]	=	$scope.SensorForm.MetaDataEndTime;
-		}
-		
-		if($scope.SensorForm.SelectReqMetaData.includes('Device ID'))
-		{
-			MetaDataItem["DeviceID"]	=	$scope.SensorForm.MetaDataDeviceID;
-		}
-		
-		if($scope.SensorForm.SelectReqMetaData.includes('Device Metadata'))
-		{
-			MetaDataItem["DeviceMetadata"]	=	$scope.SensorForm.MetaDataDeviceMetadata;
-		}
-		
-		if($scope.SensorForm.SelectReqMetaData.includes('Raw Data'))
-		{
-			MetaDataItem["RawData"]		=	$scope.SensorForm.MetaDataRawData;
-		}		
-		
-		if($scope.SensorForm.SelectReqMetaData.includes('Data Processing Method'))
-		{
-			MetaDataItem["DataProcessingMethod"]	=	$scope.SensorForm.MetaDataDataProcessingMethod;
-		}
-		
-		if($scope.SensorForm.SelectReqMetaData.includes('Business Rules'))
-		{
-			MetaDataItem["BusinessRules"]		=	$scope.SensorForm.MetaDataBusinessRules;
+			if($scope.SensorForm.SelectReqMetaData.includes('Time'))
+			{
+				MetaDataItem["Time"]		=	$scope.SensorForm.MetaDataDateTime;
+			}
+			
+			if($scope.SensorForm.SelectReqMetaData.includes('Start Time'))
+			{
+				MetaDataItem["StartTime"]	=	$scope.SensorForm.MetaDataStartTime;
+			}
+			
+			if($scope.SensorForm.SelectReqMetaData.includes('End Time'))
+			{
+				MetaDataItem["EndTime"]	=	$scope.SensorForm.MetaDataEndTime;
+			}
+			
+			if($scope.SensorForm.SelectReqMetaData.includes('Device ID'))
+			{
+				MetaDataItem["DeviceID"]	=	$scope.SensorForm.MetaDataDeviceID;
+			}
+			
+			if($scope.SensorForm.SelectReqMetaData.includes('Device Metadata'))
+			{
+				MetaDataItem["DeviceMetadata"]	=	$scope.SensorForm.MetaDataDeviceMetadata;
+			}
+			
+			if($scope.SensorForm.SelectReqMetaData.includes('Raw Data'))
+			{
+				MetaDataItem["RawData"]		=	$scope.SensorForm.MetaDataRawData;
+			}		
+			
+			if($scope.SensorForm.SelectReqMetaData.includes('Data Processing Method'))
+			{
+				MetaDataItem["DataProcessingMethod"]	=	$scope.SensorForm.MetaDataDataProcessingMethod;
+			}
+			
+			if($scope.SensorForm.SelectReqMetaData.includes('Business Rules'))
+			{
+				MetaDataItem["BusinessRules"]		=	$scope.SensorForm.MetaDataBusinessRules;
+			}
 		}
 		
 		MetaDataItem['SensorElements']			=	$scope.SensorElementsArray;	
@@ -306,8 +309,6 @@ app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$
 				{
 					$scope.SensorElementsArray[s].SensorFields["UOM"]			=	$scope.SensorForm.SensorElementUOM[SensorElementID];
 				}			
-				
-				console.log($scope.SensorElementsArray);
 				break;
 			}
 		}	
