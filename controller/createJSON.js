@@ -756,7 +756,10 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					SensorChecker(SensorForm[sf][t].DataProcessingMethod,'dataProcessingMethod',SensorMetadatObj)
 					SensorChecker(SensorForm[sf][t].BusinessRules,'bizRules',SensorMetadatObj)
 					
-					SensorMetaOuterObj["sensorMetaData"]	=	SensorMetadatObj;
+					if(Object.keys(SensorMetadatObj).length != 0)
+					{
+						SensorMetaOuterObj["sensorMetaData"]	=	SensorMetadatObj;
+					}				
 					
 					var SensorElements		=	SensorForm[sf][t].SensorElements;
 					
