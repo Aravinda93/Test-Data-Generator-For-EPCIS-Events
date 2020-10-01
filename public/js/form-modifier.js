@@ -144,7 +144,7 @@ app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$
 		angular.element('#SensorInformation').modal('hide');		
 		var TemporaryArray				=	[];
 		var MetaDataItem				=	{};
-		console.log($scope.SensorForm)
+		
 		if($scope.SensorForm.SelectReqMetaData != undefined)
 		{
 			if($scope.SensorForm.SelectReqMetaData.includes('Time'))
