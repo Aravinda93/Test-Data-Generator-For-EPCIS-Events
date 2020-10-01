@@ -5,7 +5,7 @@ const 	fs							=	require('fs');
 const	multer  					= 	require('multer');
 
 //To get the HTML page
-const	port						= 	3000;
+const	port						= 	process.env.PORT || 3000;
 const 	reqPath 					= 	__dirname;
 const 	app 						= 	express();
 var 	upload 						= 	multer({ dest: 'uploads/' });
