@@ -157,10 +157,10 @@
 								<!-- When TRANSACTION EVENT has been Selected show EPCS -->
 								<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransactionEvent' "> EPCs </td>
 								<td ng-show="formdata.eventtype1 == 'TransactionEvent' ">
-									<button ng-show="TransactionEventEPCSbutton" ng-click="TransactionEventEPCS()" type="button" class="btn-btn-info" >Add Child EPCs</button>
+									<button ng-show="TransactionEventEPCSbutton" ng-click="TransactionEventEPCS()" type="button" class="btn-btn-info" >Add EPCs</button>
 									<span ng-hide="TransactionEventEPCSbutton">
 										<button title="Delete Child EPCs" type="button" ng-click="TransactionEventChildEPCsDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>&ensp;
-										<span>Child EPCs has been added</span>
+										<span>EPCs has been added</span>
 									</span>
 								</td>
 								
@@ -204,7 +204,7 @@
 								<!-- TRANSACTION EVENT Quantities -->
 								<td style="background-color: #dfe5f1;" ng-show="formdata.eventtype1 == 'TransactionEvent' " class="column2"> Quantities </td>
 								<td ng-show="formdata.eventtype1 == 'TransactionEvent' ">
-									<button ng-show="TransactionEventQuantitiesButton" ng-click="TransactionEventQuantities()" type="button" class="btn-btn-info" >Add Child Quantities</button>
+									<button ng-show="TransactionEventQuantitiesButton" ng-click="TransactionEventQuantities()" type="button" class="btn-btn-info" >Add Quantities</button>
 									<span ng-hide="TransactionEventQuantitiesButton">
 										<span>
 											<button title="Delete Quantites" type="button" ng-click="TransactionEventQuantitiesDelete()"><span class="fa fa-trash-o" aria-hidden="true"></span></button>

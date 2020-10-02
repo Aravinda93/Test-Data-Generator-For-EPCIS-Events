@@ -16,6 +16,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 	var currentTime 		=	moment().format();
 	var SyntaxType			=	input.VocabSyntaxType;
 	var Domain				=	'https://gs1.org/';
+	var JSONHeaders			=	[];
 	
 	if(Query.XMLElement == 'Single')
 	{
@@ -23,11 +24,39 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		var JSONschemaParse =	{
 									"@context"		: 	"https://id.gs1.org/epcis-context.jsonld",
 									"isA"			:	"EPCISDocument",
-									"creationDate"	:	currentTime,
-									"schemaVersion"	: 	2.0,
 									"format"		: 	"application/ld+json",
-									"epcisBody"		:	{}
 								}
+		
+		//Get the elements from XML header for ILMD from XMLJSON function
+		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == 'TransformationEvent')
+		{
+			if(Query.ILMD.length > 0)
+			{
+				//Call the function for ILMD
+				xml_json_functions.schemaHeaders(Query.ILMD,function(ReturnXMLHeader){
+					JSONHeaders	=	ReturnXMLHeader;
+				});
+			}
+		}
+		
+		//Get the elements from XML header for Extension from XMLJSON function
+		if(Query.Extension.length > 0)
+		{
+			//Call function for Extension
+			xml_json_functions.schemaHeaders(Query.Extension,function(ReturnXMLHeader){
+				JSONHeaders	=	ReturnXMLHeader;
+			});
+		}
+		
+		//add the header elements from Extension and ILMD to XML Header
+		for(var head=0; head<JSONHeaders.length; head++)
+		{
+			JSONschemaParse[JSONHeaders[head].xmlns]	=	JSONHeaders[head].URL;
+		}
+		
+		JSONschemaParse["schemaVersion"]		=	"2.0";
+		JSONschemaParse["creationDate"]			=	currentTime;
+		JSONschemaParse["epcisBody"]			=	{};	
 	}
 	else
 	{
@@ -49,6 +78,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			if(input.EventTimeSelector == 'SpecificTime')
 			{
 				ObjectEvent['eventTime']			=	input.eventtimeSpecific + "Z";
+				RecordTime();
 				ObjectEvent['eventTimeZoneOffset']	=	input.EventTimeZone;
 			}
 			else if(input.EventTimeSelector == 'TimeRange')
@@ -66,33 +96,37 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				}
 				
 				ObjectEvent['eventTime']			=	EventTimeArray[count]+input.EventTimeZone;
+				RecordTime();
 				ObjectEvent['eventTimeZoneOffset']	=	input.EventTimeZone;
 			}
 
 		}
 		
-		//Check what type of RECORD TIME is required and fill the values accordingly
-		if(input.RecordTimeOption != "" && input.RecordTimeOption != null && typeof input.RecordTimeOption != undefined)
-		{
-			//Check if the Record Time Option is YES
-			if(input.RecordTimeOption == 'yes')
+		//function to add record time after the Event Time before Event timezoneoffset
+		function RecordTime(){
+			//Check what type of RECORD TIME is required and fill the values accordingly
+			if(input.RecordTimeOption != "" && input.RecordTimeOption != null && typeof input.RecordTimeOption != undefined)
 			{
-				//Check if Record Time Option is Same as Event TIME
-				if(input.RecordTimeOptionType	== 'RecordTimeSameAsEventTime')
+				//Check if the Record Time Option is YES
+				if(input.RecordTimeOption == 'yes')
 				{
-					if(input.EventTimeSelector == 'TimeRange')
+					//Check if Record Time Option is Same as Event TIME
+					if(input.RecordTimeOptionType	== 'RecordTimeSameAsEventTime')
 					{
-						ObjectEvent['recordTime'] 	=		EventTimeArray[count]+input.EventTimeZone;
+						if(input.EventTimeSelector == 'TimeRange')
+						{
+							ObjectEvent['recordTime'] 	=		EventTimeArray[count]+input.EventTimeZone;
+						}
+						else if(input.EventTimeSelector == 'SpecificTime')
+						{
+							ObjectEvent['recordTime'] 	=		input.eventtimeSpecific+input.EventTimeZone;
+						}					
 					}
-					else if(input.EventTimeSelector == 'SpecificTime')
+					else if(input.RecordTimeOptionType	== 'RecordTimeCurrentTime')
 					{
-						ObjectEvent['recordTime'] 	=		input.eventtimeSpecific+input.EventTimeZone;
-					}					
-				}
-				else if(input.RecordTimeOptionType	== 'RecordTimeCurrentTime')
-				{
-					//If the current time is choosen
-					ObjectEvent['recordTime'] 	=		currentTime;
+						//If the current time is choosen
+						ObjectEvent['recordTime'] 	=		currentTime;
+					}
 				}
 			}
 		}
@@ -188,17 +222,17 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 						var NameSpace 	=	ErrorExtension[i].NameSpace;
 						var LocalName 	=	ErrorExtension[i].LocalName;
 
-						if(NameSpace.includes("http://") || NameSpace.includes("https://"))
+						if(NameSpace.toLowerCase().includes("http://") || NameSpace.toLowerCase().includes("https://"))
 						{
-							NameSpace 			= 	NameSpace.split("/").slice(2);
-							NameSpace 			= 	NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
-							var value			=	NameSpace+':'+LocalName;
-							ErrorValue[value]	=	ErrorExtension[i].FreeText
+							NameSpace 							= 	NameSpace.split("/").slice(2);
+							NameSpace 							= 	NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
+							var value							=	NameSpace+':'+LocalName;
+							ObjectEvent.errorDeclaration[value]	=	ErrorExtension[i].FreeText
 						}
 						else
 						{
-							var value			=	NameSpace+':'+LocalName;
-							ErrorValue[value]	=	ErrorExtension[i].FreeText
+							var value							=	NameSpace+':'+LocalName;
+							ObjectEvent.errorDeclaration[value]	=	ErrorExtension[i].FreeText
 						}
 					}
 				}
@@ -208,6 +242,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		//IF the event type is Object event
 		if(input.eventtype1 == 'ObjectEvent')
 		{
+			ObjectEvent['epcList']	=	"";
+			
 			if(Query.EPCs.length > 0)
 			{
 				var NewEPCS		=	 [];
@@ -229,7 +265,11 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				var AEParentID			=	Query.ParentID[count];
 				ObjectEvent['parentID']	=	AEParentID[0];
 			}
+			
 			//Add the CHILD EPCS of AggregationEvent
+			
+			ObjectEvent['childEPCs']	=	"";
+			
 			if(Query.EPCs.length > 0)
 			{
 				ObjectEvent['childEPCs']	=	[];
@@ -251,6 +291,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			}
 			
 			//TransactionEvent EPCS
+			ObjectEvent['epcList']			=	"";
+			
 			if(Query.EPCs.length > 0)
 			{
 				ObjectEvent['epcList']	=	{};
@@ -350,6 +392,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			}
 			
 			//Add the CHILD EPCS of AssociationEvent
+			ObjectEvent['childEPCs']		=	"";
+			
 			if(Query.EPCs.length > 0)
 			{
 				var ChildEPCSURI			=	Query.EPCs[count];
@@ -708,29 +752,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			ObjectEvent['destinationList'].push(destinationListObj);
 		}
 		
-		//Check for the PERSISTENT DISPOSITION
-		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
-		{
-			ObjectEvent['persistentDisposition']	=	{};	
-			
-			if(input.PersistentDisposition == 'DispositionEnter')
-			{
-				ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	input.EnterPersistentDispositionText;	
-			}
-			else
-			{
-				if(SyntaxType == 'urn')
-				{
-					ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	'urn:epcglobal:cbv:disp:'+input.PersistentDisposition;
-				}
-				else if(SyntaxType == 'webURI')
-				{
-					ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	Domain+'voc/Disp-'+input.PersistentDisposition;
-				}
-			}
-		}
-		
-				//Sensor Information
+		//Sensor Information
 		if(Query.SensorForm.length > 0)
 		{				
 			var SensorForm							=	Query.SensorForm;
@@ -814,6 +836,28 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			if(field != '' && field != null && field != undefined)
 			{
 				SensorMetadatObj[attValue]	=	field;
+			}
+		}
+		
+		//Check for the PERSISTENT DISPOSITION
+		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
+		{
+			ObjectEvent['persistentDisposition']	=	{};	
+			
+			if(input.PersistentDisposition == 'DispositionEnter')
+			{
+				ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	input.EnterPersistentDispositionText;	
+			}
+			else
+			{
+				if(SyntaxType == 'urn')
+				{
+					ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	'urn:epcglobal:cbv:disp:'+input.PersistentDisposition;
+				}
+				else if(SyntaxType == 'webURI')
+				{
+					ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	Domain+'voc/Disp-'+input.PersistentDisposition;
+				}
 			}
 		}
 

@@ -13,18 +13,49 @@ exports.createXMLData	=	function(Query,Root,callback){
 	var EventIDArray	=	[];
 	var Domain			=	'https://gs1.org/';
 	var SyntaxType		=	input.VocabSyntaxType;
+	var XMLHeaders		=	[];
+	var AESubExtension	=	"";
 
 	//Assign the root node based on calling function							
 	if(Query.XMLElement == 'Single')
 	{
 		var root		= 	builder.create('epcis:EPCISDocument')
 								root.att('xmlns:epcis', "urn:epcglobal:epcis:xsd:1")
-								root.att('schemaVersion', "2.0")
-								root.att('creationDate', moment().format())
 								root.att('xmlns:xsi', "http://www.w3.org/2001/XMLSchema-instance")
 								root.att('xsi:schemaLocation',"urn:epcglobal:epcis:xsd:1 EPCglobal-epcis-2_0.xsd")
-		root			=	root.ele('EPCISBody')
-		root			=	root.ele('EventList')
+								
+		//Get the elements from XML header for ILMD from XMLJSON function
+		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == 'TransformationEvent')
+		{
+			if(Query.ILMD.length > 0)
+			{
+				//Call the function for ILMD
+				xml_json_functions.schemaHeaders(Query.ILMD,function(ReturnXMLHeader){
+					XMLHeaders	=	ReturnXMLHeader;
+				});
+			}
+		}		
+		
+		//Get the elements from XML header for Extension from XMLJSON function
+		if(Query.Extension.length > 0)
+		{
+			//Call function for Extension
+			xml_json_functions.schemaHeaders(Query.Extension,function(ReturnXMLHeader){
+				XMLHeaders	=	ReturnXMLHeader;
+			});
+		}
+		
+		//add the header elements from Extension and ILMD to XML Header
+		for(var head=0; head<XMLHeaders.length; head++)
+		{
+			root.att('xmlns:'+XMLHeaders[head].xmlns,XMLHeaders[head].URL)
+		}
+		
+		root.att('xmlns:cbvmda',"urn:epcglobal:cbv:mda")
+		root.att('schemaVersion', "2.0")
+		root.att('creationDate', moment().format())
+		root	=	root.ele('EPCISBody')
+		root	=	root.ele('EventList')
 	}
 	else
 	{
@@ -41,7 +72,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 		if(input.eventtype1 == "AssociationEvent")
 		{
 			var AEMainExtension = 	root.ele('extension')
-			var AESubExtension	=	AEMainExtension.ele('extension')
+			AESubExtension		=	AEMainExtension.ele('extension')
 		}
 	
 		if(input.eventtype1 == "AssociationEvent")
@@ -61,6 +92,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 			{
 				input.eventtimeSpecific		=	input.eventtimeSpecific.substring(0,input.eventtimeSpecific.length-1)
 				ObjectEvent.ele('eventTime', input.eventtimeSpecific+input.EventTimeZone).up()
+				RecordTime();
 				ObjectEvent.ele('eventTimeZoneOffset', input.EventTimeZone).up()
 			}
 			else if(input.EventTimeSelector == 'TimeRange')
@@ -78,32 +110,36 @@ exports.createXMLData	=	function(Query,Root,callback){
 				}
 				
 				ObjectEvent.ele('eventTime', EventTimeArray[count]+input.EventTimeZone).up()
+				RecordTime();
 				ObjectEvent.ele('eventTimeZoneOffset', input.EventTimeZone).up()
 			}
 		}
 		
-		//Check what type of RECORD TIME is required and fill the values accordingly
-		if(input.RecordTimeOption != "" && input.RecordTimeOption != null && typeof input.RecordTimeOption != undefined)
-		{
-			//Check if the Record Time Option is YES
-			if(input.RecordTimeOption == 'yes')
+		//function to add record time after the Event Time before Event timezoneoffset
+		function RecordTime(){
+			//Check what type of RECORD TIME is required and fill the values accordingly
+			if(input.RecordTimeOption != "" && input.RecordTimeOption != null && typeof input.RecordTimeOption != undefined)
 			{
-				//Check if Record Time Option is Same as Event TIME
-				if(input.RecordTimeOptionType	== 'RecordTimeSameAsEventTime')
+				//Check if the Record Time Option is YES
+				if(input.RecordTimeOption == 'yes')
 				{
-					if(input.EventTimeSelector == 'TimeRange')
+					//Check if Record Time Option is Same as Event TIME
+					if(input.RecordTimeOptionType	== 'RecordTimeSameAsEventTime')
 					{
-						ObjectEvent.ele('recordTime', EventTimeArray[count]+input.EventTimeZone).up()
+						if(input.EventTimeSelector == 'TimeRange')
+						{
+							ObjectEvent.ele('recordTime', EventTimeArray[count]+input.EventTimeZone).up()
+						}
+						else if(input.EventTimeSelector == 'SpecificTime')
+						{
+							ObjectEvent.ele('recordTime', input.eventtimeSpecific+input.EventTimeZone).up()
+						}					
 					}
-					else if(input.EventTimeSelector == 'SpecificTime')
+					else if(input.RecordTimeOptionType	== 'RecordTimeCurrentTime')
 					{
-						ObjectEvent.ele('recordTime', input.eventtimeSpecific+input.EventTimeZone).up()
-					}					
-				}
-				else if(input.RecordTimeOptionType	== 'RecordTimeCurrentTime')
-				{
-					//If the current time is choosen
-					ObjectEvent.ele('recordTime',moment().format()).up()
+						//If the current time is choosen
+						ObjectEvent.ele('recordTime',moment().format()).up()
+					}
 				}
 			}
 		}
@@ -222,9 +258,10 @@ exports.createXMLData	=	function(Query,Root,callback){
 		//IF the event type is Object event
 		if(input.eventtype1 == 'ObjectEvent')
 		{
+			var epcList 	= 	ObjectEvent.ele('epcList')
+			
 			if(Query.EPCs.length > 0)
 			{			
-				var epcList 	= 	ObjectEvent.ele('epcList')
 				var EPCsArray	=	Query.EPCs[count];
 				
 				for(var e=0; e<EPCsArray.length; e++)
@@ -244,10 +281,11 @@ exports.createXMLData	=	function(Query,Root,callback){
 			
 			
 			//Add the CHILD EPCS of AggregationEvent
+			var childEPCs		=	ObjectEvent.ele('childEPCs')
+			
 			if(Query.EPCs.length > 0)
 			{
 				var ChildEPCSURI	=	Query.EPCs[count];
-				var childEPCs		=	ObjectEvent.ele('childEPCs')
 				
 				for(var c=0; c<ChildEPCSURI.length; c++)
 				{
@@ -263,11 +301,14 @@ exports.createXMLData	=	function(Query,Root,callback){
 				var TEParentID		=	Query.ParentID[count];
 				ObjectEvent.ele('parentID',TEParentID[0]).up()
 			}
+			
 			//TransactionEvent EPCS
+			var childEPCs	=	ObjectEvent.ele('epcList')
+			
 			if(Query.EPCs.length > 0)
 			{
 				var EPCs		=	Query.EPCs[count];
-				var childEPCs	=	ObjectEvent.ele('epcList')
+				
 				
 				for(var e=0; e<EPCs.length; e++)
 				{						
@@ -359,10 +400,11 @@ exports.createXMLData	=	function(Query,Root,callback){
 			}
 			
 			//Add the CHILD EPCS of AssociationEvent
+			var childEPCs		=	ObjectEvent.ele('childEPCs')
+			
 			if(Query.EPCs.length > 0)
 			{
 				var ChildEPCSURI	=	Query.EPCs[count];
-				var childEPCs		=	ObjectEvent.ele('childEPCs')
 				
 				for(var c=0; c<ChildEPCSURI.length; c++)
 				{
@@ -492,6 +534,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 		//Check for the Quantity element and add it to the XML		
 		if(input.eventtype1 == "ObjectEvent")
 		{	
+			
 			if(Query.Quantities.length > 0)
 			{	
 				if(OuterExtension == undefined || OuterExtension == ""){
@@ -766,41 +809,6 @@ exports.createXMLData	=	function(Query,Root,callback){
 				destinations.att('type',input.OtherDestinationURI1)
 			}
 		}
-
-		//Check for the PERSISTENT DISPOSITION
-		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
-		{
-			if(OuterExtension == undefined || OuterExtension == ""){
-				if(input.eventtype1 != "AssociationEvent"){
-					OuterExtension	=	ObjectEvent.ele('extension')
-					extension		=	OuterExtension.ele('extension')
-				}else{
-					extension		=	ObjectEvent;
-				}				
-			}
-			else
-			{
-				extension		=	OuterExtension.ele('extension')
-			}
-			
-			var persistentDisposition	=	extension.ele('persistentDisposition')
-			
-			if(input.PersistentDisposition == 'DispositionEnter')
-			{
-				persistentDisposition.ele(input.PersistentDispositionType,input.EnterPersistentDispositionText)
-			}
-			else
-			{
-				if(SyntaxType == 'urn')
-				{
-					persistentDisposition.ele(input.PersistentDispositionType,'urn:epcglobal:cbv:disp:'+input.PersistentDisposition)
-				}
-				else if(SyntaxType == 'webURI')
-				{
-					persistentDisposition.ele(input.PersistentDispositionType,Domain+'voc/Disp-'+input.PersistentDisposition)
-				}
-			}
-		}
 		
 		//Sensor Information
 		if(Query.SensorForm.length > 0)
@@ -819,10 +827,17 @@ exports.createXMLData	=	function(Query,Root,callback){
 			}
 			else
 			{
-				if(extension == "")
+				if(input.eventtype1 != "AssociationEvent")
 				{
-					extension		= 	OuterExtension.ele('extension')
-				}				
+					if(extension == "")
+					{
+						extension		= 	OuterExtension.ele('extension')
+					}
+				}
+				else
+				{
+					extension		=	ObjectEvent;
+				}							
 			}
 				
 			var SensorForm			=	Query.SensorForm;
@@ -902,21 +917,70 @@ exports.createXMLData	=	function(Query,Root,callback){
 			}
 		}
 		
+		//Check for the PERSISTENT DISPOSITION
+		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
+		{
+			if(OuterExtension == undefined || OuterExtension == ""){
+				if(input.eventtype1 != "AssociationEvent"){
+					OuterExtension	=	ObjectEvent.ele('extension')
+					extension		=	OuterExtension.ele('extension')
+				}else{
+					extension		=	ObjectEvent;
+				}				
+			}
+			else
+			{
+				if(input.eventtype1 != "AssociationEvent")
+				{
+					if(extension == "")
+					{
+						extension		= 	OuterExtension.ele('extension')
+					}
+				}
+				else
+				{
+					extension		=	ObjectEvent;
+				}
+			}
+			
+			var persistentDisposition	=	extension.ele('persistentDisposition')
+			
+			if(input.PersistentDisposition == 'DispositionEnter')
+			{
+				persistentDisposition.ele(input.PersistentDispositionType,input.EnterPersistentDispositionText)
+			}
+			else
+			{
+				if(SyntaxType == 'urn')
+				{
+					persistentDisposition.ele(input.PersistentDispositionType,'urn:epcglobal:cbv:disp:'+input.PersistentDisposition)
+				}
+				else if(SyntaxType == 'webURI')
+				{
+					persistentDisposition.ele(input.PersistentDispositionType,Domain+'voc/Disp-'+input.PersistentDisposition)
+				}
+			}
+		}
+		
 		
 		//Check if the ILMD has been added then add them
 		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "TransformationEvent")
 		{
 			if(Query.ILMD.length > 0)
 			{
-				var ilmd 		= 	ObjectEvent.ele('ilmd')
-				var ilmdList	=	Query.ILMD;
+				if(OuterExtension == undefined || OuterExtension == ""){
+					OuterExtension	=	ObjectEvent.ele('extension')			
+				}
+				
+				var ilmdList	=	Query.ILMD;				
+				var ilmd 		= 	OuterExtension.ele('ilmd')
 				
 				for(var i=0; i<Query.ILMD.length; i++)
 				{
 					var NameSpace 	=	ilmdList[i].NameSpace;
 					var LocalName 	=	ilmdList[i].LocalName;
 					
-					if(NameSpace.includes("http://") || NameSpace.includes("https://"))
+					if(NameSpace.toLowerCase().includes("http://") || NameSpace.toLowerCase().includes("https://"))
 					{
 						NameSpace = NameSpace.split("/").slice(2);
 						NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf(".")); 
@@ -939,7 +1003,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 				var NameSpace 	=	Extension[ex].NameSpace; 
 				var LocalName 	=	Extension[ex].LocalName;
 					
-				if(Extension[ex].NameSpace.includes("http://") || Extension[ex].NameSpace.includes("https://"))
+				if(Extension[ex].NameSpace.toLowerCase().includes("http://") || Extension[ex].NameSpace.toLowerCase().includes("https://"))
 				{				
 					NameSpace = NameSpace.split("/").slice(2);
 					NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));

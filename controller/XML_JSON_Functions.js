@@ -5,6 +5,34 @@ var randomArray 		= 	[];
 var RecordTimeArray		=	[];
 var EventTimeArray		=	[];
 var EventIDArray		=	[];
+var HeaderArray			=	[];
+
+
+//Extensions and ILMD elements to add to JSON and XML header
+exports.schemaHeaders		=	function(InputData,callback){
+	
+	//Add the Elements from ILMD to XML Header
+	for(var i=0; i<InputData.length; i++)
+	{
+		var NameSpace 	=	InputData[i].NameSpace;
+		
+		if(NameSpace.toLowerCase().includes("http://") || NameSpace.toLowerCase().includes("https://"))
+		{
+			NameSpace = NameSpace.split("/").slice(2);
+			NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
+		}
+		
+		if(!HeaderArray.some(item => item.URL === InputData[i].NameSpace))
+		{	
+			var obj 		= 	new Object();
+			obj.xmlns		=	NameSpace;
+			obj.URL			=	InputData[i].NameSpace;
+			HeaderArray.push(obj);
+		}	
+	}
+	
+	callback(HeaderArray);
+}
 
 //Format the readpoint
 exports.ReadPointFormatter	=	function(input,File,callback){

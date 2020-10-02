@@ -155,9 +155,18 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Show Modal for Aggregation Event Parent
 	$scope.AggregationEventParent	=	function(){
-		angular.element('#ParentTypeModal').modal('show');
-		$scope.AEParentEPCsFlag		=	true;
-		$scope.CommonForm			=	{AggregationEventParentID: ''}
+		
+		//Check if number of events are provided before Parent ID
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Parent IDs");
+		}
+		else
+		{
+			angular.element('#ParentTypeModal').modal('show');
+			$scope.AEParentEPCsFlag		=	true;
+			$scope.CommonForm			=	{AggregationEventParentID: ''}
+		}
 	}
 	
 	//Delete Aggregation Parent on Button Click
@@ -168,9 +177,11 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Aggregation Event Child EPCS
 	$scope.AggregationEventChildEPCs	=	function(){
+		
+		//Check if number of events are provided before Child EPCs
 		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
 		{
-			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Child EPCs");
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add child EPCs");
 		}
 		else
 		{
@@ -187,10 +198,19 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	}
 	
 	//Aggregation Event Child Quantities
-	$scope.AggregationEventChildQuantities	=	function(){
-		angular.element('#ChildTypeModal').modal('show');
-		$scope.AEChildQuantitiesFlag		=	true;
-		$scope.CommonFormQuantity			=	{ObjectEventquantities: ''}
+	$scope.AggregationEventChildQuantities	=	function()
+	{		
+		//Check if number of events are provided before Child Quantities
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add child Quantities");
+		}
+		else
+		{
+			angular.element('#ChildTypeModal').modal('show');
+			$scope.AEChildQuantitiesFlag		=	true;
+			$scope.CommonFormQuantity			=	{ObjectEventquantities: ''}			
+		}
 	}
 	
 	//Aggregation Event CHILD QUANTITIES DELETE
@@ -203,9 +223,18 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	/* TRANSACTION EVENT PARENT ID EPCS AND QUANTITIES STARTS */
 	$scope.TransactionEventParentId		=	function(){
-		angular.element('#ParentTypeModal').modal('show');
-		$scope.TransactionEventParentIDFlag	=	true;
-		$scope.CommonForm			=	{AggregationEventParentID: ''}
+		
+		//Check if number of events are provided before Parent ID
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Parent IDs");
+		}
+		else
+		{
+			angular.element('#ParentTypeModal').modal('show');
+			$scope.TransactionEventParentIDFlag	=	true;
+			$scope.CommonForm			=	{AggregationEventParentID: ''}
+		}		
 	}
 	
 	//Delete the Transaction Event Parent ID on DELETE click
@@ -225,7 +254,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	$scope.TransactionEventEPCS	=	function(){
 		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
 		{
-			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Child EPCs");
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add EPCs");
 		}
 		else
 		{
@@ -245,9 +274,17 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	//Show Transaction Event Quantities Modal
 	$scope.TransactionEventQuantities	=	function()
 	{
-		angular.element('#ChildTypeModal').modal('show');
-		$scope.TransactionEventQuantitiesFlag	=	true;
-		$scope.CommonFormQuantity				=	{ObjectEventquantities: ''}
+		//Check if number of events are provided before Quantities
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Quantities");
+		}
+		else
+		{
+			angular.element('#ChildTypeModal').modal('show');
+			$scope.TransactionEventQuantitiesFlag	=	true;
+			$scope.CommonFormQuantity				=	{ObjectEventquantities: ''}
+		}
 	}
 	
 	//Transaction Event Delete Quantities when DELETE button is clicked
@@ -284,9 +321,18 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//TransformationEvent Show the modal for adding the Input QUANTITIES
 	$scope.TransformationEventInputQuantities	=	function(){
-		angular.element('#ChildTypeModal').modal('show');
-		$scope.TransformationEventInputQuantitiesFlag	=	true;
-		$scope.CommonFormQuantity						=	{ObjectEventquantities: ''}
+		
+		//Check if number of events are provided before Input Quantities
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to Input Quantities");
+		}
+		else
+		{
+			angular.element('#ChildTypeModal').modal('show');
+			$scope.TransformationEventInputQuantitiesFlag	=	true;
+			$scope.CommonFormQuantity						=	{ObjectEventquantities: ''}
+		}
 	}
 	
 	//TransformationEvent Delete the Input Quantities based on Delete click
@@ -317,10 +363,19 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	}
 	
 	//Show modal for adding Transformtion Event Output Quantities
-	$scope.TransformationEventOutputQuantities	=	function(){		
-		angular.element('#ChildTypeModal').modal('show');
-		$scope.TransformationEventOutputQuantitiesFlag	=	true;
-		$scope.CommonFormQuantity						=	{ObjectEventquantities: ''}
+	$scope.TransformationEventOutputQuantities	=	function()
+	{	
+		//Check if number of events are provided before Output Quantities
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to Output Quantities");
+		}
+		else
+		{
+			angular.element('#ChildTypeModal').modal('show');
+			$scope.TransformationEventOutputQuantitiesFlag	=	true;
+			$scope.CommonFormQuantity						=	{ObjectEventquantities: ''}
+		}
 	}
 	
 	$scope.TransformationEventOutputQuantitiesDelete	=	function(){
@@ -333,10 +388,19 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	/*ASSOCIATION EVENT PARENT CHILD and CHILD QUANTITIES STARTS */
 	
 	//Show Modal for ASSOCIATION Event Parent
-	$scope.AssociationEventParent	=	function(){
-		angular.element('#ParentTypeModal').modal('show');
-		$scope.AssociationEventParentFlag	=	true;
-		$scope.CommonForm					=	{AggregationEventParentID: ''}
+	$scope.AssociationEventParent	=	function()
+	{
+		//Check if number of events are provided before Parent ID
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to Parent ID");
+		}
+		else
+		{
+			angular.element('#ParentTypeModal').modal('show');
+			$scope.AssociationEventParentFlag	=	true;
+			$scope.CommonForm					=	{AggregationEventParentID: ''}
+		}
 	}
 	
 	//Delete Association EVENT Parent on Button Click
@@ -349,7 +413,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	$scope.AssociationEventChildEPCS	=	function(){
 		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
 		{
-			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Input EPCs");
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Child EPCs");
 		}
 		else
 		{
@@ -367,9 +431,17 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Association Event Child Quantities Add
 	$scope.AssociationEventChildQuantities	=	function(){
-		angular.element('#ChildTypeModal').modal('show');
-		$scope.CommonFormQuantity					=	{ObjectEventquantities: ''}
-		$scope.AssociationEventChildQuantitiesFlag	=	true;
+		//Check if number of events are provided before Parent ID
+		if($scope.formdata.eventcount  == 0 || $scope.formdata.eventcount == undefined)
+		{
+			alertify.alert(" EPCIS Test Data Generator ","Please provide the Event Count to add Child Quantities");
+		}
+		else
+		{
+			angular.element('#ChildTypeModal').modal('show');
+			$scope.CommonFormQuantity					=	{ObjectEventquantities: ''}
+			$scope.AssociationEventChildQuantitiesFlag	=	true;
+		}
 	}
 	
 	//Association Event Child Quantities Delete
@@ -981,7 +1053,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	{
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddErrorExtensionFlag	=	true;
-		$scope.AddExtensionForm			=	{};
+		$scope.AddExtensionForm			=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
 	}
 	
 	//Delete the Error Exntension on click of Delete button
@@ -1115,7 +1187,9 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		
 		if($scope.formdata.eventtype1 == 'ObjectEvent')
 		{
-			var data 	=	JSON.stringify({	
+			if($scope.ObjectEventEpcsURI.length > 0 || $scope.ObjectEventQuantitiesURI.length > 0)
+			{
+				var data 	=	JSON.stringify({	
 												input			:	$scope.formdata,
 												EPCs			:	$scope.ObjectEventEpcsURI,
 												Quantities		:	$scope.ObjectEventQuantitiesURI,
@@ -1128,26 +1202,40 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												XMLElement		:	"Single",
 												File			:	'ObjectEvent'
 											});
+			
+				//Call the function to create function
+				$scope.CreateEventFunctionHTTP(data);
+			}
+			else
+			{
+				alertify.alert("Test Data Generator", "Object Event requires: <b>EPCs</b> or <b>Quantities</b>")
+			}			
 		}
 		else if($scope.formdata.eventtype1 == 'AggregationEvent')
 		{
 			var data 	=	JSON.stringify({
-												input			:	$scope.formdata,
-												Extension		:	$scope.CommonExtensionsList,
-												ParentID		:	$scope.AggregationEventParentURI,		
-												EPCs	 		:	$scope.AggregationEventChildEPCsURI,			
-												Quantities		:	$scope.AggregationEventChildQuantitiesURI,
-												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
-												ErrorExtension	:	$scope.ErrorExtensionList,
-												BTT				:	$scope.BusinessTransactionList,
-												SensorForm		:	$rootScope.TotalSensorElementsArray,
-												XMLElement		:	"Single",
-												File			:	'AggregationEvent'
-											});
+											input			:	$scope.formdata,
+											Extension		:	$scope.CommonExtensionsList,
+											ParentID		:	$scope.AggregationEventParentURI,		
+											EPCs	 		:	$scope.AggregationEventChildEPCsURI,			
+											Quantities		:	$scope.AggregationEventChildQuantitiesURI,
+											ErrorCorrection	:	$scope.ErrorCorrectiveIds,
+											ErrorExtension	:	$scope.ErrorExtensionList,
+											BTT				:	$scope.BusinessTransactionList,
+											SensorForm		:	$rootScope.TotalSensorElementsArray,
+											XMLElement		:	"Single",
+											File			:	'AggregationEvent'
+										});
+										
+			//Call the function to create function
+			$scope.CreateEventFunctionHTTP(data);
 		}
 		else if($scope.formdata.eventtype1 == 'TransactionEvent')
 		{
-			var data	=	JSON.stringify({
+			//Check if required values are available
+			if($scope.BusinessTransactionList.length > 0)
+			{
+				var data	=	JSON.stringify({
 												input			:	$scope.formdata,
 												Extension		:	$scope.CommonExtensionsList,
 												ParentID		:	$scope.TransactionEventParentIDURI,
@@ -1160,6 +1248,16 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												XMLElement		:	"Single",
 												File			:	'TransactionEvent'
 											});
+											
+				//Call the function to create function
+				$scope.CreateEventFunctionHTTP(data);
+			}
+			else
+			{
+				alertify.alert("Test Data Generator", "Transaction Event requires: <b>Business Transactions</b>")
+			}
+			
+			
 		}
 		else if($scope.formdata.eventtype1 == 'TransformationEvent')
 		{
@@ -1178,24 +1276,35 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 												XMLElement		:	"Single",
 												File			:	'TransformationEvent'
 											});
+			
+			//Call the function to create function
+			$scope.CreateEventFunctionHTTP(data);
 		}
 		else if($scope.formdata.eventtype1 == 'AssociationEvent')
 		{
 			var data 	=	JSON.stringify({
-												input			:	$scope.formdata,
-												Extension		:	$scope.CommonExtensionsList,
-												ParentID		:	$scope.AssociationEventParentURI,		
-												EPCs	 		:	$scope.AssociationEventChildEPCsURI,			
-												Quantities		:	$scope.AssociationEventChildQuantitiesURI,
-												ErrorCorrection	:	$scope.ErrorCorrectiveIds,
-												ErrorExtension	:	$scope.ErrorExtensionList,
-												BTT				:	$scope.BusinessTransactionList,
-												SensorForm		:	$rootScope.TotalSensorElementsArray,
-												XMLElement		:	"Single",
-												File			:	'AssociationEvent'
-											});
+											input			:	$scope.formdata,
+											Extension		:	$scope.CommonExtensionsList,
+											ParentID		:	$scope.AssociationEventParentURI,		
+											EPCs	 		:	$scope.AssociationEventChildEPCsURI,			
+											Quantities		:	$scope.AssociationEventChildQuantitiesURI,
+											ErrorCorrection	:	$scope.ErrorCorrectiveIds,
+											ErrorExtension	:	$scope.ErrorExtensionList,
+											BTT				:	$scope.BusinessTransactionList,
+											SensorForm		:	$rootScope.TotalSensorElementsArray,
+											XMLElement		:	"Single",
+											File			:	'AssociationEvent'
+										});	
+			
+			//Call the function to create function
+			$scope.CreateEventFunctionHTTP(data);			
 		}
 		
+	}
+	
+	//Function to make final call for creating the events
+	$scope.CreateEventFunctionHTTP	=	function(data)
+	{
 		$http({
 			url: "/createEvents",
 			method: "POST",
