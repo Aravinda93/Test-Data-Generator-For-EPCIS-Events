@@ -617,7 +617,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	{
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddExtensionsFlag		=	true;
-		$scope.AddExtensionForm			=	{};
+		$scope.AddExtensionForm			=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
 	}
 	
 	//On submission of the Modal Add Extensions or ILMD OR ERROR Declaration
@@ -834,7 +834,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	{
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddILMDFlag		=	true;
-		$scope.AddExtensionForm	=	{};
+		$scope.AddExtensionForm	=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
 	}
 	
 	//Delete the ILMD for Object Event on Delete Button Click
