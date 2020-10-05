@@ -10,7 +10,6 @@ var HeaderArray			=	[];
 
 //Extensions and ILMD elements to add to JSON and XML header
 exports.schemaHeaders		=	function(InputData,callback){
-	
 	//Add the Elements from ILMD to XML Header
 	for(var i=0; i<InputData.length; i++)
 	{

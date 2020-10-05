@@ -15,6 +15,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 	var SyntaxType		=	input.VocabSyntaxType;
 	var XMLHeaders		=	[];
 	var AESubExtension	=	"";
+	var root			=	"";	
 
 	//Assign the root node based on calling function							
 	if(Query.XMLElement == 'Single')
@@ -45,6 +46,18 @@ exports.createXMLData	=	function(Query,Root,callback){
 			});
 		}
 		
+		//Get the elements for XML Header from Error Declaration Event
+		if(input.eventtype2 == 'errordeclaration')
+		{	
+			if(Query.ErrorExtension.length > 0)
+			{
+				//Call the function for ILMD
+				xml_json_functions.schemaHeaders(Query.ErrorExtension,function(ReturnXMLHeader){
+					XMLHeaders	=	ReturnXMLHeader;
+				});
+			}
+		}
+		
 		//add the header elements from Extension and ILMD to XML Header
 		for(var head=0; head<XMLHeaders.length; head++)
 		{
@@ -59,8 +72,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 	}
 	else
 	{
-		var root		=	Root;
-	
+		var root		=	Root;	
 	}
 	
 	for(var count=0; count<input.eventcount; count++)
@@ -69,19 +81,21 @@ exports.createXMLData	=	function(Query,Root,callback){
 		var extension		= "";
 		var baseExtension 	= "";
 		
+		//Add outer extension elements for Association Event		
 		if(input.eventtype1 == "AssociationEvent")
 		{
 			var AEMainExtension = 	root.ele('extension')
 			AESubExtension		=	AEMainExtension.ele('extension')
+			var ObjectEvent		= 	AESubExtension.ele(input.eventtype1)
 		}
-	
-		if(input.eventtype1 == "AssociationEvent")
+		else if(input.eventtype1 == "TransformationEvent")
 		{
-			var ObjectEvent	= AESubExtension.ele(input.eventtype1)
+			var TEMainExtension = 	root.ele('extension')
+			var ObjectEvent		= 	TEMainExtension.ele(input.eventtype1)
 		}
 		else
 		{
-			var ObjectEvent = root.ele(input.eventtype1)
+			var ObjectEvent 	=	root.ele(input.eventtype1)
 		}
 		
 		//Check what type of EVENT TIME is required and fill the values accordingly
@@ -255,6 +269,13 @@ exports.createXMLData	=	function(Query,Root,callback){
 			
 		}
 		
+		//If the event is TransactionEvent then add Business Transacation List here
+		if(input.eventtype1 == "TransactionEvent")
+		{
+			//Call the Business Transaction List function
+			BusinessTrasactions();
+		}
+		
 		//IF the event type is Object event
 		if(input.eventtype1 == 'ObjectEvent')
 		{
@@ -338,7 +359,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 					
 				for(var q=0; q<InputQuantities.length; q++)
 				{	
-					var quantityElement		=	inputQuantityList.ele('quantityElement').up()
+					var quantityElement		=	inputQuantityList.ele('quantityElement')
 					
 					quantityElement.ele('epcClass',InputQuantities[q].URI)
 					
@@ -529,12 +550,17 @@ exports.createXMLData	=	function(Query,Root,callback){
 					businesslocation.ele('id', 'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2)
 				}
 			}
-		}	
+		}
+		
+		//Add Business Transacations for Object Event and Aggregation Event
+		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "AggregationEvent")
+		{
+			BusinessTrasactions();
+		}
 		
 		//Check for the Quantity element and add it to the XML		
 		if(input.eventtype1 == "ObjectEvent")
-		{	
-			
+		{				
 			if(Query.Quantities.length > 0)
 			{	
 				if(OuterExtension == undefined || OuterExtension == ""){
@@ -542,8 +568,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 				}
 				
 				var QuantitiesURIs	=	Query.Quantities[count];
-				var quantityList	= 	OuterExtension.ele('quantityList')				
-				
+				var quantityList	= 	OuterExtension.ele('quantityList')			
 				
 				for(var q=0; q<QuantitiesURIs.length; q++)
 				{
@@ -573,8 +598,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 				}
 			
 				var quantityList		= 	OuterExtension.ele('childQuantityList')	
-				var ChildQuantitiesURI	=	Query.Quantities[count];
-				
+				var ChildQuantitiesURI	=	Query.Quantities[count];				
 					
 				for(c=0; c<ChildQuantitiesURI.length;c++)
 				{
@@ -622,71 +646,101 @@ exports.createXMLData	=	function(Query,Root,callback){
 			}
 		}
 		
-		//Populate The Business Transacation List
-		if(Query.BTT.length > 0)
-		{					
-			var bizTransactionList	=	ObjectEvent.ele('bizTransactionList')
-			
-			for(var b=0; b<Query.BTT.length; b++)
-			{
-				var BTT 			=	Query.BTT[b]
-				
-				if(SyntaxType == 'urn')
-				{
-					var bizTransaction 	=	bizTransactionList.ele('bizTransaction','urn:epcglobal:cbv:bt:'+BTT.BTT.Value)
-					bizTransaction.att('type','urn:epcglobal:cbv:btt:'+BTT.BTT.Type)
-				}
-				else if(SyntaxType == 'webURI')
-				{
-					var bizTransaction 	=	bizTransactionList.ele('bizTransaction',Domain+'BT-'+BTT.BTT.Value)
-					bizTransaction.att('type',Domain+'BTT-'+BTT.BTT.Type)
-				}
-			}			
+		//If the event is AssociationEvent or TransformationEvent then add Business Transacation List here
+		if(input.eventtype1 == "TransformationEvent" || input.eventtype1 == "AssociationEvent")
+		{
+			BusinessTrasactions();
 		}
 		
-		//Check for the Source and Source type
-		if(input.sourcesType != '' && input.sourcesType != null && input.sourcesType != undefined)
+		//Populate The Business Transacation List
+		function BusinessTrasactions()
 		{
-			if(OuterExtension == undefined || OuterExtension == ""){
-				if(input.eventtype1 != "AssociationEvent"){
-					OuterExtension	=	ObjectEvent.ele('extension')
-				}else{
-					OuterExtension	=	ObjectEvent;
-				}				
-			}
-			
-			var sourceList 	= OuterExtension.ele('sourceList')			
-			
-			if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party' || input.sourcesType == 'location')
-			{
-				var Domain2				=	'https://id.gs1.org/';				
-				var SourceGLN			=	input.SourceGLN;
-				var SourceCompanyPrefix	=	input.SourcesCompanyPrefix;
-				var FormattedData;
+			if(Query.BTT.length > 0)
+			{					
+				var bizTransactionList	=	ObjectEvent.ele('bizTransactionList')
 				
-				xml_json_functions.SourceDestinationFormatter(SourceGLN,SourceCompanyPrefix,function(data)
-				{	
-					FormattedData	=	data;
-				});
-
-				if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party')
+				for(var b=0; b<Query.BTT.length; b++)
 				{
-					//If PGLN then directly append
-					if(input.SourceLNType == 'pgln')
-					{						
-						if(SyntaxType == 'urn')
-						{
-							var sources 	= 	sourceList.ele('source','urn:epc:id:pgln:'+FormattedData)
-							sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)
-						}
-						else if(SyntaxType == 'webURI')
-						{
-							var sources 	= 	sourceList.ele('source',Domain2+'417/'+input.SourceGLN)
-							sources.att('type',Domain+'voc/SDT-'+input.sourcesType)
-						}
-												
+					var BTT 			=	Query.BTT[b]
+					
+					if(SyntaxType == 'urn')
+					{
+						var bizTransaction 	=	bizTransactionList.ele('bizTransaction','urn:epcglobal:cbv:bt:'+BTT.BTT.Value)
+						bizTransaction.att('type','urn:epcglobal:cbv:btt:'+BTT.BTT.Type)
 					}
-					else if(input.SourceLNType == 'sgln')
+					else if(SyntaxType == 'webURI')
+					{
+						var bizTransaction 	=	bizTransactionList.ele('bizTransaction',Domain+'BT-'+BTT.BTT.Value)
+						bizTransaction.att('type',Domain+'BTT-'+BTT.BTT.Type)
+					}
+				}			
+			}
+		}	
+		
+		
+		//Check for the Source and Source type
+		if(input.eventtype1 != "TransformationEvent")
+		{
+			if(input.sourcesType != '' && input.sourcesType != null && input.sourcesType != undefined)
+			{
+				if(OuterExtension == undefined || OuterExtension == ""){
+					if(input.eventtype1 != "AssociationEvent" && input.eventtype1 != "TransformationEvent"){
+						OuterExtension	=	ObjectEvent.ele('extension')
+					}else{
+						OuterExtension	=	ObjectEvent;
+					}				
+				}
+				
+				var sourceList 	= OuterExtension.ele('sourceList')			
+				
+				if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party' || input.sourcesType == 'location')
+				{
+					var Domain2				=	'https://id.gs1.org/';				
+					var SourceGLN			=	input.SourceGLN;
+					var SourceCompanyPrefix	=	input.SourcesCompanyPrefix;
+					var FormattedData;
+					
+					xml_json_functions.SourceDestinationFormatter(SourceGLN,SourceCompanyPrefix,function(data)
+					{	
+						FormattedData	=	data;
+					});
+
+					if(input.sourcesType == 'owning_party' || input.sourcesType == 'processing_party')
+					{
+						//If PGLN then directly append
+						if(input.SourceLNType == 'pgln')
+						{						
+							if(SyntaxType == 'urn')
+							{
+								var sources 	= 	sourceList.ele('source','urn:epc:id:pgln:'+FormattedData)
+								sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)
+							}
+							else if(SyntaxType == 'webURI')
+							{
+								var sources 	= 	sourceList.ele('source',Domain2+'417/'+input.SourceGLN)
+								sources.att('type',Domain+'voc/SDT-'+input.sourcesType)
+							}
+													
+						}
+						else if(input.SourceLNType == 'sgln')
+						{
+							FormattedData	=	FormattedData + '.' + input.SourceGLNExtension;
+							
+							if(SyntaxType == 'urn')
+							{
+								var sources 	= 	sourceList.ele('source','urn:epc:id:sgln:'+FormattedData)
+								sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)	
+							}
+							else if(SyntaxType == 'webURI')
+							{
+								var sources 	= 	sourceList.ele('source',Domain2+'414/'+input.SourceGLN+'/254/'+input.SourceGLNExtension)
+								sources.att('type',Domain+'voc/SDT-'+input.sourcesType)	
+							}
+							
+						}
+					}
+					
+					if(input.sourcesType == 'location')
 					{
 						FormattedData	=	FormattedData + '.' + input.SourceGLNExtension;
 						
@@ -698,80 +752,84 @@ exports.createXMLData	=	function(Query,Root,callback){
 						else if(SyntaxType == 'webURI')
 						{
 							var sources 	= 	sourceList.ele('source',Domain2+'414/'+input.SourceGLN+'/254/'+input.SourceGLNExtension)
-							sources.att('type',Domain+'voc/SDT-'+input.sourcesType)	
+							sources.att('type',Domain+'voc/SDT-'+input.sourcesType)
 						}
 						
-					}
+					}				
 				}
-				
-				if(input.sourcesType == 'location')
+				else if(input.sourcesType == 'other')
 				{
-					FormattedData	=	FormattedData + '.' + input.SourceGLNExtension;
-					
-					if(SyntaxType == 'urn')
-					{
-						var sources 	= 	sourceList.ele('source','urn:epc:id:sgln:'+FormattedData)
-						sources.att('type','urn:epcglobal:cbv:sdt:'+input.sourcesType)	
-					}
-					else if(SyntaxType == 'webURI')
-					{
-						var sources 	= 	sourceList.ele('source',Domain2+'414/'+input.SourceGLN+'/254/'+input.SourceGLNExtension)
-						sources.att('type',Domain+'voc/SDT-'+input.sourcesType)
-					}
-					
-				}				
-			}
-			else if(input.sourcesType == 'other')
-			{
-				var sources 	= sourceList.ele('source',input.OtherSourceURI2)
-				sources.att('type',input.OtherSourceURI1)
+					var sources 	= sourceList.ele('source',input.OtherSourceURI2)
+					sources.att('type',input.OtherSourceURI1)
+				}
 			}
 		}
 		
+		
 		//Check for the Destination and Destination type
-		if(input.destinationsType != '' && input.destinationsType != null && input.destinationsType != undefined)
+		if(input.eventtype1 != "TransformationEvent")
 		{
-			if(OuterExtension == undefined || OuterExtension == ""){
-				if(input.eventtype1 != "AssociationEvent"){
-					OuterExtension	=	ObjectEvent.ele('extension')
-				}else{
-					OuterExtension	=	ObjectEvent;
-				}				
-			}
-			
-			var destinationList 	= 	OuterExtension.ele('destinationList')
-			
-			if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party' || input.destinationsType == 'location')
+			if(input.destinationsType != '' && input.destinationsType != null && input.destinationsType != undefined)
 			{
-				var Domain2						=	'https://id.gs1.org/';	
-				var destinationGLN				=	input.DestinationGLN;
-				var destinationCompanyPrefix	=	input.DestinationCompanyPrefix;
-				var FormattedData;
+				if(OuterExtension == undefined || OuterExtension == ""){
+					if(input.eventtype1 != "AssociationEvent" && input.eventtype1 != "TransformationEvent"){
+						OuterExtension	=	ObjectEvent.ele('extension')
+					}else{
+						OuterExtension	=	ObjectEvent;
+					}				
+				}
 				
-				xml_json_functions.SourceDestinationFormatter(destinationGLN,destinationCompanyPrefix,function(data)
-				{	
-					FormattedData	=	data;
-				});
+				var destinationList 	= 	OuterExtension.ele('destinationList')
 				
-				if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party')
+				if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party' || input.destinationsType == 'location')
 				{
-					//If PGLN then directly append
-					if(input.DestinationLNType == 'pgln')
-					{						
-						if(SyntaxType == 'urn')
-						{
-							var destinations 	=	destinationList.ele('destination', 'urn:epc:id:pgln:'+FormattedData)
-							destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
-						}
-						else if(SyntaxType == 'webURI')
-						{
-							var destinations 	=	destinationList.ele('destination',Domain2+'417/'+input.DestinationGLN)
-							destinations.att('type',Domain+'voc/SDT-'+input.destinationsType)
-						}												
-					}
-					else if(input.DestinationLNType == 'sgln')
+					var Domain2						=	'https://id.gs1.org/';	
+					var destinationGLN				=	input.DestinationGLN;
+					var destinationCompanyPrefix	=	input.DestinationCompanyPrefix;
+					var FormattedData;
+					
+					xml_json_functions.SourceDestinationFormatter(destinationGLN,destinationCompanyPrefix,function(data)
+					{	
+						FormattedData	=	data;
+					});
+					
+					if(input.destinationsType == 'owning_party' || input.destinationsType == 'processing_party')
 					{
-						FormattedData		=	FormattedData + '.' + input.DestinationGLNExtension;						
+						//If PGLN then directly append
+						if(input.DestinationLNType == 'pgln')
+						{						
+							if(SyntaxType == 'urn')
+							{
+								var destinations 	=	destinationList.ele('destination', 'urn:epc:id:pgln:'+FormattedData)
+								destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
+							}
+							else if(SyntaxType == 'webURI')
+							{
+								var destinations 	=	destinationList.ele('destination',Domain2+'417/'+input.DestinationGLN)
+								destinations.att('type',Domain+'voc/SDT-'+input.destinationsType)
+							}												
+						}
+						else if(input.DestinationLNType == 'sgln')
+						{
+							FormattedData		=	FormattedData + '.' + input.DestinationGLNExtension;						
+							
+							if(SyntaxType == 'urn')
+							{
+								var destinations 	= 	destinationList.ele('destination','urn:epc:id:sgln:'+FormattedData)
+								destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
+							}
+							else if(SyntaxType == 'webURI')
+							{
+								var destinations 	= 	destinationList.ele('destination',Domain2+'414/'+input.DestinationGLN + '/254/' + input.DestinationGLNExtension)
+								destinations.att('type',Domain+'voc/SDT-'+input.destinationsType)
+							}							
+						}
+					}
+					
+					if(input.destinationsType == 'location')
+					{
+						FormattedData		=	FormattedData + '.' + input.DestinationGLNExtension;
+						
 						
 						if(SyntaxType == 'urn')
 						{
@@ -782,31 +840,53 @@ exports.createXMLData	=	function(Query,Root,callback){
 						{
 							var destinations 	= 	destinationList.ele('destination',Domain2+'414/'+input.DestinationGLN + '/254/' + input.DestinationGLNExtension)
 							destinations.att('type',Domain+'voc/SDT-'+input.destinationsType)
-						}							
+						}
+					}
+				}
+				else if(input.destinationsType == 'other')
+				{
+					var destinations 		=	destinationList.ele('destination', input.OtherDestinationURI2)
+					destinations.att('type',input.OtherDestinationURI1)
+				}
+			}
+		}	
+		
+		//For TransformationEvent add ILMD Here
+		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "TransformationEvent")
+		{
+			if(Query.ILMD.length > 0)
+			{
+				if(OuterExtension == undefined || OuterExtension == "")
+				{
+					if(input.eventtype1 == "ObjectEvent")
+					{
+						OuterExtension	=	ObjectEvent.ele('extension')
+					}
+					else if(input.eventtype1 == "TransformationEvent")
+					{
+						OuterExtension	=	ObjectEvent
 					}
 				}
 				
-				if(input.destinationsType == 'location')
+				var ilmdList	=	Query.ILMD;				
+				var ilmd 		= 	OuterExtension.ele('ilmd')
+				
+				for(var i=0; i<Query.ILMD.length; i++)
 				{
-					FormattedData		=	FormattedData + '.' + input.DestinationGLNExtension;
+					var NameSpace 	=	ilmdList[i].NameSpace;
+					var LocalName 	=	ilmdList[i].LocalName;
 					
-					
-					if(SyntaxType == 'urn')
+					if(NameSpace.toLowerCase().includes("http://") || NameSpace.toLowerCase().includes("https://"))
 					{
-						var destinations 	= 	destinationList.ele('destination','urn:epc:id:sgln:'+FormattedData)
-						destinations.att('type','urn:epcglobal:cbv:sdt:'+input.destinationsType)
+						NameSpace = NameSpace.split("/").slice(2);
+						NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf(".")); 
+						ilmd.ele(NameSpace+':'+LocalName,ilmdList[i].FreeText)
 					}
-					else if(SyntaxType == 'webURI')
+					else
 					{
-						var destinations 	= 	destinationList.ele('destination',Domain2+'414/'+input.DestinationGLN + '/254/' + input.DestinationGLNExtension)
-						destinations.att('type',Domain+'voc/SDT-'+input.destinationsType)
+						ilmd.ele(NameSpace+':'+LocalName,ilmdList[i].FreeText)
 					}
 				}
-			}
-			else if(input.destinationsType == 'other')
-			{
-				var destinations 		=	destinationList.ele('destination', input.OtherDestinationURI2)
-				destinations.att('type',input.OtherDestinationURI1)
 			}
 		}
 		
@@ -815,19 +895,27 @@ exports.createXMLData	=	function(Query,Root,callback){
 		{
 			if(OuterExtension == "")
 			{
-				if(input.eventtype1 != "AssociationEvent")
+				if(input.eventtype1 != "AssociationEvent" && input.eventtype1 != "TransformationEvent")
 				{
 					OuterExtension	=	ObjectEvent.ele('extension')
 					extension		= 	OuterExtension.ele('extension')
 				}
 				else
 				{
-					extension		=	ObjectEvent;
+					if(input.eventtype1 == "AssociationEvent")
+					{
+						extension		=	ObjectEvent;
+					}
+					else if(input.eventtype1 == "TransformationEvent")
+					{
+						OuterExtension	=	ObjectEvent.ele('extension')
+						extension		= 	OuterExtension
+					}				
 				}				
 			}
 			else
 			{
-				if(input.eventtype1 != "AssociationEvent")
+				if(input.eventtype1 != "AssociationEvent" && input.eventtype1 != "TransformationEvent")
 				{
 					if(extension == "")
 					{
@@ -836,7 +924,15 @@ exports.createXMLData	=	function(Query,Root,callback){
 				}
 				else
 				{
-					extension		=	ObjectEvent;
+					if(input.eventtype1 == "AssociationEvent")
+					{
+						extension		=	ObjectEvent.ele('extension');
+					}
+					else if(input.eventtype1 == "TransformationEvent")
+					{
+						OuterExtension	=	ObjectEvent.ele('extension')
+						extension		= 	OuterExtension
+					}
 				}							
 			}
 				
@@ -920,17 +1016,30 @@ exports.createXMLData	=	function(Query,Root,callback){
 		//Check for the PERSISTENT DISPOSITION
 		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
 		{
-			if(OuterExtension == undefined || OuterExtension == ""){
-				if(input.eventtype1 != "AssociationEvent"){
+			if(OuterExtension == undefined || OuterExtension == "")
+			{				
+				if(input.eventtype1 != "AssociationEvent" && input.eventtype1 != "TransformationEvent")
+				{
 					OuterExtension	=	ObjectEvent.ele('extension')
 					extension		=	OuterExtension.ele('extension')
-				}else{
-					extension		=	ObjectEvent;
+				}
+				else
+				{
+					
+					if(input.eventtype1 == "AssociationEvent")
+					{
+						extension		=	ObjectEvent;
+					}
+					else if(input.eventtype1 == "TransformationEvent")
+					{
+						OuterExtension	=	ObjectEvent.ele('extension')
+						extension		= 	OuterExtension
+					}
 				}				
 			}
 			else
 			{
-				if(input.eventtype1 != "AssociationEvent")
+				if(input.eventtype1 != "AssociationEvent" && input.eventtype1 != "TransformationEvent")
 				{
 					if(extension == "")
 					{
@@ -939,7 +1048,21 @@ exports.createXMLData	=	function(Query,Root,callback){
 				}
 				else
 				{
-					extension		=	ObjectEvent;
+					if(input.eventtype1 == "AssociationEvent")
+					{
+						if(extension == "")
+						{
+							extension		=	ObjectEvent.ele('extension');
+						}
+						else
+						{
+							extension		=	extension;
+						}
+					}
+					else if(input.eventtype1 == "TransformationEvent")
+					{
+						extension		= 	OuterExtension
+					}
 				}
 			}
 			
@@ -958,38 +1081,6 @@ exports.createXMLData	=	function(Query,Root,callback){
 				else if(SyntaxType == 'webURI')
 				{
 					persistentDisposition.ele(input.PersistentDispositionType,Domain+'voc/Disp-'+input.PersistentDisposition)
-				}
-			}
-		}
-		
-		
-		//Check if the ILMD has been added then add them
-		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "TransformationEvent")
-		{
-			if(Query.ILMD.length > 0)
-			{
-				if(OuterExtension == undefined || OuterExtension == ""){
-					OuterExtension	=	ObjectEvent.ele('extension')			
-				}
-				
-				var ilmdList	=	Query.ILMD;				
-				var ilmd 		= 	OuterExtension.ele('ilmd')
-				
-				for(var i=0; i<Query.ILMD.length; i++)
-				{
-					var NameSpace 	=	ilmdList[i].NameSpace;
-					var LocalName 	=	ilmdList[i].LocalName;
-					
-					if(NameSpace.toLowerCase().includes("http://") || NameSpace.toLowerCase().includes("https://"))
-					{
-						NameSpace = NameSpace.split("/").slice(2);
-						NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf(".")); 
-						ilmd.ele(NameSpace+':'+LocalName,ilmdList[i].FreeText)
-					}
-					else
-					{
-						ilmd.ele(NameSpace+':'+LocalName,ilmdList[i].FreeText)
-					}
 				}
 			}
 		}

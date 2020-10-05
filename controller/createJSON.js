@@ -33,8 +33,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			if(Query.ILMD.length > 0)
 			{
 				//Call the function for ILMD
-				xml_json_functions.schemaHeaders(Query.ILMD,function(ReturnXMLHeader){
-					JSONHeaders	=	ReturnXMLHeader;
+				xml_json_functions.schemaHeaders(Query.ILMD,function(ReturnJSONHeader){
+					JSONHeaders	=	ReturnJSONHeader;
 				});
 			}
 		}
@@ -43,9 +43,21 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		if(Query.Extension.length > 0)
 		{
 			//Call function for Extension
-			xml_json_functions.schemaHeaders(Query.Extension,function(ReturnXMLHeader){
-				JSONHeaders	=	ReturnXMLHeader;
+			xml_json_functions.schemaHeaders(Query.Extension,function(ReturnJSONHeader){
+				JSONHeaders	=	ReturnJSONHeader;
 			});
+		}
+		
+		//Get the elements for XML Header from Error Declaration Event
+		if(input.eventtype2 == 'errordeclaration')
+		{	
+			if(Query.ErrorExtension.length > 0)
+			{
+				//Call the function for ILMD
+				xml_json_functions.schemaHeaders(Query.ErrorExtension,function(ReturnJSONHeader){
+					JSONHeaders	=	ReturnJSONHeader;
+				});
+			}
 		}
 		
 		//add the header elements from Extension and ILMD to XML Header
@@ -238,12 +250,16 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				}
 			}
 		}
+		
+		//If the event is TransactionEvent then add Business Transacation List here
+		if(input.eventtype1 == "TransactionEvent")
+		{
+			BusinessTrasactions();
+		}
 
 		//IF the event type is Object event
 		if(input.eventtype1 == 'ObjectEvent')
-		{
-			ObjectEvent['epcList']	=	"";
-			
+		{			
 			if(Query.EPCs.length > 0)
 			{
 				var NewEPCS		=	 [];
@@ -266,10 +282,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				ObjectEvent['parentID']	=	AEParentID[0];
 			}
 			
-			//Add the CHILD EPCS of AggregationEvent
-			
-			ObjectEvent['childEPCs']	=	"";
-			
+			//Add the CHILD EPCS of AggregationEvent			
 			if(Query.EPCs.length > 0)
 			{
 				ObjectEvent['childEPCs']	=	[];
@@ -290,9 +303,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				ObjectEvent['parentID']		=	TEParentID[0];
 			}
 			
-			//TransactionEvent EPCS
-			ObjectEvent['epcList']			=	"";
-			
+			//TransactionEvent EPCS			
 			if(Query.EPCs.length > 0)
 			{
 				ObjectEvent['epcList']	=	{};
@@ -384,16 +395,15 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			}
 		}
 		else if(input.eventtype1 == "AssociationEvent")
-		{
+		{			
 			//Add the Parent for Association Event
 			if(Query.ParentID.length > 0)
 			{
-				ObjectEvent['parentID']	=	Query.ParentID[0];
+				var AEParentID			=	Query.ParentID[count];
+				ObjectEvent['parentID']	=	AEParentID[0];
 			}
 			
-			//Add the CHILD EPCS of AssociationEvent
-			ObjectEvent['childEPCs']		=	"";
-			
+			//Add the CHILD EPCS of AssociationEvent			
 			if(Query.EPCs.length > 0)
 			{
 				var ChildEPCSURI			=	Query.EPCs[count];
@@ -479,21 +489,23 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		//Check and create the READPOINT
 		if(input.readpointselector != '' && input.readpointselector != null && typeof input.readpointselector != undefined)
 		{
+			ObjectEvent["readPoint"]	=	{};
+			
 			if(input.readpointselector == 'manually')
 			{					
-				ObjectEvent["readPoint"]	=	input.readpoint;
+				ObjectEvent.readPoint["id"]	=	input.readpoint;
 			}
 			else if(input.readpointselector == 'sgln')
 			{
 				if(SyntaxType == 'urn')
 				{
 					xml_json_functions.ReadPointFormatter(input,File,function(data){
-						ObjectEvent["readPoint"]		=	'urn:epc:id:sgln:'+data;
+						ObjectEvent.readPoint["id"]		=	'urn:epc:id:sgln:'+data;
 					});
 				}
 				else if(SyntaxType == 'webURI')
 				{
-					ObjectEvent["readPoint"]			=	'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2;
+					ObjectEvent.readPoint["id"]			=	'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2;
 				}					
 			}
 		}
@@ -501,9 +513,11 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		//Check for the Business Location and set the Business Location
 		if(input.businesslocationselector != '' && input.businesslocationselector != null && typeof input.businesslocationselector != undefined)
 		{
+			ObjectEvent['bizLocation']		=	{};
+			
 			if(input.businesslocationselector == 'manually')
 			{
-				ObjectEvent['bizLocation']	 	=	input.businesslocation;
+				ObjectEvent.bizLocation['id']	 	=	input.businesslocation;
 			}
 			else if(input.businesslocationselector == 'sgln')
 			{
@@ -511,15 +525,20 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				{
 					xml_json_functions.BusinessLocationFormatter(input,File,function(data)
 					{ 	
-						ObjectEvent['bizLocation'] 	=	'urn:epc:id:sgln:'+data;
+						ObjectEvent.bizLocation['id'] 	=	'urn:epc:id:sgln:'+data;
 					});
 				}
 				else if(SyntaxType == 'webURI')
 				{
-					ObjectEvent['bizLocation'] 		=	'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2;
-				}
-				
+					ObjectEvent.bizLocation['id'] 		=	'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2;
+				}				
 			}
+		}
+		
+		//Add Business Transacations for Object Event and Aggregation Event
+		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "AggregationEvent")
+		{
+			BusinessTrasactions();
 		}
 
 
@@ -605,29 +624,38 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			}
 		}
 		
-		//Populate the Business Transaction List 
-		if(Query.BTT.length > 0)
+		//If the event is TransformationEvent or AssociationEvent then add Business Transacation List here
+		if(input.eventtype1 == "TransformationEvent" || input.eventtype1 == "AssociationEvent")
 		{
-			var BTTArray	=	 [];
-			for(var b=0; b<Query.BTT.length; b++)
+			BusinessTrasactions();
+		}
+		
+		//Populate the Business Transaction List 
+		function BusinessTrasactions()
+		{
+			if(Query.BTT.length > 0)
 			{
-				var BTT 					=	Query.BTT[b];
-				var BTTObj					=	new Object();
-				
-				if(SyntaxType == 'urn')
-				{	
-					BTTObj['type']				=	"urn:epcglobal:cbv:btt:"+BTT.BTT.Type;
-					BTTObj['bizTransaction']	=	'urn:epcglobal:cbv:bt:'+BTT.BTT.Value;	
-				}
-				else if(SyntaxType == 'webURI')
+				var BTTArray	=	 [];
+				for(var b=0; b<Query.BTT.length; b++)
 				{
-					BTTObj['type']				=	Domain+'BTT-'+BTT.BTT.Type;
-					BTTObj['bizTransaction']	=	Domain+'BT-'+BTT.BTT.Value;
-				}				
-				
-				BTTArray.push(BTTObj)
+					var BTT 					=	Query.BTT[b];
+					var BTTObj					=	new Object();
+					
+					if(SyntaxType == 'urn')
+					{	
+						BTTObj['type']				=	"urn:epcglobal:cbv:btt:"+BTT.BTT.Type;
+						BTTObj['bizTransaction']	=	'urn:epcglobal:cbv:bt:'+BTT.BTT.Value;	
+					}
+					else if(SyntaxType == 'webURI')
+					{
+						BTTObj['type']				=	Domain+'BTT-'+BTT.BTT.Type;
+						BTTObj['bizTransaction']	=	Domain+'BT-'+BTT.BTT.Value;
+					}				
+					
+					BTTArray.push(BTTObj)
+				}
+				ObjectEvent['bizTransactionList']		=	BTTArray;			
 			}
-			ObjectEvent['bizTransactionList']		=	BTTArray;			
 		}
 
 		//Check for the Source and Source type
@@ -752,6 +780,35 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			ObjectEvent['destinationList'].push(destinationListObj);
 		}
 		
+		//Add ILMD for Object and Transformation Events
+		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "TransformationEvent")
+		{
+			if(Query.ILMD.length > 0)
+			{
+				var ilmd 		= 	ObjectEvent['ilmd']	=	{};
+				var ilmdList	=	Query.ILMD;
+
+				for(var i=0; i<Query.ILMD.length; i++)
+				{
+					var NameSpace 	=	ilmdList[i].NameSpace;
+					var LocalName 	=	ilmdList[i].LocalName;
+
+					if(NameSpace.includes("http://") || NameSpace.includes("https://"))
+					{
+						NameSpace 	= 	NameSpace.split("/").slice(2);
+						NameSpace 	= 	NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
+						var value	=	NameSpace+':'+LocalName;
+						ilmd[value]	=	ilmdList[i].FreeText
+					}
+					else
+					{
+						var value	=	NameSpace+':'+LocalName;
+						ilmd[value]	=	ilmdList[i].FreeText
+					}
+				}
+			}
+		}
+		
 		//Sensor Information
 		if(Query.SensorForm.length > 0)
 		{				
@@ -859,36 +916,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	Domain+'voc/Disp-'+input.PersistentDisposition;
 				}
 			}
-		}
-
-		//Check for the ILMD and add it to the JSON
-		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "TransformationEvent")
-		{
-			if(Query.ILMD.length > 0)
-			{
-				var ilmd 		= 	ObjectEvent['ilmd']	=	{};
-				var ilmdList	=	Query.ILMD;
-
-				for(var i=0; i<Query.ILMD.length; i++)
-				{
-					var NameSpace 	=	ilmdList[i].NameSpace;
-					var LocalName 	=	ilmdList[i].LocalName;
-
-					if(NameSpace.includes("http://") || NameSpace.includes("https://"))
-					{
-						NameSpace 	= 	NameSpace.split("/").slice(2);
-						NameSpace 	= 	NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
-						var value	=	NameSpace+':'+LocalName;
-						ilmd[value]	=	ilmdList[i].FreeText
-					}
-					else
-					{
-						var value	=	NameSpace+':'+LocalName;
-						ilmd[value]	=	ilmdList[i].FreeText
-					}
-				}
-			}
-		}
+		}		
 		
 		//Check if the extension field is filled and add the JSON
 		var Extension			=	Query.Extension;

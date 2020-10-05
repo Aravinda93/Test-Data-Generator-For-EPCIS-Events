@@ -745,6 +745,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		angular.element('#EventModalForm').modal('hide');
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddExtensionsFlag		=	true;
+		$scope.AddExtensionForm			=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
 	}
 	
 	//On submission of the Modal Add Extensions or ILMD OR ERROR Declaration
@@ -967,6 +968,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		angular.element('#EventModalForm').modal('hide');
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddILMDFlag		=	true;
+		$scope.AddExtensionForm	=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
 	}
 	
 	//Delete the ILMD for Object Event on Delete Button Click
@@ -1116,6 +1118,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		angular.element('#EventModalForm').modal('hide');
 		angular.element('#AddExtensionModal').modal('show');
 		$scope.AddErrorExtensionFlag		=	true;
+		$scope.AddExtensionForm				=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
 	}
 	
 	//Delete the Error Exntension on click of Delete button

@@ -20,7 +20,7 @@ node index.js
 localhost:3000
 ```
 
-### Project workflow
+### Application workflow
 The web application consists of two different views. In the first view, the user can provide the required data and create the bulk EPCIS events directly. This view is beneficial for users when there are no specific requirements based on their organisation-specific supply chain. The following figure 1 provides the filled information in the view-1 of the application for the rail sector. It has been designed for the arriving events of the trains at a particular station. The generated events contain the unique GIAI and Event Time, indicating the different trains arrived at a station. However, other information such as Read Point, Business Location, Business Step, Disposition, etc. remain identical as they are captured at the same station and using the same device.
 
 ![Figure 1: View-1 of the application with information for the rail sector.](https://github.com/Aravinda93/Test-Data-Generator-For-EPCIS-Events/blob/master/images/Fig1.png?raw=true) <p align="center">*Figure 1: View-1 of the application with information for the rail sector.*</p> 
@@ -36,7 +36,7 @@ The following figure 3 describes the modelling of the events for the healthcare 
 ![Figure 3: Modelled events for the healthcare sector using the application.](https://github.com/Aravinda93/Test-Data-Generator-For-EPCIS-Events/blob/master/images/Fig3.png?raw=true) <p align="center">*Figure 3: Modelled events for the healthcare sector using the application.*</p> 
 
 
-![Figure 4: Bulk test events as per the modelled healthcare sector.](https://github.com/Aravinda93/Test-Data-Generator-For-EPCIS-Events/blob/master/images/Fig4.png?raw=true) <p align="center">*Figure 4: Bulk test events as per the modelled healthcare sector.*/p> 
+![Figure 4: Bulk test events as per the modelled healthcare sector.](https://github.com/Aravinda93/Test-Data-Generator-For-EPCIS-Events/blob/master/images/Fig4.png?raw=true) <p align="center">*Figure 4: Bulk test events as per the modelled healthcare sector.*</p> 
 
 The demonstration of bulk events generation described here provided a simple example for modelling the supply chain events for healthcare and rail industry. Similarly, any industry or organisation can be modelled according to their industry-standard and supply chain system.
 
@@ -44,8 +44,12 @@ The demonstration of bulk events generation described here provided a simple exa
 ### Licence
 
 ![MIT Licence Logo](https://github.com/Aravinda93/Test-Data-Generator-For-EPCIS-Events/blob/master/images/Fig5.png?raw=true)
+
  
 Copyright 2020 | Aravinda Baliga B aravindabaligab@gmail.com. 
+
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the software, and to permit persons to whom the software is furnished to do so, subject to the following conditions:
+
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the software.
+
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
