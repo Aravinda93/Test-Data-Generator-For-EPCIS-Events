@@ -25,6 +25,40 @@ exports.createXMLData	=	function(Query,Root,callback){
 								root.att('xmlns:xsi', "http://www.w3.org/2001/XMLSchema-instance")
 								root.att('xsi:schemaLocation',"urn:epcglobal:epcis:xsd:1 EPCglobal-epcis-2_0.xsd")
 								
+		//Call function to collect all the URLS from ILMD, Extension and Error Extension
+		XMLHeaderFn();		
+		
+		//add the header elements from Extension, ILMD and Error Extension to XML Header
+		for(var head=0; head<XMLHeaders.length; head++)
+		{
+			root.att('xmlns:'+XMLHeaders[head].xmlns,XMLHeaders[head].URL)
+		}
+		
+		root.att('xmlns:cbvmda',"urn:epcglobal:cbv:mda")
+		root.att('schemaVersion', "2.0")
+		root.att('creationDate', moment().format())
+		root	=	root.ele('EPCISBody')
+		root	=	root.ele('EventList')
+	}
+	else
+	{
+		//Call function to collect all the URLS from ILMD, Extension and Error Extension
+		XMLHeaderFn();
+		
+		Root = Root.up().up()
+		
+		//add the header elements from Extension, ILMD and Error Extension to XML Header
+		for(var head=0; head<XMLHeaders.length; head++)
+		{
+			Root.att('xmlns:'+XMLHeaders[head].xmlns,XMLHeaders[head].URL)
+		}	
+		
+		var root		=	Root;
+	}
+	
+	//Function to Add all ILMD, Error Extension and Extension into an Arry
+	function XMLHeaderFn()
+	{
 		//Get the elements from XML header for ILMD from XMLJSON function
 		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == 'TransformationEvent')
 		{
@@ -57,22 +91,6 @@ exports.createXMLData	=	function(Query,Root,callback){
 				});
 			}
 		}
-		
-		//add the header elements from Extension and ILMD to XML Header
-		for(var head=0; head<XMLHeaders.length; head++)
-		{
-			root.att('xmlns:'+XMLHeaders[head].xmlns,XMLHeaders[head].URL)
-		}
-		
-		root.att('xmlns:cbvmda',"urn:epcglobal:cbv:mda")
-		root.att('schemaVersion', "2.0")
-		root.att('creationDate', moment().format())
-		root	=	root.ele('EPCISBody')
-		root	=	root.ele('EventList')
-	}
-	else
-	{
-		var root		=	Root;	
 	}
 	
 	for(var count=0; count<input.eventcount; count++)
@@ -104,7 +122,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 			//If Specific Event time has been selected
 			if(input.EventTimeSelector == 'SpecificTime')
 			{
-				input.eventtimeSpecific		=	input.eventtimeSpecific.substring(0,input.eventtimeSpecific.length-1)
+				input.eventtimeSpecific		=	moment.utc(input.eventtimeSpecific).local().format('YYYY-MM-DDTHH:mm:SS.sss');
 				ObjectEvent.ele('eventTime', input.eventtimeSpecific+input.EventTimeZone).up()
 				RecordTime();
 				ObjectEvent.ele('eventTimeZoneOffset', input.EventTimeZone).up()
@@ -192,7 +210,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 					if(input.ErrorDeclarationTimeSelector == 'SpecificTime')
 					{
 						//Add Error Declaration Time
-						input.ErrorDeclarationTime		=	input.ErrorDeclarationTime.substring(0,input.ErrorDeclarationTime.length-1)
+						input.ErrorDeclarationTime		=	moment.utc(input.ErrorDeclarationTime).local().format('YYYY-MM-DDTHH:mm:SS.sss');
 						errorDeclaration.ele('declarationTime',input.ErrorDeclarationTime+input.ErrorTimeZone)
 					}
 					else if(input.ErrorDeclarationTimeSelector == 'TimeRange')

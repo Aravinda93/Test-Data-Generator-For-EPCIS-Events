@@ -339,14 +339,14 @@
 									</td>
 									
 									<td ng-show="formdata.EventTimeSelector == 'SpecificTime' ">
-										<input type="datetime-local" class="form-control" ng-model="formdata.eventtimeSpecific" id="eventtime" title="Set Specific Event Time">
+										<input type="datetime-local" ng-required="formdata.EventTimeSelector == 'SpecificTime'" class="form-control" ng-model="formdata.eventtimeSpecific" id="eventtime" title="Set Specific Event Time">
 									</td>
 									
 									<td ng-show="formdata.EventTimeSelector == 'TimeRange' " class="form-inline">
 										<span> FROM </span>&ensp;
-										<input type="datetime-local" class="form-control" ng-model="formdata.EventTimeFrom" title="Event Time Range FROM">&ensp;&ensp;
+										<input type="datetime-local" ng-required="formdata.EventTimeSelector == 'TimeRange'" class="form-control" ng-model="formdata.EventTimeFrom" title="Event Time Range FROM">&ensp;&ensp;
 										<span> TO </span>&ensp;
-										<input type="datetime-local" class="form-control" ng-model="formdata.EventTimeTo" title="Event Time Range TO">
+										<input type="datetime-local" ng-required="formdata.EventTimeSelector == 'TimeRange'" class="form-control" ng-model="formdata.EventTimeTo" title="Event Time Range TO">
 									</td>
 									
 									<td ng-show="formdata.EventTimeSelector == 'SpecificTime' || formdata.EventTimeSelector == 'TimeRange' ">

@@ -26,7 +26,31 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 									"isA"			:	"EPCISDocument",
 									"format"		: 	"application/ld+json",
 								}
+								
+		//Call function to collect all the URLS from ILMD, Extension and Error Extension
+		JSONHeaderFn();
 		
+		//add the header elements from Extension and ILMD to XML Header
+		for(var head=0; head<JSONHeaders.length; head++)
+		{
+			JSONschemaParse[JSONHeaders[head].xmlns]	=	JSONHeaders[head].URL;
+		}
+		
+		JSONschemaParse["schemaVersion"]		=	"2.0";
+		JSONschemaParse["creationDate"]			=	currentTime;
+		JSONschemaParse["epcisBody"]			=	{};	
+	}
+	else
+	{
+		//Call function to collect all the URLS from ILMD, Extension and Error Extension
+		JSONHeaderFn();
+		
+		var JSONschemaParse		=	JSONHeader;
+	}	
+	
+	
+	function JSONHeaderFn()
+	{
 		//Get the elements from XML header for ILMD from XMLJSON function
 		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == 'TransformationEvent')
 		{
@@ -59,22 +83,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				});
 			}
 		}
-		
-		//add the header elements from Extension and ILMD to XML Header
-		for(var head=0; head<JSONHeaders.length; head++)
-		{
-			JSONschemaParse[JSONHeaders[head].xmlns]	=	JSONHeaders[head].URL;
-		}
-		
-		JSONschemaParse["schemaVersion"]		=	"2.0";
-		JSONschemaParse["creationDate"]			=	currentTime;
-		JSONschemaParse["epcisBody"]			=	{};	
 	}
-	else
-	{
-		var JSONschemaParse		=	JSONHeader;
-	}	
-
+	
 	//Loop through the event count and create append to JSON data
 	for(var count=0; count<input.eventcount; count++)
 	{

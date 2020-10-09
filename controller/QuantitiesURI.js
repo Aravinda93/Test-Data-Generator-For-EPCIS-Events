@@ -1,3 +1,4 @@
+const gs1 		= require('gs1');
 
 exports.QuantitiesURI	=	function(Query,callback){
 	var input		=	Query.input;
@@ -23,6 +24,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 	{
 		var companyPrefixInput		=	input.OEQLGTIN1.toString();
 		var companyPrefixPoint		=	input.OEQuantityCompanyPrefix;
+			companyPrefixInput		=	companyPrefixInput.substring(0,13) + gs1.checkdigit(companyPrefixInput.substring(0,13));
 		var companyPrefixInputURN	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
 			companyPrefixInputURN	=	companyPrefixInputURN.substring(0,14)
 			

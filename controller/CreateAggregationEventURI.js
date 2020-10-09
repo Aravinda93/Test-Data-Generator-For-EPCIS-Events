@@ -1,4 +1,5 @@
-var randomArray = 	[];
+const gs1 		= require('gs1');
+var randomArray	= 	[];
 var EpcLists 	= 	[];
 
 //Based on the Selected Aggregation Event format the URI
@@ -32,6 +33,8 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput	=	input.AEPSGTIN1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
+				companyPrefixInput	=	companyPrefixInput.substring(0,13);
+				companyPrefixInput	=	companyPrefixInput + gs1.checkdigit(companyPrefixInput);
 				
 			if(syntaxType 	== 'urn')
 			{
@@ -157,16 +160,18 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				if(input.SSCCType == 'userCustomized')
 				{				
 					var Start	=	parseInt(input.AEPSSCCStartValue,10);
-					
+						GCP		=	Extension + GCP;
+						
 					for(var i=0; i<=Count; i++)
 					{
 						var EPCValue	=	GCP + Start;
 						var EPCValueLen	=	EPCValue.length;
 						var StartLen	=	String(Start).length;
-						var AppendLen	=	18-EPCValueLen+StartLen;
+						var AppendLen	=	17-EPCValueLen+StartLen;
 						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
 						var FinalVal	=	GCP + AppendVal;
-						FinalVal		=	FinalVal.substring(0,18)
+						FinalVal		=	FinalVal.substring(0,17)
+						FinalVal		=	FinalVal + gs1.checkdigit(FinalVal);
 						var epcID		=	Domain+'/00/'+FinalVal;
 						EpcLists.push(epcID);
 						Start++;
@@ -174,9 +179,10 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					callback(EpcLists);
 				}
 				else if(input.SSCCType == 'random')
-				{
+				{					
+					GCP					=	Extension + GCP;
 					var GCPLen			=	GCP.length;
-					var RequiredLen		=	18-GCPLen;
+					var RequiredLen		=	17-GCPLen;
 					var min_Length		=	RequiredLen;
 					var max_Length		=	RequiredLen;
 					var randomType		=	'numeric';
@@ -185,7 +191,8 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					
 					for(var r=0; r<data.length; r++)
 					{
-						var epcID 	=	Domain+'/00/'+GCP+companyPrefixNormal(data[r],input.SSCCCompanyPrefix);
+						var finalValue	=	GCP + data[r] + gs1.checkdigit(GCP + data[r]); 
+						var epcID 		=	Domain+'/00/'+finalValue;
 						EpcLists.push(epcID);
 					}
 					callback(EpcLists);
@@ -196,11 +203,18 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput	=	input.SingleSGLNValue1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
+				companyPrefixInput	=	companyPrefixInput.substring(0,12) +  gs1.checkdigit(companyPrefixInput.substring(0,12));
 				
-			
 			if(syntaxType 	== 'urn')
 			{
-				companyPrefixInput 	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
+				for(var x=6; x<=12;x++)	
+				{	
+					if(x == companyPrefixPoint)
+					{	
+						companyPrefixInput = [companyPrefixInput.slice(0, x), ".", companyPrefixInput.slice(x,companyPrefixInput.length-1)].join('');
+						break;
+					}
+				}
 				
 				if(input.sgtintype == 'none')
 				{
@@ -274,7 +288,8 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 			if(syntaxType 	== 'urn')
 			{
 				var companyPrefixInput		=	'0'+input.AEPGRAI.toString();
-				var companyPrefixPoint		=	parseInt(input.AEPCompanyPrefix, 10);			
+				var companyPrefixPoint		=	parseInt(input.AEPCompanyPrefix, 10);
+					companyPrefixInput		=	companyPrefixInput.substring(0,12) +  gs1.checkdigit(companyPrefixInput.substring(0,12));					
 					companyPrefixInput		=	companyPrefixNormal(companyPrefixInput,companyPrefixPoint);
 					companyPrefixInput		=	companyPrefixInput.substring(0, 13)+'.'+companyPrefixInput.substring(14);
 					
@@ -317,6 +332,8 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 			else if(syntaxType == 'webURI')
 			{
 				var companyPrefixInput		=	input.AEPGRAI.toString();
+					companyPrefixInput		=	companyPrefixInput.substring(0,12) +  gs1.checkdigit(companyPrefixInput);					
+					companyPrefixInput		=	companyPrefixNormal(companyPrefixInput,companyPrefixPoint);
 				
 				if(input.sgtintype == 'none')
 				{
@@ -443,7 +460,9 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID 	=	Domain+'/8018/'+companyPrefixInput+data[r];
+						var FinalValue 	=	companyPrefixInput+data[r];
+							FinalValue	=	FinalValue.substring(0,17) +  gs1.checkdigit(FinalValue.substring(0,17))
+						var epcID 		=	Domain+'/8018/'+FinalValue;
 					}
 					EpcLists.push(epcID);
 				}
@@ -468,9 +487,10 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var AppendLen	=	18-EPCValueLen+StartLen;
+						var AppendLen	=	17-EPCValueLen+StartLen;
 						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
-						var FinalVal	=	companyPrefixInput + AppendVal;	
+						var FinalVal	=	companyPrefixInput + AppendVal;
+							FinalVal	=	FinalVal.substring(0,17) +  gs1.checkdigit(FinalVal.substring(0,17))
 						var epcID		=	Domain+'/8018/'+FinalVal;
 					}					
 					EpcLists.push(epcID);
@@ -502,7 +522,9 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var epcID 	=	Domain+'/8017/'+companyPrefixInput+data[r];
+						var FinalValue 	=	companyPrefixInput+data[r];
+							FinalValue	=	FinalValue.substring(0,17) +  gs1.checkdigit(FinalValue.substring(0,17))
+						var epcID 		=	Domain+'/8017/'+FinalValue;
 					}
 					EpcLists.push(epcID);
 				}
@@ -527,9 +549,10 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					}
 					else if(syntaxType == 'webURI')
 					{
-						var AppendLen	=	18-EPCValueLen+StartLen;
+						var AppendLen	=	17-EPCValueLen+StartLen;
 						var AppendVal	=	Start.toString().padStart(AppendLen,'0');
 						var FinalVal	=	companyPrefixInput + AppendVal;	
+							FinalVal	=	FinalVal.substring(0,17) +  gs1.checkdigit(FinalVal.substring(0,17))
 						var epcID		=	Domain+'/8017/'+FinalVal;
 					}					
 					EpcLists.push(epcID);
@@ -541,10 +564,11 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		else if(input.AggregationEventParentID === 'GDTI (Al 253)')
 		{
 			var companyPrefixInput		=	input.AEPGDTI.toString();
-			var companyPrefixPoint		=	input.AEPCompanyPrefix;
+			var companyPrefixPoint		=	input.AEPCompanyPrefix
+				companyPrefixInput		=	companyPrefixInput.substring(0,12) + gs1.checkdigit(companyPrefixInput.substring(0,12));
 			var companyPrefixInputURN	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
 				companyPrefixInputURN	=	companyPrefixInputURN.slice(0,13)+'.'+companyPrefixInputURN.slice(14);			
-				
+
 			if(input.sgtintype == 'none')
 			{
 				var Serial				=	"";
@@ -613,6 +637,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput		=	input.AEPGSN.toString();
 			var companyPrefixPoint		=	input.AEPCompanyPrefix;
+				companyPrefixInput		=	companyPrefixInput.substring(0,12) + gs1.checkdigit(companyPrefixInput.substring(0,12));
 			var Count					=	parseInt(input.AEPGCNCount, 10);
 			var companyPrefixInputURN	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);			
 				companyPrefixInputURN	=	companyPrefixInputURN.slice(0,13)+'.'+companyPrefixInputURN.slice(14);				
@@ -845,6 +870,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		else if(input.AggregationEventParentID === 'ITIP (Al 8006 + Al 21)')
 		{
 			var companyPrefixInput	=	input.AEPITIP1.toString();
+				companyPrefixInput	=	companyPrefixInput.substring(0,17) + gs1.checkdigit(companyPrefixInput.substring(0,17));
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
 			
 			if(syntaxType 	== 'urn')
@@ -930,6 +956,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput	=	input.AEPUPIUI1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
+				companyPrefixInput	=	companyPrefixInput.substring(0,13) + gs1.checkdigit(companyPrefixInput.substring(0,13));
 			var CompanyPrefixURN	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
 			
 			if(input.sgtintype == 'none')
@@ -1224,6 +1251,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput	=	input.AEPSGTIN1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
+				companyPrefixInput	=	companyPrefixInput.substring(0,13) + gs1.checkdigit(companyPrefixInput.substring(0,13));
 			
 			if(syntaxType 	== 'urn')
 			{
@@ -1320,7 +1348,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 			}
 			else if(syntaxType == 'webURI')
 			{
-				GCP			=	GCP + Extension;
+				GCP					=	Extension + GCP;
 				
 				if(input.SSCCType == 'userCustomized')
 				{
@@ -1329,21 +1357,23 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 					var EPCValue	=	GCP + Start;
 					var EPCValueLen	=	EPCValue.length;
 					var StartLen	=	String(Start).length;
-					var AppendVal	=	Start.toString().padStart(18-EPCValueLen+StartLen,'0');
+					var AppendVal	=	Start.toString().padStart(17-EPCValueLen+StartLen,'0');
 					var FinalVal	=	GCP + AppendVal;
-					FinalVal		=	FinalVal.substring(0,18)
+					FinalVal		=	FinalVal.substring(0,17) + gs1.checkdigit(FinalVal.substring(0,17));
 					var epcID		=	Domain+'/00/'+FinalVal;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
 				else if(input.SSCCType == 'random')
 				{
-					var min_Length	=	18-GCP.length;
-					var max_Length	=	18-GCP.length;
+					var min_Length	=	17-GCP.length;
+					var max_Length	=	17-GCP.length;
 					var randomType	=	'numeric';
 					var randomCount	=	1;
 					var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
-					var epcID 		=	Domain+'/00/'+GCP+data[0];
+					var FinalVal	=	GCP+data[0];
+						FinalVal	=	FinalVal.substring(0,17) + gs1.checkdigit(FinalVal.substring(0,17));
+					var epcID 		=	Domain+'/00/'+FinalVal;
 					EpcLists.push(epcID);
 					callback(EpcLists);
 				}
@@ -1353,7 +1383,8 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput	=	input.SingleSGLNValue1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
-			
+				companyPrefixInput	=	companyPrefixInput.substring(0,12) +  gs1.checkdigit(companyPrefixInput.substring(0,12));
+				
 			if(syntaxType 	== 'urn')
 			{
 				companyPrefixInput 	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
@@ -1415,6 +1446,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput		=	'0'+input.AEPGRAI.toString();
 			var companyPrefixPoint		=	parseInt(input.AEPCompanyPrefix, 10);
+				companyPrefixInput		=	companyPrefixInput.substring(0,12) +  gs1.checkdigit(companyPrefixInput.substring(0,12));
 			var companyPrefixInputURN	=	companyPrefixNormal(companyPrefixInput,companyPrefixPoint);
 				companyPrefixInputURN	=	companyPrefixInputURN.substring(0, 13)+'.'+companyPrefixInputURN.substring(14);
 			var epcID					=	"";
@@ -1551,7 +1583,9 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				}
 				else if(syntaxType == 'webURI')
 				{
-						epcID 	=	Domain+'/8018/'+companyPrefixInput+data[0];
+					var FinalValue 	=	companyPrefixInput+data[0];
+						FinalValue	=	FinalValue.substring(0,17) +  gs1.checkdigit(FinalValue.substring(0,17))
+							epcID 	=	Domain+'/8018/'+FinalValue;
 				}
 			}
 			else if(input.SSCCType == 'userCustomized')
@@ -1570,9 +1604,10 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var AppendLen	=	18-EPCValueLen+StartLen;
+					var AppendLen	=	17-EPCValueLen+StartLen;
 					var AppendVal	=	Start.toString().padStart(AppendLen,'0');
-					var FinalVal	=	companyPrefixInput + AppendVal;	
+					var FinalVal	=	companyPrefixInput + AppendVal;
+						FinalVal	=	FinalVal.substring(0,17) +  gs1.checkdigit(FinalVal.substring(0,17))
 					var epcID		=	Domain+'/8018/'+FinalVal;
 				}	
 			}			
@@ -1602,7 +1637,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				else if(syntaxType == 'webURI')
 				{
 					var Final	=	companyPrefixInput+data[0];
-						Final	=	Final.substring(0,18)
+						Final	=	Final.substring(0,17) +  gs1.checkdigit(Final.substring(0,17))
 						epcID 	=	Domain+'/8017/'+Final;
 				}
 			}
@@ -1622,9 +1657,10 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				}
 				else if(syntaxType == 'webURI')
 				{
-					var AppendLen	=	18-EPCValueLen+StartLen;
+					var AppendLen	=	17-EPCValueLen+StartLen;
 					var AppendVal	=	Start.toString().padStart(AppendLen,'0');
 					var FinalVal	=	companyPrefixInput + AppendVal;	
+						FinalVal	=	FinalVal.substring(0,17) +  gs1.checkdigit(FinalVal.substring(0,17))
 						epcID		=	Domain+'/8017/'+FinalVal;
 				}
 			}			
@@ -1635,6 +1671,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput		=	input.AEPGDTI.toString();
 			var companyPrefixPoint		=	input.AEPCompanyPrefix;
+				companyPrefixInput		=	companyPrefixInput.substring(0,12) + gs1.checkdigit(companyPrefixInput.substring(0,12));
 			var companyPrefixInputURN	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);
 				companyPrefixInputURN	=	companyPrefixInputURN.slice(0,13)+'.'+companyPrefixInputURN.slice(14);
 			var epcID					=	"";
@@ -1694,6 +1731,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput		=	input.AEPGSN.toString();
 			var companyPrefixPoint		=	input.AEPCompanyPrefix;
+				companyPrefixInput		=	companyPrefixInput.substring(0,12) + gs1.checkdigit(companyPrefixInput.substring(0,12));
 			var companyPrefixInputURN	=	companyPrefixNormal(companyPrefixInput, companyPrefixPoint);			
 				companyPrefixInputURN	=	companyPrefixInputURN.slice(0,13)+'.'+companyPrefixInputURN.slice(14);	
 			var epcID 					=	"";
@@ -1890,6 +1928,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		else if(input.AggregationEventParentID === 'ITIP (Al 8006 + Al 21)')
 		{
 			var companyPrefixInput	=	input.AEPITIP1.toString();
+				companyPrefixInput	=	companyPrefixInput.substring(0,17) + gs1.checkdigit(companyPrefixInput.substring(0,17));
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
 			var epcID				=	"";
 			
@@ -1955,6 +1994,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 		{
 			var companyPrefixInput	=	input.AEPUPIUI1.toString();
 			var companyPrefixPoint	=	input.AEPCompanyPrefix;
+				companyPrefixInput	=	companyPrefixInput.substring(0,13) + gs1.checkdigit(companyPrefixInput.substring(0,13));
 			var CompanyPrefixURN	=	companyPrefix(companyPrefixInput, companyPrefixPoint);
 			var epcID				=	"";
 			
@@ -1982,24 +2022,24 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				{
 					epcID			=	Domain+'/01/'+companyPrefixInput+'/235/'+id;
 				}
-				else if(input.sgtintype == 'random')
+			}
+			else if(input.sgtintype == 'random')
+			{
+				var min_Length	=	parseInt(input.radomMinLength, 10);
+				var max_Length	=	parseInt(input.randomMaxLength, 10);
+				var randomType	=	input.randomType;
+				var randomCount	=	1;
+				var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
+				
+				if(syntaxType == 'urn')
 				{
-					var min_Length	=	parseInt(input.radomMinLength, 10);
-					var max_Length	=	parseInt(input.randomMaxLength, 10);
-					var randomType	=	input.randomType;
-					var randomCount	=	1;
-					var data 		= 	RandomGenerator(min_Length,max_Length,randomType,randomCount);
-					
-					if(syntaxType == 'urn')
-					{
-						var appendValue	=	CompanyPrefixURN+"."+data[0];
-							epcID		=	'urn:epc:id:upui:'+appendValue;
-					}
-					else if(syntaxType == 'webURI')
-					{
-							epcID		=	Domain+'/01/'+companyPrefixInput+'/235/'+data[0];
-					}		
+					var appendValue	=	CompanyPrefixURN+"."+data[0];
+						epcID		=	'urn:epc:id:upui:'+appendValue;
 				}
+				else if(syntaxType == 'webURI')
+				{
+						epcID		=	Domain+'/01/'+companyPrefixInput+'/235/'+data[0];
+				}		
 			}
 			EpcLists.push(epcID);
 			callback(EpcLists);

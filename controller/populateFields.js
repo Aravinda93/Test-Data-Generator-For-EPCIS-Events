@@ -434,8 +434,7 @@ exports.BusinessStep = function(callback){
 									{value:'Mean Value',								text:'Mean Value'},
 									{value:'Standard Deviation',						text:'Standard Deviation'},
 									{value:'Perc Rank',									text:'Perc Rank'},
-									{value:'Perc Value',								text:'Perc Value'},
-									{value:'UOM',										text:'UOM'},
+									{value:'Perc Value',								text:'Perc Value'}
 								];
 	
 	var TimeZones			=	[

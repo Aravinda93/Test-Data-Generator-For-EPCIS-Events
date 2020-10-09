@@ -9,7 +9,9 @@ var HeaderArray			=	[];
 
 
 //Extensions and ILMD elements to add to JSON and XML header
-exports.schemaHeaders		=	function(InputData,callback){
+exports.schemaHeaders		=	function(InputData,callback)
+{
+	
 	//Add the Elements from ILMD to XML Header
 	for(var i=0; i<InputData.length; i++)
 	{
@@ -19,17 +21,16 @@ exports.schemaHeaders		=	function(InputData,callback){
 		{
 			NameSpace = NameSpace.split("/").slice(2);
 			NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
-		}
-		
-		if(!HeaderArray.some(item => item.URL === InputData[i].NameSpace))
-		{	
-			var obj 		= 	new Object();
-			obj.xmlns		=	NameSpace;
-			obj.URL			=	InputData[i].NameSpace;
-			HeaderArray.push(obj);
-		}	
-	}
-	
+			
+			if(!HeaderArray.some(item => item.URL === InputData[i].NameSpace))
+			{	
+				var obj 		= 	new Object();
+				obj.xmlns		=	NameSpace;
+				obj.URL			=	InputData[i].NameSpace;
+				HeaderArray.push(obj);
+			}
+		}			
+	}	
 	callback(HeaderArray);
 }
 

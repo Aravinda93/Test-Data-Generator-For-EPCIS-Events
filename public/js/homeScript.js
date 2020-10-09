@@ -455,6 +455,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	
 	//Aggregation Event Parent Creation
 	$scope.CommonEventFormat	=	function(){
+		
 		//Call the function to create the URI and Display it
 		angular.element('#ParentTypeModal').modal('hide');
 		var ItemCount			=	0;
@@ -470,7 +471,6 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 				headers	: 	{'Content-Type': 'application/json'},
 				data	:	data
 			}).success(function(response){
-				
 				if($scope.AEParentEPCsFlag || $scope.TransactionEventParentIDFlag || $scope.AssociationEventParentFlag)
 				{
 					//Check for the loop completion
