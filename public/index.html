@@ -86,7 +86,7 @@
 									<td rowspan="{{ EventTypeRowSpan }}" style="background-color: #F2F3F4;"></td>
 									<td> Event Count </td>
 									<td>
-										<input type="number" min="1" max="1000" class="form-control" ng-model="formdata.eventcount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');"  oninvalid="this.setCustomValidity('Number of Events must be between 1 and 1000')" placeholder="Number of events required" required ></input>
+										<input id="eventcount" type="number" min="1" max="1000" class="form-control" ng-model="formdata.eventcount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');"  oninvalid="this.setCustomValidity('Number of Events must be between 1 and 1000')" placeholder="Number of events required" required ></input>
 									</td>
 								</tr>
 								<tr>
@@ -331,7 +331,7 @@
 									<td style="background-color: #eedded;"  class="column2"> Event Time </td>
 									
 									<td>
-										<select ng-model="formdata.EventTimeSelector" class="form-control" required>
+										<select id="EventTimeSelector" ng-model="formdata.EventTimeSelector" class="form-control" required>
 											<option class="dropdown-item" value="" selected> Choose </option>
 											<option class="dropdown-item" value="SpecificTime"> Specific Time </option>
 											<option class="dropdown-item" value="TimeRange"> Time Range </option>

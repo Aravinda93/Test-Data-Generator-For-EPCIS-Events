@@ -1173,6 +1173,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			$scope.SensorMetaDatas		=	response.SensorMetaDatas;
 			$scope.SensorReportDatas	=	response.SensorReportDatas;
 			$scope.TimeZones			=	response.TimeZones;
+			
 		}).error(function(error) {
 			console.log("Something went wrong in init")
 			console.log(error);
@@ -1180,10 +1181,13 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 	};
 	
 	//If submit button is clicked then send data to Nodejs for XML and JSON creation
-	$scope.createEvents	= 	function(){
+	$scope.createEvents	= 	function()
+	{
 		//params: 	{input:$scope.formdata,Extension:$scope.ExtensionList}	
 		//headers: 	{'Content-Type': 'application/x-www-form-urlencoded'},
 		//Based on the Selected Event Send the respective values
+		
+		//Check if the dates are valid else call the create events function
 		
 		if($scope.formdata.eventtype1 == 'ObjectEvent')
 		{
@@ -1299,7 +1303,6 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 			//Call the function to create function
 			$scope.CreateEventFunctionHTTP(data);			
 		}
-		
 	}
 	
 	//Function to make final call for creating the events
