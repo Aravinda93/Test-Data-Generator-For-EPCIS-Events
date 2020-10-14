@@ -221,6 +221,8 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		//Set the default values for some of the fields
 	
 		//Set the date fields with current values
+		$scope.formdata.EventTimeSelector			=	"SpecificTime";
+		$scope.formdata.RecordTimeOption			=	"no";
 		$scope.formdata.eventtimeSpecific			=	new Date();
 		$scope.formdata.EventTimeFrom				=	new Date();
 		$scope.formdata.ErrorDeclarationTime		=	new Date();
@@ -1418,116 +1420,154 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		var EventTypeLabel;
 		
 		if($scope.formdata.eventtype1 == 'ObjectEvent')
-		{		
-			var obj				=	new Object();
-			obj.input			=	$scope.formdata;
-			obj.EPCs			=	$scope.ObjectEventEpcsURI;
-			obj.Quantities		=	$scope.ObjectEventQuantitiesURI;
-			obj.ILMD			=	$scope.ObjectEventILMDList;
-			obj.Extension		=	$scope.CommonExtensionsList;
-			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
-			obj.ErrorExtension	=	$scope.ErrorExtensionList;
-			obj.BTT				=	$scope.BusinessTransactionList;
-			obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
-			obj.XMLElement		=	"Multiple";
-			obj.File			=	'ObjectEvent';
-			obj.NodeID			=	$scope.NodeEventId;
-			EventTypeLabel		=	"Object Event";	
-			
-			//Call function to save data and close modal
-			$scope.saveEventData(obj,EventTypeLabel);			
-		}
-		else if($scope.formdata.eventtype1 == 'AggregationEvent')
 		{
-			var obj				=	new Object();
-			obj.input			=	$scope.formdata;
-			obj.Extension		=	$scope.CommonExtensionsList;
-			obj.ParentID		=	$scope.AggregationEventParentURI;		
-			obj.EPCs	 		=	$scope.AggregationEventChildEPCsURI;			
-			obj.Quantities		=	$scope.AggregationEventChildQuantitiesURI;
-			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
-			obj.ErrorExtension	=	$scope.ErrorExtensionList;
-			obj.BTT				=	$scope.BusinessTransactionList;
-			obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
-			obj.XMLElement		=	"Multiple";
-			obj.File			=	'AggregationEvent';
-			obj.NodeID			=	$scope.NodeEventId;
-			EventTypeLabel		=	"Aggregation Event";
-			
-			//Call function to save data and close modal
-			$scope.saveEventData(obj,EventTypeLabel);		
-			
-		}
-		else if($scope.formdata.eventtype1 == 'TransactionEvent')
-		{
-			//Check if Business Transaction is available
-			if($scope.BusinessTransactionList.length > 0)
+			//Check if the count of Events and elements in EPCs/Quantities Match
+			if(($scope.ObjectEventEpcsURI.length > 0 && $scope.formdata.eventcount != $scope.ObjectEventEpcsURI.length) || ($scope.ObjectEventQuantitiesURI.length > 0 && $scope.formdata.eventcount != $scope.ObjectEventQuantitiesURI.length))
+			{
+				alertify.alert("Test Data Generator", "The <b>Event count</b> and identifiers in <b>EPCs</b> or <b>Quantities</b> do not match")
+			}
+			else
 			{
 				var obj				=	new Object();
 				obj.input			=	$scope.formdata;
+				obj.EPCs			=	$scope.ObjectEventEpcsURI;
+				obj.Quantities		=	$scope.ObjectEventQuantitiesURI;
+				obj.ILMD			=	$scope.ObjectEventILMDList;
 				obj.Extension		=	$scope.CommonExtensionsList;
-				obj.ParentID		=	$scope.TransactionEventParentIDURI;
-				obj.EPCs 			=	$scope.TransactionEventEPCsURI;
-				obj.Quantities		=	$scope.TransactionEventQuantitiesURI;
 				obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
 				obj.ErrorExtension	=	$scope.ErrorExtensionList;
 				obj.BTT				=	$scope.BusinessTransactionList;
 				obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
 				obj.XMLElement		=	"Multiple";
-				obj.File			=	'TransactionEvent';
+				obj.File			=	'ObjectEvent';
 				obj.NodeID			=	$scope.NodeEventId;
-				EventTypeLabel		=	"Transaction Event";
+				EventTypeLabel		=	"Object Event";	
+				
+				//Call function to save data and close modal
+				$scope.saveEventData(obj,EventTypeLabel);		
+			}		
+		}
+		else if($scope.formdata.eventtype1 == 'AggregationEvent')
+		{
+			//Check if the count of Events and elements in ParentID/Child EPCs/Child Quantities Match
+			if(($scope.AggregationEventParentURI.length > 0 && $scope.formdata.eventcount != $scope.AggregationEventParentURI.length) || ($scope.AggregationEventChildEPCsURI.length > 0 && $scope.formdata.eventcount != $scope.AggregationEventChildEPCsURI.length) || ($scope.AggregationEventChildQuantitiesURI.length > 0 && $scope.formdata.eventcount != $scope.AggregationEventChildQuantitiesURI.length))
+			{
+				alertify.alert("Test Data Generator", "The <b>Event count</b> and identifiers in <b>Parent IDs</b>/<b>Child EPCs</b>/<b>Child Quantities</b> do not match")
+			}
+			else
+			{
+				var obj				=	new Object();
+				obj.input			=	$scope.formdata;
+				obj.Extension		=	$scope.CommonExtensionsList;
+				obj.ParentID		=	$scope.AggregationEventParentURI;		
+				obj.EPCs	 		=	$scope.AggregationEventChildEPCsURI;			
+				obj.Quantities		=	$scope.AggregationEventChildQuantitiesURI;
+				obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
+				obj.ErrorExtension	=	$scope.ErrorExtensionList;
+				obj.BTT				=	$scope.BusinessTransactionList;
+				obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
+				obj.XMLElement		=	"Multiple";
+				obj.File			=	'AggregationEvent';
+				obj.NodeID			=	$scope.NodeEventId;
+				EventTypeLabel		=	"Aggregation Event";
+				
+				//Call function to save data and close modal
+				$scope.saveEventData(obj,EventTypeLabel);
+			}			
+		}
+		else if($scope.formdata.eventtype1 == 'TransactionEvent')
+		{
+			//Check if the count of Events and elements in Prent IDs/EPCs/Quantities Match
+			if(($scope.TransactionEventParentIDURI.length > 0 && $scope.formdata.eventcount != $scope.TransactionEventParentIDURI.length) || ($scope.TransactionEventEPCsURI.length > 0 && $scope.formdata.eventcount != $scope.TransactionEventEPCsURI.length) || ($scope.TransactionEventQuantitiesURI.length > 0 && $scope.formdata.eventcount != $scope.TransactionEventQuantitiesURI.length))
+			{
+				alertify.alert("Test Data Generator", "The <b>Event count</b> and identifiers in <b>Parent IDs</b>/<b>EPCs</b>/<b>Quantities</b> do not match")
+			}
+			else
+			{
+				//Check if Business Transaction is available
+				if($scope.BusinessTransactionList.length > 0)
+				{
+					var obj				=	new Object();
+					obj.input			=	$scope.formdata;
+					obj.Extension		=	$scope.CommonExtensionsList;
+					obj.ParentID		=	$scope.TransactionEventParentIDURI;
+					obj.EPCs 			=	$scope.TransactionEventEPCsURI;
+					obj.Quantities		=	$scope.TransactionEventQuantitiesURI;
+					obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
+					obj.ErrorExtension	=	$scope.ErrorExtensionList;
+					obj.BTT				=	$scope.BusinessTransactionList;
+					obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
+					obj.XMLElement		=	"Multiple";
+					obj.File			=	'TransactionEvent';
+					obj.NodeID			=	$scope.NodeEventId;
+					EventTypeLabel		=	"Transaction Event";
+					
+					//Call function to save data and close modal
+					$scope.saveEventData(obj,EventTypeLabel);
+				}
+				else
+				{
+					alertify.alert("Test Data Generator", "Transaction Event requires: <b>Business Transactions</b>")
+				}
+			}			
+		}
+		else if($scope.formdata.eventtype1 == 'TransformationEvent')
+		{
+			//Check if the count of Events and elements in Input EPCs/Quantities or Output EPCs/Quantities Match
+			if(($scope.TransformationEventInputEPCsURI.length > 0 && $scope.formdata.eventcount != $scope.TransformationEventInputEPCsURI.length) || ($scope.TransformationEventInputQuantityURI.length > 0 && $scope.formdata.eventcount != $scope.TransformationEventInputQuantityURI.length) || ($scope.TransformationEventOutputEPCSURI.length > 0 && $scope.formdata.eventcount != $scope.TransformationEventOutputEPCSURI.length) || ($scope.TransformationEventOutputQuantityURI.length > 0 && $scope.formdata.eventcount != $scope.TransformationEventOutputQuantityURI.length))
+			{
+				alertify.alert("Test Data Generator", "The <b>Event count</b> and identifiers in <b>Input EPCs</b>/<b>Input Quantities</b>/<b>Output EPCs</b>/<b>Output Quantities</b> do not match")
+			}
+			else
+			{
+				var obj				=	new Object();
+				obj.input			=	$scope.formdata;
+				obj.EPCs			=	$scope.TransformationEventInputEPCsURI;
+				obj.Quantities		=	$scope.TransformationEventInputQuantityURI;
+				obj.OutputEPCs		=	$scope.TransformationEventOutputEPCSURI;
+				obj.OutputQuantities=	$scope.TransformationEventOutputQuantityURI;
+				obj.ILMD			=	$scope.TransformationEventILMDList;
+				obj.Extension		=	$scope.CommonExtensionsList;
+				obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
+				obj.ErrorExtension	=	$scope.ErrorExtensionList;
+				obj.BTT				=	$scope.BusinessTransactionList;
+				obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
+				obj.XMLElement		=	"Multiple";
+				obj.File			=	'TransformationEvent';			
+				obj.NodeID			=	$scope.NodeEventId;
+				EventTypeLabel		=	"Transformation Event";
 				
 				//Call function to save data and close modal
 				$scope.saveEventData(obj,EventTypeLabel);
 			}
-			else
-			{
-				alertify.alert("Test Data Generator", "Transaction Event requires: <b>Business Transactions</b>")
-			}
-			
-		}
-		else if($scope.formdata.eventtype1 == 'TransformationEvent')
-		{
-			var obj				=	new Object();
-			obj.input			=	$scope.formdata;
-			obj.EPCs			=	$scope.TransformationEventInputEPCsURI;
-			obj.Quantities		=	$scope.TransformationEventInputQuantityURI;
-			obj.OutputEPCs		=	$scope.TransformationEventOutputEPCSURI;
-			obj.OutputQuantities=	$scope.TransformationEventOutputQuantityURI;
-			obj.ILMD			=	$scope.TransformationEventILMDList;
-			obj.Extension		=	$scope.CommonExtensionsList;
-			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
-			obj.ErrorExtension	=	$scope.ErrorExtensionList;
-			obj.BTT				=	$scope.BusinessTransactionList;
-			obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
-			obj.XMLElement		=	"Multiple";
-			obj.File			=	'TransformationEvent';			
-			obj.NodeID			=	$scope.NodeEventId;
-			EventTypeLabel		=	"Transformation Event";
-			
-			//Call function to save data and close modal
-			$scope.saveEventData(obj,EventTypeLabel);
 		}
 		else if($scope.formdata.eventtype1 == 'AssociationEvent')
 		{
-			var obj				=	new Object();
-			obj.input			=	$scope.formdata;
-			obj.Extension		=	$scope.CommonExtensionsList;
-			obj.ParentID		=	$scope.AssociationEventParentURI;		
-			obj.EPCs	 		=	$scope.AssociationEventChildEPCsURI;			
-			obj.Quantities		=	$scope.AssociationEventChildQuantitiesURI;
-			obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
-			obj.ErrorExtension	=	$scope.ErrorExtensionList;
-			obj.BTT				=	$scope.BusinessTransactionList;
-			obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
-			obj.XMLElement		=	"Multiple";
-			obj.File			=	'AssociationEvent';
-			obj.NodeID			=	$scope.NodeEventId;
-			EventTypeLabel		=	"Association Event";
-			
-			//Call function to save data and close modal
-			$scope.saveEventData(obj,EventTypeLabel);
+			//Check if the count of Events and elements in ParentID/Child EPCs/Child Quantities Match
+			if(($scope.AssociationEventParentURI.length > 0 && $scope.formdata.eventcount != $scope.AssociationEventParentURI.length) || ($scope.AssociationEventChildEPCsURI.length > 0 && $scope.formdata.eventcount != $scope.AssociationEventChildEPCsURI.length) || ($scope.AssociationEventChildQuantitiesURI.length > 0 && $scope.formdata.eventcount != $scope.AssociationEventChildQuantitiesURI.length))
+			{
+				alertify.alert("Test Data Generator", "The <b>Event count</b> and identifiers in <b>Parent IDs</b>/<b>Child EPCs</b>/<b>Child Quantities</b> do not match")
+			}
+			else
+			{
+				var obj				=	new Object();
+				obj.input			=	$scope.formdata;
+				obj.Extension		=	$scope.CommonExtensionsList;
+				obj.ParentID		=	$scope.AssociationEventParentURI;		
+				obj.EPCs	 		=	$scope.AssociationEventChildEPCsURI;			
+				obj.Quantities		=	$scope.AssociationEventChildQuantitiesURI;
+				obj.ErrorCorrection	=	$scope.ErrorCorrectiveIds;
+				obj.ErrorExtension	=	$scope.ErrorExtensionList;
+				obj.BTT				=	$scope.BusinessTransactionList;
+				obj.SensorForm		=	$rootScope.TotalSensorElementsArray;
+				obj.XMLElement		=	"Multiple";
+				obj.File			=	'AssociationEvent';
+				obj.NodeID			=	$scope.NodeEventId;
+				EventTypeLabel		=	"Association Event";
+				
+				//Call function to save data and close modal
+				$scope.saveEventData(obj,EventTypeLabel);
+			}
 		}	
 	}
 	

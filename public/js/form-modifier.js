@@ -23,6 +23,8 @@ app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$
 	//Set the default values for some of the fields
 	
 	//Set the date fields with current values
+	$scope.formdata.EventTimeSelector			=	"SpecificTime";
+	$scope.formdata.RecordTimeOption			=	"no";
 	$scope.formdata.eventtimeSpecific			=	new Date();
 	$scope.formdata.EventTimeFrom				=	new Date();
 	$scope.formdata.ErrorDeclarationTime		=	new Date();
