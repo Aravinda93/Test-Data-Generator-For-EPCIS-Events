@@ -1,4 +1,10 @@
 /*CSS for the Alertify Message Starts*/
+
+select { 
+	width: 400px; 
+	text-align-last:center;#
+}
+
 .alertify .ajs-footer .ajs-buttons.ajs-primary 
 {
     text-align: right;

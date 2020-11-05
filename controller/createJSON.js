@@ -1,6 +1,7 @@
 var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 const gs1 				= 	require('gs1');
+var HashID				=	require('./EventIDSHA256Calculation');
 var xml_json_functions	=	require('./XML_JSON_Functions');
 
 exports.createJSONData	=	function(Query,JSONHeader,callback){
@@ -17,7 +18,9 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 	var currentTime 		=	moment().format();
 	var SyntaxType			=	input.VocabSyntaxType;
 	var Domain				=	'https://gs1.org/';
+	var Domain2				=	'https://id.gs1.org/';	
 	var JSONHeaders			=	[];
+	var EventIDArrayStore	=	[];
 	
 	if(Query.XMLElement == 'Single')
 	{
@@ -89,10 +92,16 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 	//Loop through the event count and create append to JSON data
 	for(var count=0; count<input.eventcount; count++)
 	{
-		var ObjectEvent		=	{};
+		var ObjectEvent								=	{};
+		var HashIDInput								=	input;
+		var HashStringInput							=	{};
+		HashStringInput['bizTransactionList']		=	[];
+		HashStringInput['sourceList']				=	[];
+		HashStringInput['destinationList']			=	[];
 		
 		//Type of event
-		ObjectEvent['isA']	=	input.eventtype1;
+		ObjectEvent['isA']				=	input.eventtype1;
+		HashStringInput['eventType']	=	input.eventtype1;
 		
 		//Check what type of EVENT TIME is required and fill the values accordingly
 		if(input.EventTimeSelector != "" && input.EventTimeSelector != null && typeof input.EventTimeSelector != undefined)
@@ -100,9 +109,12 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			//If Specific Event time has been selected
 			if(input.EventTimeSelector == 'SpecificTime')
 			{
-				ObjectEvent['eventTime']			=	input.eventtimeSpecific + "Z";
+				var EventTimeSpecific						=	moment.utc(input.eventtimeSpecific).local().format('YYYY-MM-DDTHH:mm:SS.sss');
+				ObjectEvent['eventTime']					=	EventTimeSpecific + input.EventTimeZone;
 				RecordTime();
-				ObjectEvent['eventTimeZoneOffset']	=	input.EventTimeZone;
+				ObjectEvent['eventTimeZoneOffset']			=	input.EventTimeZone;
+				HashStringInput['eventTime']				=	input.eventtimeSpecific;
+				HashStringInput['eventTimeZoneOffset']		=	input.EventTimeZone;
 			}
 			else if(input.EventTimeSelector == 'TimeRange')
 			{
@@ -118,11 +130,12 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					});
 				}
 				
-				ObjectEvent['eventTime']			=	EventTimeArray[count]+input.EventTimeZone;
+				ObjectEvent['eventTime']				=	EventTimeArray[count]+input.EventTimeZone;
 				RecordTime();
-				ObjectEvent['eventTimeZoneOffset']	=	input.EventTimeZone;
+				ObjectEvent['eventTimeZoneOffset']		=	input.EventTimeZone;
+				HashStringInput['eventTime']			=	EventTimeArray[count];
+				HashStringInput['eventTimeZoneOffset']	=	input.EventTimeZone;
 			}
-
 		}
 		
 		//function to add record time after the Event Time before Event timezoneoffset
@@ -138,43 +151,57 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					{
 						if(input.EventTimeSelector == 'TimeRange')
 						{
-							ObjectEvent['recordTime'] 	=		EventTimeArray[count]+input.EventTimeZone;
+							ObjectEvent['recordTime'] 		=	EventTimeArray[count]+input.EventTimeZone;
+							HashStringInput['recordTime']	=	EventTimeArray[count];
 						}
 						else if(input.EventTimeSelector == 'SpecificTime')
 						{
-							ObjectEvent['recordTime'] 	=		input.eventtimeSpecific+input.EventTimeZone;
+							ObjectEvent['recordTime'] 		=	input.eventtimeSpecific+input.EventTimeZone;
+							HashStringInput['recordTime']	=	input.eventtimeSpecific;
 						}					
 					}
 					else if(input.RecordTimeOptionType	== 'RecordTimeCurrentTime')
 					{
 						//If the current time is choosen
-						ObjectEvent['recordTime'] 	=		currentTime;
+						ObjectEvent['recordTime'] 		=		currentTime;
+						HashStringInput['recordTime']	=		currentTime;
 					}
 				}
 			}
 		}
-
+		
 		//If error declaration has been set then add the below tags
 		if(input.eventtype2 == 'errordeclaration' || input.EventIDOption == "yes")
 		{
 			//Add the EVENT ID if its populated
 			if(input.EventIDOption == "yes")
-			{				
-				if(count == 0)
+			{
+				//If the UUID type EventID
+				if(input.EventIDType == 'uuid')
 				{
-					EventIDArray	=	[];
-					xml_json_functions.RandomEventIDGenerator(File,input.eventcount,input.EventIDType,function(ReturnEventIDArray){
-						EventIDArray	= ReturnEventIDArray;
-					});	
+					if(count == 0)
+					{
+						EventIDArray	=	[];
+						xml_json_functions.RandomEventIDGenerator(File,input.eventcount,input.EventIDType,function(ReturnEventIDArray){
+							EventIDArray	= ReturnEventIDArray;
+						});	
+					}
+					
+					ObjectEvent['eventID']	=	EventIDArray[count];
 				}
-				
-				ObjectEvent['eventID']	=	EventIDArray[count];
+				else if(input.EventIDType == 'sha256')
+				{					
+					ObjectEvent['eventID']	=	'';
+				}				
 			}
 
 			//Add the error declaration if its populated
 			if(input.eventtype2 == 'errordeclaration')
 			{		
-				ObjectEvent['errorDeclaration']	=	{};
+				ObjectEvent['errorDeclaration']			=	{};
+				HashStringInput['eventType2']			=	'errordeclaration';
+				HashStringInput['correctiveEventIDs']	=	[];
+				HashStringInput['errorExtension']		=	Query.ErrorExtension;
 				
 				//Check what type of error declaration has been choosen
 				if(input.ErrorDeclarationTimeSelector != '')
@@ -183,6 +210,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					{
 						//Add Error Declaration Time
 						ObjectEvent.errorDeclaration['declarationTime']		=	input.ErrorDeclarationTime+input.ErrorTimeZone;
+						HashStringInput['declarationTime']					=	input.ErrorDeclarationTime;
 					}
 					else if(input.ErrorDeclarationTimeSelector == 'TimeRange')
 					{
@@ -199,7 +227,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 							});	
 						}
 						
-						ObjectEvent.errorDeclaration['declarationTime']		=	ErrorTimeArray[count]+input.ErrorTimeZone;	
+						ObjectEvent.errorDeclaration['declarationTime']		=	ErrorTimeArray[count]+input.ErrorTimeZone;
+						HashStringInput['declarationTime']					=	ErrorTimeArray[count];						
 					}
 				}
 
@@ -209,16 +238,19 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					if(input.ErrorReasonType == 'Other')
 					{
 						ObjectEvent.errorDeclaration['reason']	=	input.ErrorReasonOther;
+						HashStringInput['reason']				=	input.ErrorReasonOther;
 					}
 					else
 					{
 						if(SyntaxType == 'urn')
 						{
 							ObjectEvent.errorDeclaration['reason']	=	'urn:epcglobal:cbv:er:'+input.ErrorReasonType;
+							HashStringInput['reason']				=	'urn:epcglobal:cbv:er:'+input.ErrorReasonType;
 						}
 						else if(SyntaxType == 'webURI')
 						{
 							ObjectEvent.errorDeclaration['reason']	=	Domain+'voc/ER-'+input.ErrorReasonType;
+							HashStringInput['reason']				=	Domain+'voc/ER-'+input.ErrorReasonType;
 						}
 						
 					}
@@ -232,6 +264,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					for(var e=0; e<Query.ErrorCorrection.length; e++)
 					{
 						ObjectEvent.errorDeclaration["correctiveEventIDs"].push(Query.ErrorCorrection[e].CorrectiveText);
+						HashStringInput.correctiveEventIDs.push(Query.ErrorCorrection[e].CorrectiveText);
 					}
 				}
 
@@ -240,22 +273,72 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				{
 					var ErrorExtension	=	Query.ErrorExtension;
 					
-					for(var i=0; i<ErrorExtension.length; i++)
+					for(var ex=0; ex<ErrorExtension.length; ex++)
 					{
-						var NameSpace 	=	ErrorExtension[i].NameSpace;
-						var LocalName 	=	ErrorExtension[i].LocalName;
-
-						if(NameSpace.toLowerCase().includes("http://") || NameSpace.toLowerCase().includes("https://"))
-						{
-							NameSpace 							= 	NameSpace.split("/").slice(2);
-							NameSpace 							= 	NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
-							var value							=	NameSpace+':'+LocalName;
-							ObjectEvent.errorDeclaration[value]	=	ErrorExtension[i].FreeText
+						var NameSpace 	=	ErrorExtension[ex].NameSpace; 
+						var LocalName 	=	ErrorExtension[ex].LocalName;
+							
+						if(ErrorExtension[ex].NameSpace.includes("http://") || ErrorExtension[ex].NameSpace.includes("https://"))
+						{		
+							NameSpace 			= 	NameSpace.split("/").slice(2);
+							NameSpace 			= 	NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
+							var value			=	NameSpace+':'+LocalName;
+							
+							if(ErrorExtension[ex].ComplexErrorExtension.length > 0)
+							{
+								var OuterErrorExtension 	=	ObjectEvent.errorDeclaration[value]	=	{};
+								
+								for(var Cex=0; Cex<ErrorExtension[ex].ComplexErrorExtension.length;Cex++)
+								{
+									var NameSpace1 	=	ErrorExtension[ex].ComplexErrorExtension[Cex].NameSpace; 
+									var LocalName1 	=	ErrorExtension[ex].ComplexErrorExtension[Cex].LocalName;
+									
+									if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+									{
+										NameSpace1 	=	NameSpace1.split("/").slice(2);
+										NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+										OuterErrorExtension[NameSpace1+':'+LocalName1] = ErrorExtension[ex].ComplexErrorExtension[Cex].FreeText;
+									}
+									else
+									{
+										OuterErrorExtension[NameSpace1+':'+LocalName1] = ErrorExtension[ex].ComplexErrorExtension[Cex].FreeText;
+									}
+								}
+							}
+							else
+							{
+								ObjectEvent.errorDeclaration[value]	=	ErrorExtension[ex].FreeText
+							}					
 						}
 						else
 						{
-							var value							=	NameSpace+':'+LocalName;
-							ObjectEvent.errorDeclaration[value]	=	ErrorExtension[i].FreeText
+							var value			=	NameSpace+':'+LocalName;
+
+							if(ErrorExtension[ex].ComplexErrorExtension.length > 0)
+							{
+								var OuterErrorExtension 	=	ObjectEvent.errorDeclaration[value]	=	{};
+								
+								for(var Cex=0; Cex<ErrorExtension[ex].ComplexErrorExtension.length;Cex++)
+								{
+									var NameSpace1 	=	ErrorExtension[ex].ComplexErrorExtension[Cex].NameSpace; 
+									var LocalName1 	=	ErrorExtension[ex].ComplexErrorExtension[Cex].LocalName;
+									
+									if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+									{
+										NameSpace1 	=	NameSpace1.split("/").slice(2);
+										NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+										OuterErrorExtension[NameSpace1+':'+LocalName1] = ErrorExtension[ex].ComplexErrorExtension[Cex].FreeText;
+									}
+									else
+									{
+										OuterErrorExtension[NameSpace1+':'+LocalName1] = ErrorExtension[ex].ComplexErrorExtension[Cex].FreeText;
+									}
+								}
+							}
+							else
+							{
+								ObjectEvent.errorDeclaration[value]	=	ErrorExtension[ex].FreeText
+							}					
 						}
 					}
 				}
@@ -265,12 +348,15 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		//If the event is TransactionEvent then add Business Transacation List here
 		if(input.eventtype1 == "TransactionEvent")
 		{
+			HashStringInput['BTT']		=	[];
 			BusinessTrasactions();
 		}
 
 		//IF the event type is Object event
 		if(input.eventtype1 == 'ObjectEvent')
-		{			
+		{	
+			HashStringInput['epcList']		=	[];
+			
 			if(Query.EPCs.length > 0)
 			{
 				var NewEPCS		=	 [];
@@ -281,23 +367,29 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					NewEPCS.push(OEEPCS[e]);
 				}			
 
-				ObjectEvent['epcList'] = NewEPCS;
+				ObjectEvent['epcList'] 		= 	NewEPCS;
+				HashStringInput.epcList		=	NewEPCS;
 			}
 		}
 		else if(input.eventtype1 == "AggregationEvent")
 		{
+			HashStringInput['parentID']		=	"";
+			HashStringInput['childEPCs']	=	[];
+			
 			//Add the parent of AggregationEvent
 			if(Query.ParentID.length > 0)
 			{
-				var AEParentID			=	Query.ParentID[count];
-				ObjectEvent['parentID']	=	AEParentID[0];
+				var AEParentID				=	Query.ParentID[count];
+				ObjectEvent['parentID']		=	AEParentID[0];
+				HashStringInput.parentID	=	AEParentID[0];
 			}
 			
 			//Add the CHILD EPCS of AggregationEvent			
 			if(Query.EPCs.length > 0)
 			{
-				ObjectEvent['childEPCs']	=	[];
-				var ChildEPCSURI			=	Query.EPCs[count];
+				ObjectEvent['childEPCs']		=	[];
+				var ChildEPCSURI				=	Query.EPCs[count];
+				HashStringInput.childEPCs		=	Query.EPCs[count];
 				
 				for(var o=0; o<ChildEPCSURI.length; o++)
 				{					
@@ -307,19 +399,24 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		}
 		else if(input.eventtype1 == "TransactionEvent")
 		{
+			HashStringInput['parentID']		=	"";
+			HashStringInput['EPCs']			=	[];
+			
 			//TransactionEvent Parent ID
 			if(Query.ParentID.length >0)
 			{
 				var TEParentID				=	Query.ParentID[count];
 				ObjectEvent['parentID']		=	TEParentID[0];
+				HashStringInput.parentID	=	TEParentID[0];
 			}
 			
 			//TransactionEvent EPCS			
 			if(Query.EPCs.length > 0)
 			{
-				ObjectEvent['epcList']	=	{};
-				var EPCs				=	Query.EPCs[count];
-				var AllChildEpcs		=	[];
+				ObjectEvent['epcList']			=	{};
+				var EPCs						=	Query.EPCs[count];
+				var AllChildEpcs				=	[];
+				HashStringInput.EPCs			=	Query.EPCs[count];
 				
 				for(var o=0; o<EPCs.length; o++)
 				{
@@ -331,11 +428,17 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		}
 		else if(input.eventtype1 == "TransformationEvent")
 		{
+			HashStringInput['inputEPCs']			=	[];
+			HashStringInput['inputQuantityList']	=	[];
+			HashStringInput['outputEPCs']			=	[];
+			HashStringInput['outputQuantityList']	=	[];			
+			
 			//Transformation Event Input EPCs
 			if(Query.EPCs.length > 0)
 			{
-				ObjectEvent['inputEPCList']	=	[];
-				var InputQueryEPCs			=	Query.EPCs[count];				
+				ObjectEvent['inputEPCList']		=	[];
+				var InputQueryEPCs				=	Query.EPCs[count];
+				HashStringInput.inputEPCs		=	Query.EPCs[count];
 				
 				for(var i=0; i<InputQueryEPCs.length; i++)
 				{
@@ -347,7 +450,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			if(Query.Quantities.length > 0)
 			{
 				ObjectEvent['inputQuantityList']	=	[];
-				var InputQuantities					=	Query.Quantities[count];									
+				var InputQuantities					=	Query.Quantities[count];
+				HashStringInput.inputQuantityList	=	Query.Quantities[count];
 					
 				for(var q=0; q<InputQuantities.length; q++)
 				{	
@@ -371,8 +475,9 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			//Transformation Event output EPCS
 			if(Query.OutputEPCs.length > 0)
 			{
-				ObjectEvent['outputEPCList']	=	[];
-				var outputEPCs					=	Query.OutputEPCs[count];
+				ObjectEvent['outputEPCList']			=	[];
+				var outputEPCs							=	Query.OutputEPCs[count];
+				HashStringInput.outputEPCs				=	Query.OutputEPCs[count];
 				
 				for(var i=0; i<outputEPCs.length; i++)
 				{		
@@ -383,8 +488,9 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			//Transformation Event Output Quantities
 			if(Query.OutputQuantities.length > 0)
 			{
-				ObjectEvent['outputQuantityList']	=	[];
-				var OutputQuantities				=	Query.OutputQuantities[count];				
+				ObjectEvent['outputQuantityList']		=	[];
+				var OutputQuantities					=	Query.OutputQuantities[count];
+				HashStringInput.outputQuantityList		=	Query.OutputQuantities[count];				
 					
 				for(var q=0; q<OutputQuantities.length; q++)
 				{	
@@ -404,21 +510,34 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					ObjectEvent['outputQuantityList'].push(obj);
 				}
 			}
+			
+			//Check if Transformation ID is populated
+			if(input.transformationXformId != '' && typeof input.transformationXformId != undefined)
+			{
+				ObjectEvent['transformationID']		=	input.transformationXformId;
+				HashStringInput['transformationID']	=	input.transformationXformId;
+			}
 		}
 		else if(input.eventtype1 == "AssociationEvent")
-		{			
+		{	
+			HashStringInput['parentID']				=	"";
+			HashStringInput['childEPCs']			=	[];
+			HashStringInput['childQuantityList']	=	[];
+			
 			//Add the Parent for Association Event
 			if(Query.ParentID.length > 0)
 			{
-				var AEParentID			=	Query.ParentID[count];
-				ObjectEvent['parentID']	=	AEParentID[0];
+				var AEParentID				=	Query.ParentID[count];
+				ObjectEvent['parentID']		=	AEParentID[0];
+				HashStringInput.parentID	=	AEParentID[0];
 			}
 			
 			//Add the CHILD EPCS of AssociationEvent			
 			if(Query.EPCs.length > 0)
 			{
-				var ChildEPCSURI			=	Query.EPCs[count];
-				ObjectEvent['childEPCs']	=	[];
+				var ChildEPCSURI				=	Query.EPCs[count];
+				ObjectEvent['childEPCs']		=	[];
+				HashStringInput.childEPCs		=	Query.EPCs[count];
 				
 				for(var c=0; c<ChildEPCSURI.length; c++)
 				{
@@ -429,8 +548,9 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			//AGGREGATION EVENT CHILD Quantities			
 			if(Query.Quantities.length > 0)
 			{
-				ObjectEvent['childQuantityList']	=	[];
-				var ChildQuantitiesURI		=	Query.Quantities[count];									
+				ObjectEvent['childQuantityList']		=	[];
+				var ChildQuantitiesURI					=	Query.Quantities[count];
+				HashStringInput.childQuantityList		=	Query.Quantities[count];
 					
 				for(c=0; c<ChildQuantitiesURI.length;c++)
 				{
@@ -454,7 +574,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		//Check for action element and add it
 		if(input.action != "" && input.action != null && typeof input.action != undefined && input.eventtype1 != "TransformationEvent")
 		{
-			ObjectEvent['action']	=	input.action;
+			ObjectEvent['action']		=	input.action;
+			HashStringInput['action']	=	input.action;
 		}
 
 		//Check for BUSINESS STEP
@@ -462,17 +583,20 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		{
 			if(input.businessStep == 'BusinessStepEnter')
 			{
-				ObjectEvent['bizStep']  = input.EnterBusinessStepText;
+				ObjectEvent['bizStep']  	= 	input.EnterBusinessStepText;
+				HashStringInput['bizStep']	=	input.EnterBusinessStepText;
 			}
 			else
 			{
 				if(SyntaxType == 'urn')
 				{
-					ObjectEvent['bizStep']  =	'urn:epcglobal:cbv:bizstep:'+input.businessStep;
+					ObjectEvent['bizStep']  	=	'urn:epcglobal:cbv:bizstep:'+input.businessStep;
+					HashStringInput['bizStep']	=	'urn:epcglobal:cbv:bizstep:'+input.businessStep;
 				}
 				else if(SyntaxType == 'webURI')
 				{
-					ObjectEvent['bizStep']  =	Domain+'voc/Bizstep-'+input.businessStep;
+					ObjectEvent['bizStep'] 		=	Domain+'voc/Bizstep-'+input.businessStep;
+					HashStringInput['bizStep']	=	Domain+'voc/Bizstep-'+input.businessStep;
 				}				
 			}
 		}
@@ -482,17 +606,20 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		{
 			if(input.disposition == 'DispositionEnter')
 			{
-				ObjectEvent['disposition']	=	input.EnterDispositionText;
+				ObjectEvent['disposition']		=	input.EnterDispositionText;
+				HashStringInput['disposition']	=	input.EnterDispositionText;
 			}
 			else
 			{
 				if(SyntaxType == 'urn')
 				{
-					ObjectEvent['disposition']	=	'urn:epcglobal:cbv:disp:'+input.disposition;
+					ObjectEvent['disposition']		=	'urn:epcglobal:cbv:disp:'+input.disposition;
+					HashStringInput['disposition']	=	'urn:epcglobal:cbv:disp:'+input.disposition;
 				}
 				else if(SyntaxType == 'webURI')
 				{
-					ObjectEvent['disposition'] 	=	Domain+'voc/Disp-'+input.disposition;
+					ObjectEvent['disposition'] 		=	Domain+'voc/Disp-'+input.disposition;
+					HashStringInput['disposition']	=	Domain+'voc/Disp-'+input.disposition;
 				}	
 			}
 		}
@@ -506,7 +633,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			
 			if(input.readpointselector == 'manually')
 			{					
-				ObjectEvent.readPoint["id"]	=	input.readpoint;
+				ObjectEvent.readPoint["id"]		=	input.readpoint;
+				HashStringInput['ReadPointID']	=	input.readpoint;	
 			}
 			else if(input.readpointselector == 'sgln')
 			{
@@ -514,11 +642,13 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				{
 					xml_json_functions.ReadPointFormatter(input,File,function(data){
 						ObjectEvent.readPoint["id"]		=	'urn:epc:id:sgln:'+data;
+						HashStringInput['ReadPointID']	=	'urn:epc:id:sgln:'+data;	
 					});
 				}
 				else if(SyntaxType == 'webURI')
 				{
 					ObjectEvent.readPoint["id"]			=	'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2;
+					HashStringInput['ReadPointID']		=	'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2;	
 				}					
 			}
 		}
@@ -531,6 +661,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			if(input.businesslocationselector == 'manually')
 			{
 				ObjectEvent.bizLocation['id']	 	=	input.businesslocation;
+				HashStringInput['bizLocationID']	=	input.businesslocation;
 			}
 			else if(input.businesslocationselector == 'sgln')
 			{
@@ -539,11 +670,13 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					xml_json_functions.BusinessLocationFormatter(input,File,function(data)
 					{ 	
 						ObjectEvent.bizLocation['id'] 	=	'urn:epc:id:sgln:'+data;
+						HashStringInput['bizLocationID']=	'urn:epc:id:sgln:'+data;
 					});
 				}
 				else if(SyntaxType == 'webURI')
 				{
 					ObjectEvent.bizLocation['id'] 		=	'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2;
+					HashStringInput['bizLocationID']	=	'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2;
 				}				
 			}
 		}
@@ -551,6 +684,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		//Add Business Transacations for Object Event and Aggregation Event
 		if(input.eventtype1 == "ObjectEvent" || input.eventtype1 == "AggregationEvent")
 		{
+			HashStringInput['BTT']		=	[];
 			BusinessTrasactions();
 		}
 
@@ -558,11 +692,14 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		//Check for the Quantity element and add it to the JSON		
 		if(input.eventtype1 == "ObjectEvent")
 		{	
+			HashStringInput['quantityList']			=	[];
+			
 			//OBJECT EVENT CHILD Quantities
 			if(Query.Quantities.length > 0)
 			{				
-				var QuantitiesURIs			=	Query.Quantities[count];
-				ObjectEvent["quantityList"]	=	[];
+				var QuantitiesURIs					=	Query.Quantities[count];
+				ObjectEvent["quantityList"]			=	[];
+				HashStringInput.quantityList		=	Query.Quantities[count];
 
 				for(var q=0; q<QuantitiesURIs.length; q++)
 				{
@@ -583,13 +720,16 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				}
 			}
 		}
-		else if(input.eventtype1 == "AggregationEvent" || input.eventtype1 == "AssociationEvent")
+		else if(input.eventtype1 == "AggregationEvent")
 		{
+			HashStringInput['childQuantityList']			=	[];
+			
 			//AGGREGATION EVENT CHILD Quantities			
 			if(Query.Quantities.length > 0)
 			{
-				ObjectEvent['childQuantityList']	=	[];
-				var ChildQuantitiesURI		=	Query.Quantities[count];									
+				ObjectEvent['childQuantityList']		=	[];
+				var ChildQuantitiesURI					=	Query.Quantities[count];
+				HashStringInput.childQuantityList		=	Query.Quantities[count];				
 					
 				for(c=0; c<ChildQuantitiesURI.length;c++)
 				{
@@ -611,11 +751,14 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		}
 		else if(input.eventtype1 == "TransactionEvent")
 		{
+			HashStringInput['quantityList']		=	[];
+			
 			//TRANSACTION EVENT CHILD QUANTITIES
 			if(Query.Quantities.length >0)
 			{
 				ObjectEvent["quantityList"]		=	[];
 				var Quantities 					=	Query.Quantities[count];
+				HashStringInput.quantityList	=	Query.Quantities[count];
 			
 				for(q=0; q<Quantities.length; q++)
 				{
@@ -640,6 +783,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		//If the event is TransformationEvent or AssociationEvent then add Business Transacation List here
 		if(input.eventtype1 == "TransformationEvent" || input.eventtype1 == "AssociationEvent")
 		{
+			HashStringInput['BTT']		=	[];
 			BusinessTrasactions();
 		}
 		
@@ -648,7 +792,9 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		{
 			if(Query.BTT.length > 0)
 			{
-				var BTTArray	=	 [];
+				var BTTArray								=	[];
+				HashStringInput.BTT							=	Query.BTT;
+				
 				for(var b=0; b<Query.BTT.length; b++)
 				{
 					var BTT 					=	Query.BTT[b];
@@ -656,16 +802,17 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					
 					if(SyntaxType == 'urn')
 					{	
-						BTTObj['type']				=	"urn:epcglobal:cbv:btt:"+BTT.BTT.Type;
-						BTTObj['bizTransaction']	=	'urn:epcglobal:cbv:bt:'+BTT.BTT.Value;	
+						BTTObj['type']											=	"urn:epcglobal:cbv:btt:"+BTT.BTT.Type;
+						BTTObj['bizTransaction']								=	'urn:epcglobal:cbv:bt:'+BTT.BTT.Value;
 					}
 					else if(SyntaxType == 'webURI')
 					{
-						BTTObj['type']				=	Domain+'BTT-'+BTT.BTT.Type;
-						BTTObj['bizTransaction']	=	Domain+'BT-'+BTT.BTT.Value;
+						BTTObj['type']											=	Domain+'BTT-'+BTT.BTT.Type;
+						BTTObj['bizTransaction']								=	Domain+'BT-'+BTT.BTT.Value;
 					}				
 					
 					BTTArray.push(BTTObj)
+					HashStringInput.bizTransactionList.push(BTTObj)
 				}
 				ObjectEvent['bizTransactionList']		=	BTTArray;			
 			}
@@ -681,8 +828,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				//Find the check digit in 13th place
 				input.SourceGLN					=	input.SourceGLN.substring(0,12) + gs1.checkdigit(input.SourceGLN.substring(0,12));
 
-				var SourceListObj				=	new Object();
-				var Domain2						=	'https://id.gs1.org/';				
+				var SourceListObj				=	new Object();			
 				var SourceGLN					=	input.SourceGLN;
 				var SourceCompanyPrefix			=	input.SourcesCompanyPrefix;
 				var FormattedSource;
@@ -746,6 +892,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			}
 			
 			ObjectEvent['sourceList'].push(SourceListObj)
+			HashStringInput.sourceList.push(SourceListObj)
 		}
 
 		//Check for the Destination and Destination type
@@ -757,7 +904,6 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				input.DestinationGLN				=	input.DestinationGLN.substring(0,12) + gs1.checkdigit(input.DestinationGLN.substring(0,12));
 
 				ObjectEvent['destinationList']		=	[];
-				var Domain2							=	'https://id.gs1.org/';	
 				var destinationListObj				=	new Object();
 				var destinationGLN					=	input.DestinationGLN;
 				var destinationCompanyPrefix		=	input.DestinationCompanyPrefix;
@@ -823,6 +969,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			}
 			
 			ObjectEvent['destinationList'].push(destinationListObj);
+			HashStringInput.destinationList.push(destinationListObj)
 		}
 		
 		//Add ILMD for Object and Transformation Events
@@ -843,12 +990,62 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 						NameSpace 	= 	NameSpace.split("/").slice(2);
 						NameSpace 	= 	NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
 						var value	=	NameSpace+':'+LocalName;
-						ilmd[value]	=	ilmdList[i].FreeText
+						
+						if(ilmdList[i].ComplexILMD.length > 0)
+						{
+							var InnerILMD	=	ilmd[value]		=	{};
+							
+							for(var Cilmd=0; Cilmd<ilmdList[i].ComplexILMD.length;Cilmd++)
+							{
+								var NameSpace1 	=	ilmdList[i].ComplexILMD[Cilmd].NameSpace;
+								var LocalName1 	=	ilmdList[i].ComplexILMD[Cilmd].LocalName;
+								
+								if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+								{
+									NameSpace1 	=	NameSpace1.split("/").slice(2);
+									NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+									InnerILMD[NameSpace1+':'+LocalName1] = ilmdList[i].ComplexILMD[Cilmd].FreeText
+								}
+								else
+								{
+									InnerILMD[NameSpace1+':'+LocalName1] = ilmdList[i].ComplexILMD[Cilmd].FreeText
+								}
+							}
+						}
+						else
+						{
+							ilmd[value]	=	ilmdList[i].FreeText
+						}
 					}
 					else
 					{
 						var value	=	NameSpace+':'+LocalName;
-						ilmd[value]	=	ilmdList[i].FreeText
+						
+						if(ilmdList[i].ComplexILMD.length > 0)
+						{
+							var InnerILMD	=	ilmd[value]		=	{};
+							
+							for(var Cilmd=0; Cilmd<ilmdList[i].ComplexILMD.length;Cilmd++)
+							{
+								var NameSpace1 	=	ilmdList[i].ComplexILMD[Cilmd].NameSpace;
+								var LocalName1 	=	ilmdList[i].ComplexILMD[Cilmd].LocalName;
+								
+								if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+								{
+									NameSpace1 	=	NameSpace1.split("/").slice(2);
+									NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+									InnerILMD[NameSpace1+':'+LocalName1] = ilmdList[i].ComplexILMD[Cilmd].FreeText;
+								}
+								else
+								{
+									InnerILMD[NameSpace1+':'+LocalName1] = ilmdList[i].ComplexILMD[Cilmd].FreeText;
+								}
+							}
+						}
+						else
+						{
+							ilmd[value]	=	ilmdList[i].FreeText
+						}
 					}
 				}
 			}
@@ -977,19 +1174,83 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					NameSpace 			= 	NameSpace.split("/").slice(2);
 					NameSpace 			= 	NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
 					var value			=	NameSpace+':'+LocalName;
-					ObjectEvent[value]	=	Extension[ex].FreeText
-					//ObjectEvent.ele(NameSpace+':'+LocalName,Extension[ex].FreeText).up()
+					
+					if(Extension[ex].ComplexExtension.length > 0)
+					{
+						var OuterExtension 	=	ObjectEvent[value]	=	{};
+						
+						for(var Cex=0; Cex<Extension[ex].ComplexExtension.length;Cex++)
+						{
+							var NameSpace1 	=	Extension[ex].ComplexExtension[Cex].NameSpace; 
+							var LocalName1 	=	Extension[ex].ComplexExtension[Cex].LocalName;
+							
+							if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+							{
+								NameSpace1 	=	NameSpace1.split("/").slice(2);
+								NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+								OuterExtension[NameSpace1+':'+LocalName1] = Extension[ex].ComplexExtension[Cex].FreeText;
+							}
+							else
+							{
+								OuterExtension[NameSpace1+':'+LocalName1] = Extension[ex].ComplexExtension[Cex].FreeText;
+							}
+						}
+					}
+					else
+					{
+						ObjectEvent[value]	=	Extension[ex].FreeText
+					}					
 				}
 				else
 				{
 					var value			=	NameSpace+':'+LocalName;
-					ObjectEvent[value]	=	Extension[ex].FreeText
-					//ObjectEvent.ele(Extension[ex].NameSpace+Extension[ex].LocalName,Extension[ex].FreeText).up()
+
+					if(Extension[ex].ComplexExtension.length > 0)
+					{
+						var OuterExtension 	=	ObjectEvent[value]	=	{};
+						
+						for(var Cex=0; Cex<Extension[ex].ComplexExtension.length;Cex++)
+						{
+							var NameSpace1 	=	Extension[ex].ComplexExtension[Cex].NameSpace; 
+							var LocalName1 	=	Extension[ex].ComplexExtension[Cex].LocalName;
+							
+							if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+							{
+								NameSpace1 	=	NameSpace1.split("/").slice(2);
+								NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+								OuterExtension[NameSpace1+':'+LocalName1] = Extension[ex].ComplexExtension[Cex].FreeText;
+							}
+							else
+							{
+								OuterExtension[NameSpace1+':'+LocalName1] = Extension[ex].ComplexExtension[Cex].FreeText;
+							}
+						}
+					}
+					else
+					{
+						ObjectEvent[value]	=	Extension[ex].FreeText
+					}					
 				}
 			}
 		}
 		
 		MainArray.push(ObjectEvent)
+		
+		//Calculate the HashId for the event based on other information if EventiD is choosen as SHA256
+		if(input.EventIDOption == "yes")
+		{
+			if(input.EventIDType == 'sha256')
+			{
+				HashStringInput['Extension']	=	Query.Extension;
+				HashStringInput['Sensor']		=	Query.SensorForm;
+				HashStringInput['ILMD']			=	Query.ILMD;
+				
+				HashID.HashIDCreator(HashStringInput,HashIDInput,File,EventIDArrayStore,function(hashID){
+					ObjectEvent.eventID			=	hashID;
+					EventIDArrayStore.push(hashID);
+				});
+			}
+		}
 		
 		//Increment the count and push the each event to an array
 		itemProcessed++;

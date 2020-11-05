@@ -450,6 +450,7 @@ exports.QuantitiesURI	=	function(Query,callback){
 	}
 	else if(input.ObjectEventquantities == 'ITIP, no serial (Al 8006)')
 	{
+		console.log("ONE")
 		//If the selected OBJECT EVENT Quantity is ITIP, no serial (Al 8006)
 		var OEQuantityInput			=	input.OEQITIP;
 		var OEQuantityPreifxPoint	=	input.OEQuantityCompanyPrefix;
@@ -476,14 +477,17 @@ exports.QuantitiesURI	=	function(Query,callback){
 		}
 		if(input.Quantitysgtintype == 'range')
 		{
+			console.log("TWO")
 			for(var id=input.QuantitysgtnGTINFrom; id<=input.QuantitysgtnGTINTo; id++)
 			{
 				if(syntaxType 	== 'urn')
 				{
+					console.log("TEN")
 					var QuantityId		=	'urn:epc:idpat:itip:'+OEQuantityInputURN+'.'+id;
 				}
 				else if(syntaxType == 'webURI')
 				{
+					console.log("THREE")
 					var QuantityId		=	Domain+'/itip/'+OEQuantityInput+id;
 				}		
 				

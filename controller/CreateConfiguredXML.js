@@ -238,8 +238,8 @@ exports.createXML	=	function(AllData,callback){
 		if(itemProcessed == AllEventsArray.length)
 		{
 			var Returndata 	=	[];
-			Returndata.push({'XML':FinalXML});
 			Returndata.push({'JSON':FinalJSON});
+			Returndata.push({'XML':FinalXML});
 			callback(Returndata);
 		}
 	}
@@ -280,16 +280,16 @@ exports.createXML	=	function(AllData,callback){
 		//If not then add to Array and create XML
 		AddedEvents.push(NodeName);
 		
-		//Call create XML function to create the XML
-		createXML.createXMLData(Query,root,function(data){
-			//FinalXML	=	FinalXML.concat(data);
-			FinalXML	=	data;
-		});
-		
 		//Call createJSON function to create JSON
 		createJSON.createJSONData(Query,JSONHeader,function(JSONdata){
 			FinalJSON	=	JSONdata;
 			//FinalJSON = JSONdata;
+		});
+		
+		//Call create XML function to create the XML
+		createXML.createXMLData(Query,root,function(data){
+			//FinalXML	=	FinalXML.concat(data);
+			FinalXML	=	data;
 		});
 	}
 }

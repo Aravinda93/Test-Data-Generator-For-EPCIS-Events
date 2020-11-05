@@ -368,7 +368,7 @@
 									<span> (414) </span>&ensp;
 									<input type="text" class="form-control" id="businesspointsgln1" ng-model="formdata.businesspointsgln1" pattern="[0-9]{13,13}" maxlength="13" oninput="this.value=this.value.replace(/[^0-9]/g,'');" title="GLN must be 13 digits"></input>&ensp;
 									<span> (254) </span>&ensp;
-									<input type="text" class="form-control" id="businesspointsgln2" ng-model="formdata.businesspointsgln2"></input>&ensp;
+									<input type="text" class="form-control" id="businesspointsgln2" ng-model="formdata.businesspointsgln2" placeholder="Extension"></input>&ensp;
 									<span ng-show="formdata.VocabSyntaxType == 'urn' ">
 										<span> GS1 Company Prefix Length </span> &ensp;
 										<select ng-model="formdata.BusinessLocationPrefix" id="BusinessLocationPrefix" class="form-control" ng-options="companyPrefix.value as companyPrefix.text for companyPrefix in companyPrefixs" ng-required="formdata.businesslocationselector == 'sgln' && formdata.VocabSyntaxType == 'urn'">
@@ -576,36 +576,55 @@
 								<td> ILMD </td>
 								<td>
 									<button ng-click="AddILMDModalShow()" type="button" class="btn-btn-info" >Add ILMD</button><br/>
-									<span ng-show="formdata.eventtype1 == 'ObjectEvent'">
-										<span ng-repeat="(key, value) in ObjectEventILMDList" class="form-inline">
-											<br/><br/>
-											<span>
+									<table ng-show="formdata.eventtype1 == 'ObjectEvent'">
+										<tr ng-repeat="(key, value) in ObjectEventILMDList">
+											<td>
 												<button title="Delete ILMD" type="button" ng-click="DeleteObjectEventILMD(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
-											</span>&ensp;
-											<span>
 												<button title="Edit ILMD" type="button" ng-click="EditObjectEventILMD(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
-											</span>&ensp;
-											<span>
 												{{ value.NameSpace + ":" + value.LocalName }}
-											</span>&ensp;
-											<input type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddObjectEventILMDFreeText(value.FreeText,value.ID)">
-										</span>
-									</span>
-									<span ng-show="formdata.eventtype1 == 'TransformationEvent'">
-										<span ng-repeat="(key, value) in TransformationEventILMDList" class="form-inline">
-											<br/><br/>
-											<span>
+												<input ng-show="value.DataType == 'String' " type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddObjectEventILMDFreeText(value.FreeText,value.ID)">
+											</td>
+											
+											<td ng-show="value.DataType == 'Complex' ">
+												<button ng-click="ComplexILMDAdd(value.ID)" type="button" class="btn-btn-info" >Add Another</button>
+												<table>
+													<tr ng-repeat="(key1, value1) in value.ComplexILMD">
+														<td>
+															<button title="Delete ILMD" type="button" ng-click="DeleteObjectEventComplexILMD(value.ID,value1.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+															<button title="Edit ILMD" type="button" ng-click="EditComplexILMD(value.ID,value1.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
+															{{ value1.NameSpace + ":" + value1.LocalName }}
+															  <input type="text" class="form-control" ng-model="value1.FreeText" ng-blur="AddILMDFreeText(value.ID,value1.FreeText,value1.ID)">
+														</td>
+													</tr>														
+												</table>
+											</td>
+										</tr>
+									</table>						
+									
+									<table ng-show="formdata.eventtype1 == 'TransformationEvent'">
+										<tr ng-repeat="(key, value) in TransformationEventILMDList">
+											<td>
 												<button title="Delete ILMD" type="button" ng-click="DeleteTransformationEventILMD(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
-											</span>&ensp;
-											<span>
-												<button title="Edit ILMD" type="button" ng-click="EditTransformationEventILMD(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
-											</span>&ensp;
-											<span>
+												<button title="Edit ILMD" 	type="button" ng-click="EditTransformationEventILMD(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
 												{{ value.NameSpace + ":" + value.LocalName }}
-											</span>&ensp;
-											<input type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddTransformationEventILMDFreeText(value.FreeText,value.ID)">
-										</span>
-									</span>
+												<input ng-show="value.DataType == 'String' " type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddTransformationEventILMDFreeText(value.FreeText,value.ID)">
+											</td>
+											
+											<td ng-show="value.DataType == 'Complex' ">
+												<button ng-click="ComplexILMDAdd(value.ID)" type="button" class="btn-btn-info" >Add Another</button>
+												<table>
+													<tr ng-repeat="(key1, value1) in value.ComplexILMD">
+														<td>
+															<button title="Delete ILMD" type="button" ng-click="DeleteObjectEventComplexILMD(value.ID,value1.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+															<button title="Edit ILMD" type="button" ng-click="EditComplexILMD(value.ID,value1.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
+															{{ value1.NameSpace + ":" + value1.LocalName }}
+															<input type="text" class="form-control" ng-model="value1.FreeText" ng-blur="AddILMDFreeText(value.ID,value1.FreeText,value1.ID)">
+														</td>
+													</tr>
+												</table>
+											</td>												
+										</tr>
+									</table>
 								</td>
 							</tr>
 							
@@ -614,19 +633,28 @@
 								<td> Extensions </td>
 								<td>
 									<button ng-click="AddExtensionsModalShow()" type="button" class="btn-btn-info" >Add Extension</button><br/>
-									<span ng-repeat="(key, value) in CommonExtensionsList" class="form-inline">
-										<br/><br/>
-										<span>
-											<button title="Delete Extension" type="button" id="{{value.ID}}" ng-click="Delete_Extension(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
-										</span>&ensp;
-										<span>
-											<button title="Edit Extension" type="button" ng-click="Edit_Extension(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
-										</span>&ensp;
-										<span>
-											{{ value.NameSpace + ":" + value.LocalName }}
-										</span>&ensp;
-										<input type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddExtensionText(value.FreeText,value.ID)">
-									</span>
+									<table>
+										<tr ng-repeat="(key, value) in CommonExtensionsList">
+											<td class="form-inline">
+												<button title="Delete Extension" type="button" id="{{value.ID}}" ng-click="Delete_Extension(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+												<button title="Edit Extension" type="button" ng-click="Edit_Extension(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
+												{{ value.NameSpace + ":" + value.LocalName }}
+												<input  ng-show="value.DataType == 'String' " type="text" ng-model="value.FreeText" ng-blur="AddExtensionText(value.FreeText,value.ID)">
+											</td>
+											<td ng-show="value.DataType == 'Complex' ">													
+												<button ng-click="AddComplexExtensionModalShow(value.ID)" type="button" class="btn-btn-info" >Add Another</button>
+												
+												<table ng-repeat="(key1, value1) in value.ComplexExtension">
+													<td>
+														<button title="Delete Extension" 	type="button" ng-click="Delete_ComplexExtension(value.ID,value1.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+														<button title="Edit Extension" 		type="button" ng-click="Edit_ComplexExtension(value.ID,value1.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
+														{{ value1.NameSpace + ":" + value1.LocalName }}
+														<input type="text" ng-model="value1.FreeText" ng-blur="AddComplexExtensionText(value.ID,value1.FreeText,value1.ID)">
+													</td>
+												</table>
+											</td>
+										</tr>
+									</table>
 								</td>
 							</tr>							
 							
@@ -719,19 +747,28 @@
 								<td style="background-color: #f2c2c2;text-align: center;"> Extension </td>
 								<td>
 									<button ng-click="ErrorExtensionAddModal()" type="button" class="btn-btn-info" >Add Another</button><br/>
-									<span ng-repeat="(key,value) in ErrorExtensionList" class="form-inline">
-										<br/><br/>
-										<span>
-											<button title="Delete Error Extension" type="button" ng-click="DeleteErrorExtension(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
-										</span>&ensp;
-										<span>
-											<button title="Edit Error Extension" type="button" ng-click="EditErrorExtension(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
-										</span>&ensp;
-										{{value.NameSpace+':'+value.LocalName}}
-										<span>
-											<input type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddErrorExtensionText(value.FreeText, value.ID)">
-										</span>
-									</span>
+									
+									<table>
+										<tr ng-repeat="(key,value) in ErrorExtensionList">
+											<td>
+												<button title="Delete Error Extension" type="button" ng-click="DeleteErrorExtension(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+												<button title="Edit Error Extension" type="button" ng-click="EditErrorExtension(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
+												{{value.NameSpace+':'+value.LocalName}}
+												<input ng-show="value.DataType == 'String' " type="text" class="form-control" ng-model="value.FreeText" ng-blur="AddErrorExtensionText(value.FreeText, value.ID)">
+											</td>
+											<td ng-show="value.DataType == 'Complex' ">
+												<button ng-click="AddComplexErrorExtensionModalShow(value.ID)" type="button" class="btn-btn-info" >Add Another</button>
+												<table ng-repeat="(key1, value1) in value.ComplexErrorExtension">
+													<td>
+														<button title="Delete Extension" 	type="button" ng-click="Delete_ComplexErrorExtension(value.ID,value1.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
+														<button title="Edit Extension" 		type="button" ng-click="Edit_ComplexErrorExtension(value.ID,value1.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
+														{{ value1.NameSpace + ":" + value1.LocalName }}
+														<input type="text" ng-model="value1.FreeText" ng-blur="AddComplexErrorExtensionText(value.ID,value1.FreeText,value1.ID)">														
+													</td>
+												</table>
+											</td>
+										</tr>
+									</table>										
 								</td>
 							</tr>
 							<!-- ERROR Declaration ENDS-->

@@ -99,6 +99,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				$scope.CommonExtensionsList						=	PreviousValues.Extension;
 				$scope.BusinessTransactionList					=	PreviousValues.BTT;
 				$rootScope.TotalSensorElementsArray				=	PreviousValues.SensorForm;
+				$scope.ErrorExtensionList						=	PreviousValues.ErrorExtension;
 				
 				
 				//Based on different event type assign the respective values
@@ -167,7 +168,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 	$scope.resetValues	=	function()
 	{
 		//Common
-		$scope.formdata								=	{eventtype1:'', ElementssyntaxType:'urn', VocabSyntaxType:'urn', EventIDOption:'no', EventIDType: 'uuid'};
+		$scope.formdata								=	{eventtype1:'', eventtype2: 'ordinaryevent', RecordTimeOptionType: 'RecordTimeCurrentTime', ElementssyntaxType:'urn', VocabSyntaxType:'urn', EventIDOption:'no', EventIDType: 'uuid',readpointsgln2:"0", businesspointsgln2: "0"};
 		$scope.AddExtensionForm						=	{};
 		$scope.EditExtensionForm					=	{};
 		$scope.EventTypeRowSpan						= 	5;
@@ -176,6 +177,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		$scope.OtherFields							=	2;
 		$scope.CommonExtensionsList					=	[];
 		$scope.CommonExtensionsID					=	0;
+		$scope.ComplexExtensionID					=	0;
 		$scope.BusinessTransactionList				=	[];
 		$scope.BusinessTransactionCount				=	0;
 		$scope.BTT									=	{};		
@@ -185,6 +187,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		$scope.ObjectEventQuantitiesURI				=	[];
 		$scope.ObjectEventILMDList					=	[];
 		$scope.ObjectEventILMDID					=	0;
+		$scope.ComplexILMDID						=	0;
 			
 		//Aggregation Event		
 		$scope.AggregationEventParentURI			=	[];
@@ -214,6 +217,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		$scope.ErrorExtensionList					=	[];
 		$scope.ErrorCorrectiveElementID				=	0;
 		$scope.ErrorExtensionID 					=	0;
+		$scope.ComplexErrorExtensionID				=	0;
 		
 		//Sensor information variables
 		$rootScope.TotalSensorElementsArray			=	[];
@@ -221,26 +225,25 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		//Set the default values for some of the fields
 	
 		//Set the date fields with current values
+		var yesterday								=	new Date();
+		yesterday.setDate(new Date().getDate()-1);
+		
 		$scope.formdata.EventTimeSelector			=	"SpecificTime";
 		$scope.formdata.RecordTimeOption			=	"no";
 		$scope.formdata.eventtimeSpecific			=	new Date();
-		$scope.formdata.EventTimeFrom				=	new Date();
+		$scope.formdata.EventTimeFrom				=	yesterday;
+		$scope.formdata.EventTimeTo					=	new Date();
 		$scope.formdata.ErrorDeclarationTime		=	new Date();
-		$scope.formdata.ErrorDeclarationTimeFrom	=	new Date();
+		$scope.formdata.ErrorDeclarationTimeFrom		=	yesterday;
+		$scope.formdata.ErrorDeclarationTimeTo		=	new Date();
 		var h 										= 	$scope.formdata.eventtimeSpecific.getHours();
 		var m 										= 	$scope.formdata.eventtimeSpecific.getMinutes();
 		
 		$scope.formdata.eventtimeSpecific.setHours(h,m,0,0);
 		$scope.formdata.EventTimeFrom.setHours(h,m,0,0);
+		$scope.formdata.EventTimeTo.setHours(h,m,0,0);
 		$scope.formdata.ErrorDeclarationTime.setHours(h,m,0,0);
 		$scope.formdata.ErrorDeclarationTimeFrom.setHours(h,m,0,0);
-		
-		var tomorrow								=	new Date();
-		tomorrow.setDate(new Date().getDate()+1);
-
-		$scope.formdata.EventTimeTo					=	tomorrow;
-		$scope.formdata.ErrorDeclarationTimeTo		=	tomorrow;
-		$scope.formdata.EventTimeTo.setHours(h,m,0,0);
 		$scope.formdata.ErrorDeclarationTimeTo.setHours(h,m,0,0);
 		
 		//Set the default values for timezone field
@@ -917,6 +920,16 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		$scope.AddExtensionForm			=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
 	}
 	
+	//Show the Modal for adding the complex extension
+	$scope.AddComplexExtensionModalShow	=	function(ID)
+	{
+		angular.element('#EventModalForm').modal('hide');
+		angular.element('#AddExtensionModal').modal('show');
+		$scope.ComplexExtensionFlag		=	true;
+		$scope.ComplexExtensionParentID	=	ID;
+		$scope.AddExtensionForm			=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
+	}
+	
 	//On submission of the Modal Add Extensions or ILMD OR ERROR Declaration
 	$scope.AddNewExtension	=	function(){		
 		angular.element('#AddExtensionModal').modal('hide');
@@ -932,10 +945,33 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			obj.DataType				=	$scope.AddExtensionForm.AddExtensionDataType;
 			obj.ID						=	$scope.CommonExtensionsID;
 			obj.FreeText				=	"";
+			obj.ComplexExtension		=	[];	
 			$scope.CommonExtensionsList.push(obj);
 			$scope.CommonExtensionsID++;
 			$scope.AddExtensionsFlag	=	false;
-		}	
+		}
+		
+		//Add the extension to Extension List if Complex type is choosen
+		if($scope.ComplexExtensionFlag)
+		{
+			var obj 					= 	new Object();
+			obj.ExtensionXMLElement		=	$scope.AddExtensionForm.AddExtensionXMLElement;
+			obj.NameSpace				=	$scope.AddExtensionForm.AddExtensionNamespaceURI;
+			obj.LocalName				=	$scope.AddExtensionForm.AddExtensionLocalName;
+			obj.DataType				=	$scope.AddExtensionForm.AddExtensionDataType;
+			obj.ID						=	$scope.ComplexExtensionID;
+			obj.FreeText				=	"";
+			
+			for(var com=0; com<$scope.CommonExtensionsList.length; com++)
+			{
+				if($scope.CommonExtensionsList[com].ID == $scope.ComplexExtensionParentID)
+				{
+					$scope.CommonExtensionsList[com].ComplexExtension.push(obj);
+					$scope.ComplexExtensionFlag	=	false;
+					$scope.ComplexExtensionID++;
+				}
+			}
+		}
 			
 		//Set the ILMD List
 		if($scope.AddILMDFlag)
@@ -950,6 +986,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				obj.DataType				=	$scope.AddExtensionForm.AddExtensionDataType;
 				obj.ID						=	$scope.ObjectEventILMDID;
 				obj.FreeText				=	"";
+				obj.ComplexILMD				=	[];
 				$scope.ObjectEventILMDList.push(obj);
 				$scope.ObjectEventILMDID++;
 				$scope.AddILMDFlag			=	false;
@@ -965,9 +1002,50 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				obj.DataType				=	$scope.AddExtensionForm.AddExtensionDataType;
 				obj.ID						=	$scope.TransformationEventILMDID;
 				obj.FreeText				=	"";
+				obj.ComplexILMD				=	[];
 				$scope.TransformationEventILMDList.push(obj);
 				$scope.TransformationEventILMDID++;
 				$scope.AddILMDFlag			=	false;
+			}
+		}
+		
+		//ObjectEvent Complex ILMD
+		if($scope.ComplexILMDFlag)
+		{
+			var obj 					= 	new Object();
+			obj.ExtensionXMLElement		=	$scope.AddExtensionForm.AddExtensionXMLElement;
+			obj.NameSpace				=	$scope.AddExtensionForm.AddExtensionNamespaceURI;
+			obj.LocalName				=	$scope.AddExtensionForm.AddExtensionLocalName;
+			obj.DataType				=	$scope.AddExtensionForm.AddExtensionDataType;
+			obj.ID						=	$scope.ComplexILMDID;
+			obj.FreeText				=	"";
+				
+			//If Object Event Set the Object Event ILMD List
+			if($scope.formdata.eventtype1 == 'ObjectEvent')
+			{
+				for(var com=0; com<$scope.ObjectEventILMDList.length; com++)
+				{
+					if($scope.ObjectEventILMDList[com].ID == $scope.ComplexILMDParentID)
+					{
+						$scope.ObjectEventILMDList[com].ComplexILMD.push(obj);
+						$scope.ComplexILMDFlag	=	false;
+						$scope.ComplexILMDID++;
+					}
+				}
+			}
+			
+			//If Transformation Event has been selected
+			if($scope.formdata.eventtype1 == 'TransformationEvent')
+			{
+				for(var com=0; com<$scope.TransformationEventILMDList.length; com++)
+				{
+					if($scope.TransformationEventILMDList[com].ID == $scope.ComplexILMDParentID)
+					{
+						$scope.TransformationEventILMDList[com].ComplexILMD.push(obj);
+						$scope.ComplexILMDFlag	=	false;
+						$scope.ComplexILMDID++;
+					}
+				}
 			}
 		}
 		
@@ -981,9 +1059,33 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				obj.DataType				=	$scope.AddExtensionForm.AddExtensionDataType;
 				obj.ID						=	$scope.ErrorExtensionID;
 				obj.FreeText				=	"";
+				obj.ComplexErrorExtension	=	[];
 				$scope.ErrorExtensionList.push(obj);
 				$scope.ErrorExtensionID++;
 				$scope.AddErrorExtensionFlag	=	false;
+		}
+		
+		//Add the Complex Error Extension
+		if($scope.AddComplexErrorExtensionFlag)
+		{
+			var obj 					= 	new Object();
+			obj.ExtensionXMLElement		=	$scope.AddExtensionForm.AddExtensionXMLElement;
+			obj.NameSpace				=	$scope.AddExtensionForm.AddExtensionNamespaceURI;
+			obj.LocalName				=	$scope.AddExtensionForm.AddExtensionLocalName;
+			obj.DataType				=	$scope.AddExtensionForm.AddExtensionDataType;
+			obj.ID						=	$scope.ComplexErrorExtensionID;
+			obj.FreeText				=	"";
+			
+			//Loop and find the parent ID
+			for(var com=0; com<$scope.ErrorExtensionList.length; com++)
+			{
+				if($scope.ErrorExtensionList[com].ID == $scope.ComplexErrorExtensionParentID)
+				{
+					$scope.ErrorExtensionList[com].ComplexErrorExtension.push(obj);
+					$scope.AddComplexErrorExtensionFlag	=	false;
+					$scope.ComplexErrorExtensionID++;
+				}
+			}
 		}
 	}
 	
@@ -1001,6 +1103,26 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		}
 	}
 	
+	//Delete Complex Extension on Click
+	$scope.Delete_ComplexExtension	=	function(parentID, ChildID)
+	{		
+		//Loop through all extension and find the corresponding parent ID
+		for(var Pex=0; Pex<$scope.CommonExtensionsList.length;Pex++)
+		{
+			if($scope.CommonExtensionsList[Pex].ID == parentID)
+			{
+				for(var Cex=0; Cex<$scope.CommonExtensionsList[Pex].ComplexExtension.length;Cex++)
+				{
+					if($scope.CommonExtensionsList[Pex].ComplexExtension[Cex].ID == ChildID)
+					{
+						$scope.CommonExtensionsList[Pex].ComplexExtension.splice(Cex, 1);
+						break;
+					}
+				}
+			}
+		}		
+	}
+	
 	//Add FreeText for the corresponding Extension
 	$scope.AddExtensionText		=	function(FreeText,ID){
 		
@@ -1010,6 +1132,26 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			{
 				$scope.CommonExtensionsList[ex].FreeText	=	FreeText;
 				break;
+			}
+		}
+	}
+	
+	//Add FreeText for the Correspondng Extension for Complex Extension
+	$scope.AddComplexExtensionText	=	function(ParentID,FreeText,ChildID)
+	{
+		//Loop through all extension and find the corresponding parent ID
+		for(var Pex=0; Pex<$scope.CommonExtensionsList.length;Pex++)
+		{
+			if($scope.CommonExtensionsList[Pex].ID == ParentID)
+			{
+				for(var Cex=0; Cex<$scope.CommonExtensionsList[Pex].ComplexExtension.length;Cex++)
+				{
+					if($scope.CommonExtensionsList[Pex].ComplexExtension[Cex].ID == ChildID)
+					{
+						$scope.CommonExtensionsList[Pex].ComplexExtension[Cex].FreeText	=	FreeText;
+						break;
+					}
+				}
 			}
 		}
 	}
@@ -1037,6 +1179,37 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		}
 	}
 	
+	//Edit the Complex Extension
+	$scope.Edit_ComplexExtension	=	function(ParentID,ChildID)
+	{
+		//Loop through all extension and find the corresponding parent ID
+		for(var Pex=0; Pex<$scope.CommonExtensionsList.length;Pex++)
+		{
+			if($scope.CommonExtensionsList[Pex].ID == ParentID)
+			{
+				for(var Cex=0; Cex<$scope.CommonExtensionsList[Pex].ComplexExtension.length;Cex++)
+				{
+					if($scope.CommonExtensionsList[Pex].ComplexExtension[Cex].ID == ChildID)
+					{
+						$scope.EditExtensionForm	=	{
+															EditExtensionXMLElement		:	$scope.CommonExtensionsList[Pex].ComplexExtension[Cex].ExtensionXMLElement,
+															EditExtensionNamespaceURI	:	$scope.CommonExtensionsList[Pex].ComplexExtension[Cex].NameSpace,
+															EditExtensionLocalName		:	$scope.CommonExtensionsList[Pex].ComplexExtension[Cex].LocalName,
+															EditExtensionDataType		:	$scope.CommonExtensionsList[Pex].ComplexExtension[Cex].DataType,
+															EditInsertId				:	ChildID													
+														};
+														
+						$scope.ComplexExtensionParentID	=	ParentID;
+						angular.element('#EventModalForm').modal('hide');
+						angular.element('#EditExtensionModal').modal('show');
+						$scope.EditComplexExtensionFlag	=	true;
+						break;
+					}
+				}
+			}
+		}
+	}
+	
 	//On Submission of EDIT Extension Modal update the corresponding Extensions
 	$scope.EditExtension	=	function(){
 		
@@ -1057,6 +1230,32 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 					$scope.EditExtensionFlag								=	false;
 					break;
 				}	
+			}
+		}
+		
+		//Edit the Complex Extension
+		if($scope.EditComplexExtensionFlag)
+		{
+			for(var Pex=0; Pex<$scope.CommonExtensionsList.length;Pex++)
+			{
+				if($scope.CommonExtensionsList[Pex].ID == $scope.ComplexExtensionParentID)
+				{
+					for(var Cex=0; Cex<$scope.CommonExtensionsList[Pex].ComplexExtension.length;Cex++)
+					{
+						if($scope.CommonExtensionsList[Pex].ComplexExtension[Cex].ID == $scope.EditExtensionForm.EditInsertId)
+						{
+							$scope.CommonExtensionsList[Pex].ComplexExtension[Cex].ExtensionXMLElement		=	$scope.EditExtensionForm.EditExtensionXMLElement;
+							$scope.CommonExtensionsList[Pex].ComplexExtension[Cex].NameSpace				=	$scope.EditExtensionForm.EditExtensionNamespaceURI;
+							$scope.CommonExtensionsList[Pex].ComplexExtension[Cex].LocalName				=	$scope.EditExtensionForm.EditExtensionLocalName;
+							$scope.CommonExtensionsList[Pex].ComplexExtension[Cex].ID						=	$scope.EditExtensionForm.EditInsertId
+							$scope.CommonExtensionsList[Pex].ComplexExtension[Cex].DataType					=	$scope.EditExtensionForm.EditExtensionDataType;
+							$scope.EditComplexExtensionFlag													=	false;
+							angular.element('#EditExtensionModal').modal('hide');
+							angular.element('#EventModalForm').modal('show');
+							break;
+						}
+					}
+				}
 			}
 		}
 		
@@ -1106,6 +1305,61 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			}
 		}
 		
+		//Add the Edited Complex ILMD values to the ILMD Array
+		if($scope.EditComplexILMDFlag)
+		{
+			if($scope.formdata.eventtype1 == 'ObjectEvent')
+			{
+				//Loop through all ILMD and find the corresponding parent ID
+				for(var Parent=0; Parent<$scope.ObjectEventILMDList.length;Parent++)
+				{
+					if($scope.ObjectEventILMDList[Parent].ID == $scope.ComplexILMDParentID)
+					{
+						for(var Child=0; Child<$scope.ObjectEventILMDList[Parent].ComplexILMD.length;Child++)
+						{
+							if($scope.ObjectEventILMDList[Parent].ComplexILMD[Child].ID == $scope.EditExtensionForm.EditInsertId)
+							{								
+								$scope.ObjectEventILMDList[Parent].ComplexILMD[Child].ExtensionXMLElement	=	$scope.EditExtensionForm.EditExtensionXMLElement;
+								$scope.ObjectEventILMDList[Parent].ComplexILMD[Child].NameSpace				=	$scope.EditExtensionForm.EditExtensionNamespaceURI;
+								$scope.ObjectEventILMDList[Parent].ComplexILMD[Child].LocalName				=	$scope.EditExtensionForm.EditExtensionLocalName;
+								$scope.ObjectEventILMDList[Parent].ComplexILMD[Child].ID					=	$scope.EditExtensionForm.EditInsertId
+								$scope.ObjectEventILMDList[Parent].ComplexILMD[Child].DataType				=	$scope.EditExtensionForm.EditExtensionDataType;
+								$scope.EditComplexILMDFlag													=	false;
+								angular.element('#EditExtensionModal').modal('hide');
+								angular.element('#EventModalForm').modal('show');
+								break;								
+							}
+						}
+					}
+				}
+			}
+			else if($scope.formdata.eventtype1 == 'TransformationEvent')
+			{
+				//Loop through all ILMD and find the corresponding parent ID
+				for(var Parent=0; Parent<$scope.TransformationEventILMDList.length;Parent++)
+				{
+					if($scope.TransformationEventILMDList[Parent].ID == $scope.ComplexILMDParentID)
+					{
+						for(var Child=0; Child<$scope.TransformationEventILMDList[Parent].ComplexILMD.length;Child++)
+						{
+							if($scope.TransformationEventILMDList[Parent].ComplexILMD[Child].ID == $scope.EditExtensionForm.EditInsertId)
+							{								
+								$scope.TransformationEventILMDList[Parent].ComplexILMD[Child].ExtensionXMLElement	=	$scope.EditExtensionForm.EditExtensionXMLElement;
+								$scope.TransformationEventILMDList[Parent].ComplexILMD[Child].NameSpace				=	$scope.EditExtensionForm.EditExtensionNamespaceURI;
+								$scope.TransformationEventILMDList[Parent].ComplexILMD[Child].LocalName				=	$scope.EditExtensionForm.EditExtensionLocalName;
+								$scope.TransformationEventILMDList[Parent].ComplexILMD[Child].ID					=	$scope.EditExtensionForm.EditInsertId
+								$scope.TransformationEventILMDList[Parent].ComplexILMD[Child].DataType				=	$scope.EditExtensionForm.EditExtensionDataType;
+								$scope.EditComplexILMDFlag													=	false;
+								angular.element('#EditExtensionModal').modal('hide');
+								angular.element('#EventModalForm').modal('show');
+								break;								
+							}
+						}
+					}
+				}
+			}
+		}
+		
 		//Edit Insert the Error Extension 
 		if($scope.EditErrorExtensionFlag)
 		{
@@ -1125,6 +1379,32 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				}	
 			}
 		}
+		
+		//Add the edited Error Extension Complex elements
+		if($scope.EditComplexErrorExtensionFlag)
+		{
+			for(var Pex=0; Pex<$scope.ErrorExtensionList.length;Pex++)
+			{
+				if($scope.ErrorExtensionList[Pex].ID == $scope.ComplexErrorExtensionParentID)
+				{
+					for(var Cex=0; Cex<$scope.ErrorExtensionList[Pex].ComplexErrorExtension.length;Cex++)
+					{
+						if($scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].ID == $scope.EditExtensionForm.EditInsertId)
+						{
+							$scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].ExtensionXMLElement	=	$scope.EditExtensionForm.EditExtensionXMLElement;
+							$scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].NameSpace				=	$scope.EditExtensionForm.EditExtensionNamespaceURI;
+							$scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].LocalName				=	$scope.EditExtensionForm.EditExtensionLocalName;
+							$scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].ID					=	$scope.EditExtensionForm.EditInsertId
+							$scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].DataType				=	$scope.EditExtensionForm.EditExtensionDataType;
+							$scope.EditComplexErrorExtensionFlag											=	false;
+							angular.element('#EditExtensionModal').modal('hide');
+							angular.element('#EventModalForm').modal('show');
+							break;
+						}
+					}
+				}
+			}
+		}
 	}
 
 	/* ALL EVENT EXTENSIONS LIST ENDS*/
@@ -1140,6 +1420,16 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		$scope.AddExtensionForm	=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
 	}
 	
+	//Addition of information for COMPLEX ILMD
+	$scope.ComplexILMDAdd	=	function(ID)
+	{
+		angular.element('#EventModalForm').modal('hide');
+		angular.element('#AddExtensionModal').modal('show');
+		$scope.ComplexILMDFlag			=	true;
+		$scope.ComplexILMDParentID		=	ID;
+		$scope.AddExtensionForm			=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
+	}
+	
 	//Delete the ILMD for Object Event on Delete Button Click
 	$scope.DeleteObjectEventILMD	=	function(Delete_ILMD_ID){
 		//Loop and find which element needs to be deleted from Extension List
@@ -1151,6 +1441,47 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				break;
 			}
 		}
+	}
+	
+	//Delete Complex ILMD based on the ParentID and ChildID
+	$scope.DeleteObjectEventComplexILMD	=	function(ParentID,ChildID)
+	{
+		if($scope.formdata.eventtype1 == 'ObjectEvent')
+		{
+			//Loop through all ILMD and find the corresponding parent ID
+			for(var Parent=0; Parent<$scope.ObjectEventILMDList.length;Parent++)
+			{
+				if($scope.ObjectEventILMDList[Parent].ID == ParentID)
+				{
+					for(var Child=0; Child<$scope.ObjectEventILMDList[Parent].ComplexILMD.length;Child++)
+					{
+						if($scope.ObjectEventILMDList[Parent].ComplexILMD[Child].ID == ChildID)
+						{
+							$scope.ObjectEventILMDList[Parent].ComplexILMD.splice(Child, 1);
+							break;
+						}
+					}
+				}
+			}
+		}
+		else if($scope.formdata.eventtype1 == 'TransformationEvent')
+		{
+			//Loop through all ILMD and find the corresponding parent ID
+			for(var Parent=0; Parent<$scope.TransformationEventILMDList.length;Parent++)
+			{
+				if($scope.TransformationEventILMDList[Parent].ID == ParentID)
+				{
+					for(var Child=0; Child<$scope.TransformationEventILMDList[Parent].ComplexILMD.length;Child++)
+					{
+						if($scope.TransformationEventILMDList[Parent].ComplexILMD[Child].ID == ChildID)
+						{
+							$scope.TransformationEventILMDList[Parent].ComplexILMD.splice(Child, 1);
+							break;
+						}
+					}
+				}
+			}
+		}				
 	}
 	
 	//Edit the ILMD for Object Event on click of Edit button
@@ -1180,6 +1511,69 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		}
 	}
 	
+	//Display the modal with values for Complex ILMD
+	$scope.EditComplexILMD		=	function(ParentID,ChildID)
+	{
+		if($scope.formdata.eventtype1 == 'ObjectEvent')
+		{
+			//Loop through all extension and find the corresponding parent ID
+			for(var Parent=0; Parent<$scope.ObjectEventILMDList.length;Parent++)
+			{
+				if($scope.ObjectEventILMDList[Parent].ID == ParentID)
+				{
+					for(var Child=0; Child<$scope.ObjectEventILMDList[Parent].ComplexILMD.length;Child++)
+					{
+						if($scope.ObjectEventILMDList[Parent].ComplexILMD[Child].ID == ChildID)
+						{
+							$scope.EditExtensionForm	=	{
+											EditExtensionXMLElement		:	$scope.ObjectEventILMDList[Parent].ComplexILMD[Child].ExtensionXMLElement,
+											EditExtensionNamespaceURI	:	$scope.ObjectEventILMDList[Parent].ComplexILMD[Child].NameSpace,
+											EditExtensionLocalName		:	$scope.ObjectEventILMDList[Parent].ComplexILMD[Child].LocalName,
+											EditExtensionDataType		:	$scope.ObjectEventILMDList[Parent].ComplexILMD[Child].DataType,
+											EditInsertId				:	ChildID													
+										  };
+										  
+							$scope.ComplexILMDParentID	=	ParentID;
+							angular.element('#EventModalForm').modal('hide');
+							angular.element('#EditExtensionModal').modal('show');
+							$scope.EditComplexILMDFlag	=	true;
+							break;
+						}
+					}
+				}
+			}
+		}
+		else if($scope.formdata.eventtype1 == 'TransformationEvent')
+		{
+			//Loop through all extension and find the corresponding parent ID
+			for(var Parent=0; Parent<$scope.TransformationEventILMDList.length;Parent++)
+			{
+				if($scope.TransformationEventILMDList[Parent].ID == ParentID)
+				{
+					for(var Child=0; Child<$scope.TransformationEventILMDList[Parent].ComplexILMD.length;Child++)
+					{
+						if($scope.TransformationEventILMDList[Parent].ComplexILMD[Child].ID == ChildID)
+						{
+							$scope.EditExtensionForm	=	{
+											EditExtensionXMLElement		:	$scope.TransformationEventILMDList[Parent].ComplexILMD[Child].ExtensionXMLElement,
+											EditExtensionNamespaceURI	:	$scope.TransformationEventILMDList[Parent].ComplexILMD[Child].NameSpace,
+											EditExtensionLocalName		:	$scope.TransformationEventILMDList[Parent].ComplexILMD[Child].LocalName,
+											EditExtensionDataType		:	$scope.TransformationEventILMDList[Parent].ComplexILMD[Child].DataType,
+											EditInsertId				:	ChildID													
+										  };
+										  
+							$scope.ComplexILMDParentID	=	ParentID;
+							angular.element('#EventModalForm').modal('hide');
+							angular.element('#EditExtensionModal').modal('show');
+							$scope.EditComplexILMDFlag	=	true;
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	//Add FreeText for the corresponding Object Event ILMD 
 	$scope.AddObjectEventILMDFreeText		=	function(FreeText,ID){		
 		for(var ex=0; ex<$scope.ObjectEventILMDList.length; ex++)
@@ -1188,6 +1582,47 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 			{
 				$scope.ObjectEventILMDList[ex].FreeText	=	FreeText;
 				break;
+			}
+		}
+	}
+	
+	//Add the free text for Complex ILMD
+	$scope.AddILMDFreeText		=	function(ParentID, FreeText, ChildID)
+	{
+		if($scope.formdata.eventtype1 == 'ObjectEvent')
+		{
+			//Loop through all ILMD and find the corresponding parent ID
+			for(var Parent=0; Parent<$scope.ObjectEventILMDList.length;Parent++)
+			{
+				if($scope.ObjectEventILMDList[Parent].ID == ParentID)
+				{
+					for(var Child=0; Child<$scope.ObjectEventILMDList[Parent].ComplexILMD.length;Child++)
+					{
+						if($scope.ObjectEventILMDList[Parent].ComplexILMD[Child].ID == ChildID)
+						{
+							$scope.ObjectEventILMDList[Parent].ComplexILMD[Child].FreeText	=	FreeText;
+							break;
+						}
+					}
+				}
+			}
+		}
+		else if($scope.formdata.eventtype1 == 'TransformationEvent')
+		{
+			//Loop through all ILMD and find the corresponding parent ID
+			for(var Parent=0; Parent<$scope.TransformationEventILMDList.length;Parent++)
+			{
+				if($scope.TransformationEventILMDList[Parent].ID == ParentID)
+				{
+					for(var Child=0; Child<$scope.TransformationEventILMDList[Parent].ComplexILMD.length;Child++)
+					{
+						if($scope.TransformationEventILMDList[Parent].ComplexILMD[Child].ID == ChildID)
+						{
+							$scope.TransformationEventILMDList[Parent].ComplexILMD[Child].FreeText	=	FreeText;
+							break;
+						}
+					}
+				}
 			}
 		}
 	}
@@ -1290,6 +1725,16 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		$scope.AddExtensionForm				=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
 	}
 	
+	//Show the modal for Complex Error Extension
+	$scope.AddComplexErrorExtensionModalShow	=	function(ParentID)
+	{
+		angular.element('#EventModalForm').modal('hide');
+		angular.element('#AddExtensionModal').modal('show');
+		$scope.AddComplexErrorExtensionFlag		=	true;
+		$scope.ComplexErrorExtensionParentID	=	ParentID;
+		$scope.AddExtensionForm					=	{AddExtensionXMLElement:'Element',AddExtensionDataType:'String'};
+	}
+	
 	//Delete the Error Exntension on click of Delete button
 	$scope.DeleteErrorExtension	=	function(DeleteID){
 		
@@ -1301,6 +1746,26 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				break;				
 			}
 		}
+	}
+	
+	//Delete the Complex error extension
+	$scope.Delete_ComplexErrorExtension	=	function(ParentID, ChildID)
+	{		
+		//Loop through all extension and find the corresponding parent ID
+		for(var Pex=0; Pex<$scope.ErrorExtensionList.length;Pex++)
+		{
+			if($scope.ErrorExtensionList[Pex].ID == ParentID)
+			{
+				for(var Cex=0; Cex<$scope.ErrorExtensionList[Pex].ComplexErrorExtension.length;Cex++)
+				{
+					if($scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].ID == ChildID)
+					{
+						$scope.ErrorExtensionList[Pex].ComplexErrorExtension.splice(Cex, 1);
+						break;
+					}
+				}
+			}
+		}		
 	}
 	
 	//Add text to corresponding Extension list on entering
@@ -1315,8 +1780,29 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		}
 	}
 	
+	//Add FreeText for the Correspondng Error Extension for Complex Extension
+	$scope.AddComplexErrorExtensionText	=	function(ParentID,FreeText,ChildID)
+	{
+		//Loop through all extension and find the corresponding parent ID
+		for(var Pex=0; Pex<$scope.ErrorExtensionList.length;Pex++)
+		{
+			if($scope.ErrorExtensionList[Pex].ID == ParentID)
+			{
+				for(var Cex=0; Cex<$scope.ErrorExtensionList[Pex].ComplexErrorExtension.length;Cex++)
+				{
+					if($scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].ID == ChildID)
+					{
+						$scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].FreeText	=	FreeText;
+						break;
+					}
+				}
+			}
+		}
+	}
+	
 	//Show the modal for editing the error extension
-	$scope.EditErrorExtension	=	function(Edit_Extension_ID){		
+	$scope.EditErrorExtension	=	function(Edit_Extension_ID)
+	{		
 		for(var ex=0; ex<$scope.ErrorExtensionList.length; ex++)
 		{			
 			if($scope.ErrorExtensionList[ex].ID == Edit_Extension_ID)
@@ -1336,6 +1822,37 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 				$scope.TransformationEventEditILMDFlag 	=	false;
 				$scope.EditErrorExtensionFlag			=	true;
 				break;
+			}
+		}
+	}
+	
+	//Edit the Complex Extension
+	$scope.Edit_ComplexErrorExtension	=	function(ParentID,ChildID)
+	{
+		//Loop through all extension and find the corresponding parent ID
+		for(var Pex=0; Pex<$scope.ErrorExtensionList.length;Pex++)
+		{
+			if($scope.ErrorExtensionList[Pex].ID == ParentID)
+			{
+				for(var Cex=0; Cex<$scope.ErrorExtensionList[Pex].ComplexErrorExtension.length;Cex++)
+				{
+					if($scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].ID == ChildID)
+					{
+						$scope.EditExtensionForm	=	{
+															EditExtensionXMLElement		:	$scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].ExtensionXMLElement,
+															EditExtensionNamespaceURI	:	$scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].NameSpace,
+															EditExtensionLocalName		:	$scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].LocalName,
+															EditExtensionDataType		:	$scope.ErrorExtensionList[Pex].ComplexErrorExtension[Cex].DataType,
+															EditInsertId				:	ChildID													
+														};
+														
+						$scope.ComplexErrorExtensionParentID	=	ParentID;
+						angular.element('#EventModalForm').modal('hide');
+						angular.element('#EditExtensionModal').modal('show');
+						$scope.EditComplexErrorExtensionFlag	=	true;
+						break;
+					}
+				}
 			}
 		}
 	}

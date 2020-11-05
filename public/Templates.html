@@ -65,11 +65,11 @@
 			<br/>
 			<div ng-show="inputElements">
 				<div class="row">
-					<div class="col-sm-4">
+					<div class="col-sm-6">
 						<button class="btn btn-primary btn-sm" ng-click="ConnectorAdd();">Add Connector</button>&nbsp;
 						<button class="btn btn-primary btn-sm" ng-click="NodeAdd();">Add Event</button>&nbsp;
 						<button class="btn btn-success btn-sm" ng-click="submitEvents();">Submit</button>&nbsp;
-						<!--<button class="btn btn-success btn-sm" ng-click="ExportDiagram();">Export</button>&nbsp;-->
+						<button class="btn btn-info btn-sm" ng-click="ExportDiagram();">Export</button>&nbsp;
 					</div>
 				</div>
 				<br/>
@@ -104,7 +104,7 @@
 				<div class="row">
 					<div class="col-md-2"></div>
 					<div class="col-md-8">
-						<h5>Test Events in JSON :</h5>
+						<h5>Test Events in JSON/JSON-LD :</h5>
 						<textarea class="form-control" id="jsondata" ng-model="jsondata"></textarea>
 						<br/><br/>
 					</div>

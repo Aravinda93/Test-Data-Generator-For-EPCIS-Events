@@ -3,6 +3,10 @@ var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 const gs1 				= 	require('gs1');
 var xml_json_functions	=	require('./XML_JSON_Functions');
+var HashID				=	require('./EventIDSHA256Calculation');
+const xml2js 			= 	require('xml2js');
+const util 				= 	require('util');
+const XMLParse			= 	require('xml-parse');
 								
 exports.createXMLData	=	function(Query,Root,callback){
 	var input			=	Query.input;
@@ -95,7 +99,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 	}
 	
 	for(var count=0; count<input.eventcount; count++)
-	{
+	{					
 		var OuterExtension 	= "";
 		var extension		= "";
 		var baseExtension 	= "";
@@ -123,8 +127,8 @@ exports.createXMLData	=	function(Query,Root,callback){
 			//If Specific Event time has been selected
 			if(input.EventTimeSelector == 'SpecificTime')
 			{
-				input.eventtimeSpecific		=	moment.utc(input.eventtimeSpecific).local().format('YYYY-MM-DDTHH:mm:SS.sss');
-				ObjectEvent.ele('eventTime', input.eventtimeSpecific+input.EventTimeZone).up()
+				var EventTimeSpecific		=	moment.utc(input.eventtimeSpecific).local().format('YYYY-MM-DDTHH:mm:SS.sss');
+				ObjectEvent.ele('eventTime', EventTimeSpecific+input.EventTimeZone).up()
 				RecordTime();
 				ObjectEvent.ele('eventTimeZoneOffset', input.EventTimeZone).up()
 			}
@@ -142,6 +146,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 					});	
 				}
 				
+				EventTimeArray[count]	=	EventTimeArray[count].substring(0,EventTimeArray[count].length-1)
 				ObjectEvent.ele('eventTime', EventTimeArray[count]+input.EventTimeZone).up()
 				RecordTime();
 				ObjectEvent.ele('eventTimeZoneOffset', input.EventTimeZone).up()
@@ -185,15 +190,26 @@ exports.createXMLData	=	function(Query,Root,callback){
 			{
 				baseExtension		=	ObjectEvent.ele('baseExtension')
 				
-				if(count == 0)
+				//If the UUID type EventID
+				if(input.EventIDType == 'uuid')
 				{
-					EventIDArray	=	[];
-					xml_json_functions.RandomEventIDGenerator(File,input.eventcount,input.EventIDType,function(ReturnEventIDArray){
-						EventIDArray	= ReturnEventIDArray;
-					});	
+					if(count == 0)
+					{
+						EventIDArray	=	[];
+						xml_json_functions.RandomEventIDGenerator(File,input.eventcount,input.EventIDType,function(ReturnEventIDArray){
+							EventIDArray	= ReturnEventIDArray;
+						});	
+					}
+					
+					baseExtension.ele('eventID',EventIDArray[count])
 				}
-				
-				baseExtension.ele('eventID',EventIDArray[count])
+				else if(input.EventIDType == 'sha256')
+				{
+					//Call nodejs file for creation of Eventhash id
+					HashID.HashIDCreator('dummy','dummy',File,'dummy',function(hashID){
+						baseExtension.ele('eventID',hashID[count])
+					});
+				}	
 			}	
 			
 			//Add the error declaration if its populated
@@ -227,7 +243,9 @@ exports.createXMLData	=	function(Query,Root,callback){
 							xml_json_functions.RandomEventTimeGenerator(From,To,EventCount,File,function(RandomErrorTime){
 								ErrorTimeArray	= RandomErrorTime;
 							});	
-						}						
+						}
+						
+						ErrorTimeArray[count]	=	ErrorTimeArray[count].substring(0,ErrorTimeArray[count].length-1)
 						errorDeclaration.ele('declarationTime',ErrorTimeArray[count]+input.ErrorTimeZone)	
 					}
 				}
@@ -267,22 +285,71 @@ exports.createXMLData	=	function(Query,Root,callback){
 				{
 					var ErrorExtension	=	Query.ErrorExtension;
 					
-					for(var i=0; i<ErrorExtension.length; i++)
+					for(var ex=0; ex<ErrorExtension.length; ex++)
 					{
-						var NameSpace 	=	ErrorExtension[i].NameSpace;
-						var LocalName 	=	ErrorExtension[i].LocalName;
-						
-						if(NameSpace.includes("http://") || NameSpace.includes("https://"))
-						{
+						var NameSpace 	=	ErrorExtension[ex].NameSpace; 
+						var LocalName 	=	ErrorExtension[ex].LocalName;
+							
+						if(ErrorExtension[ex].NameSpace.toLowerCase().includes("http://") || ErrorExtension[ex].NameSpace.toLowerCase().includes("https://"))
+						{				
 							NameSpace = NameSpace.split("/").slice(2);
-							NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf(".")); 
-							errorDeclaration.ele(NameSpace+':'+LocalName,ErrorExtension[i].FreeText)
+							NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
+							
+							if(ErrorExtension[ex].ComplexErrorExtension.length > 0)
+							{
+								var OuterErrorExtension 	=	errorDeclaration.ele(NameSpace+':'+LocalName)
+								
+								for(var Cex=0; Cex<ErrorExtension[ex].ComplexErrorExtension.length;Cex++)
+								{
+									var NameSpace1 	=	ErrorExtension[ex].ComplexErrorExtension[Cex].NameSpace; 
+									var LocalName1 	=	ErrorExtension[ex].ComplexErrorExtension[Cex].LocalName;
+									
+									if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+									{
+										NameSpace1 	=	NameSpace1.split("/").slice(2);
+										NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+										OuterErrorExtension.ele(NameSpace1+':'+LocalName1,ErrorExtension[ex].ComplexErrorExtension[Cex].FreeText).up()
+									}
+									else
+									{
+										OuterErrorExtension.ele(NameSpace1+':'+LocalName1,ErrorExtension[ex].ComplexErrorExtension[Cex].FreeText).up()
+									}
+								}
+							}
+							else
+							{
+								errorDeclaration.ele(NameSpace+':'+LocalName,ErrorExtension[ex].FreeText).up()
+							}					
 						}
 						else
 						{
-							errorDeclaration.ele(NameSpace+':'+LocalName,ErrorExtension[i].FreeText)
+							if(ErrorExtension[ex].ComplexErrorExtension.length > 0)
+							{
+								var OuterErrorExtension 	=	errorDeclaration.ele(NameSpace+':'+LocalName)
+								
+								for(var Cex=0; Cex<ErrorExtension[ex].ComplexErrorExtension.length;Cex++)
+								{
+									var NameSpace1 	=	ErrorExtension[ex].ComplexErrorExtension[Cex].NameSpace; 
+									var LocalName1 	=	ErrorExtension[ex].ComplexErrorExtension[Cex].LocalName;
+									
+									if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+									{
+										NameSpace1 	=	NameSpace1.split("/").slice(2);
+										NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+										OuterErrorExtension.ele(NameSpace1+':'+LocalName1,ErrorExtension[ex].ComplexErrorExtension[Cex].FreeText).up()
+									}
+									else
+									{
+										OuterErrorExtension.ele(NameSpace1+':'+LocalName1,ErrorExtension[ex].ComplexErrorExtension[Cex].FreeText).up()
+									}
+								}
+							}
+							else
+							{
+								errorDeclaration.ele(NameSpace+':'+LocalName,ErrorExtension[ex].FreeText).up()
+							}
 						}
-					}
+					}		
 				}
 			}
 			
@@ -428,6 +495,12 @@ exports.createXMLData	=	function(Query,Root,callback){
 						quantityElement.ele('uom',OutputQuantities[q].QuantityUOM).up()
 					}
 				}								
+			}
+			
+			//Check if Transformation ID is populated
+			if(input.transformationXformId != '' && typeof input.transformationXformId != undefined)
+			{
+				ObjectEvent.ele('transformationID', input.transformationXformId)
 			}
 		}
 		else if(input.eventtype1 == "AssociationEvent")
@@ -898,7 +971,6 @@ exports.createXMLData	=	function(Query,Root,callback){
 						OuterExtension	=	ObjectEvent
 					}
 				}
-				
 				var ilmdList	=	Query.ILMD;				
 				var ilmd 		= 	OuterExtension.ele('ilmd')
 				
@@ -910,12 +982,61 @@ exports.createXMLData	=	function(Query,Root,callback){
 					if(NameSpace.toLowerCase().includes("http://") || NameSpace.toLowerCase().includes("https://"))
 					{
 						NameSpace = NameSpace.split("/").slice(2);
-						NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf(".")); 
-						ilmd.ele(NameSpace+':'+LocalName,ilmdList[i].FreeText)
+						NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
+						
+						if(ilmdList[i].ComplexILMD.length > 0)
+						{
+							var OuterILMD	=	ilmd.ele(NameSpace+':'+LocalName)
+							
+							for(var Cilmd=0; Cilmd<ilmdList[i].ComplexILMD.length;Cilmd++)
+							{
+								var NameSpace1 	=	ilmdList[i].ComplexILMD[Cilmd].NameSpace; 
+								var LocalName1 	=	ilmdList[i].ComplexILMD[Cilmd].LocalName;
+								
+								if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+								{
+									NameSpace1 	=	NameSpace1.split("/").slice(2);
+									NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+									OuterILMD.ele(NameSpace1+':'+LocalName1,ilmdList[i].ComplexILMD[Cilmd].FreeText).up()
+								}
+								else
+								{
+									OuterILMD.ele(NameSpace1+':'+LocalName1,ilmdList[i].ComplexILMD[Cilmd].FreeText).up()
+								}
+							}
+						}
+						else
+						{
+							ilmd.ele(NameSpace+':'+LocalName,ilmdList[i].FreeText)
+						}
 					}
 					else
 					{
-						ilmd.ele(NameSpace+':'+LocalName,ilmdList[i].FreeText)
+						if(ilmdList[i].ComplexILMD.length > 0)
+						{
+							var OuterILMD	=	ilmd.ele(NameSpace+':'+LocalName)
+							
+							for(var Cilmd=0; Cilmd<ilmdList[i].ComplexILMD.length;Cilmd++)
+							{
+								var NameSpace1 	=	ilmdList[i].ComplexILMD[Cilmd].NameSpace; 
+								var LocalName1 	=	ilmdList[i].ComplexILMD[Cilmd].LocalName;
+								
+								if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+								{
+									NameSpace1 	=	NameSpace1.split("/").slice(2);
+									NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+									OuterILMD.ele(NameSpace1+':'+LocalName1,ilmdList[i].ComplexILMD[Cilmd].FreeText).up()
+								}
+								else
+								{
+									OuterILMD.ele(NameSpace1+':'+LocalName1,ilmdList[i].ComplexILMD[Cilmd].FreeText).up()
+								}
+							}
+						}
+						else
+						{
+							ilmd.ele(NameSpace+':'+LocalName,ilmdList[i].FreeText)
+						}
 					}
 				}
 			}
@@ -1129,16 +1250,65 @@ exports.createXMLData	=	function(Query,Root,callback){
 				{				
 					NameSpace = NameSpace.split("/").slice(2);
 					NameSpace = NameSpace[0].toString().substr(0, NameSpace[0].indexOf("."));
-					ObjectEvent.ele(NameSpace+':'+LocalName,Extension[ex].FreeText).up()
+					
+					if(Extension[ex].ComplexExtension.length > 0)
+					{
+						var OuterExtension 	=	ObjectEvent.ele(NameSpace+':'+LocalName)
+						
+						for(var Cex=0; Cex<Extension[ex].ComplexExtension.length;Cex++)
+						{
+							var NameSpace1 	=	Extension[ex].ComplexExtension[Cex].NameSpace; 
+							var LocalName1 	=	Extension[ex].ComplexExtension[Cex].LocalName;
+							
+							if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+							{
+								NameSpace1 	=	NameSpace1.split("/").slice(2);
+								NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+								OuterExtension.ele(NameSpace1+':'+LocalName1,Extension[ex].ComplexExtension[Cex].FreeText).up()
+							}
+							else
+							{
+								OuterExtension.ele(NameSpace1+':'+LocalName1,Extension[ex].ComplexExtension[Cex].FreeText).up()
+							}
+						}
+					}
+					else
+					{
+						ObjectEvent.ele(NameSpace+':'+LocalName,Extension[ex].FreeText).up()
+					}					
 				}
 				else
 				{
-					ObjectEvent.ele(Extension[ex].NameSpace+':'+Extension[ex].LocalName,Extension[ex].FreeText).up()
+					if(Extension[ex].ComplexExtension.length > 0)
+					{
+						var OuterExtension 	=	ObjectEvent.ele(NameSpace+':'+LocalName)
+						
+						for(var Cex=0; Cex<Extension[ex].ComplexExtension.length;Cex++)
+						{
+							var NameSpace1 	=	Extension[ex].ComplexExtension[Cex].NameSpace; 
+							var LocalName1 	=	Extension[ex].ComplexExtension[Cex].LocalName;
+							
+							if(NameSpace1.toLowerCase().includes("http://") || NameSpace1.toLowerCase().includes("https://"))
+							{
+								NameSpace1 	=	NameSpace1.split("/").slice(2);
+								NameSpace1 	= 	NameSpace1[0].toString().substr(0, NameSpace1[0].indexOf("."));
+								OuterExtension.ele(NameSpace1+':'+LocalName1,Extension[ex].ComplexExtension[Cex].FreeText).up()
+							}
+							else
+							{
+								OuterExtension.ele(NameSpace1+':'+LocalName1,Extension[ex].ComplexExtension[Cex].FreeText).up()
+							}
+						}
+					}
+					else
+					{
+						ObjectEvent.ele(NameSpace+':'+LocalName,Extension[ex].FreeText).up()
+					}
 				}
 			}
 		}
 			
-		itemProcessed++;
+		itemProcessed++;		
 		
 		//After creation of all the XML events return the data to index.js
 		if(itemProcessed == input.eventcount)

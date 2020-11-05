@@ -3,10 +3,7 @@ var randomArray	= 	[];
 var EpcLists 	= 	[];
 
 //Based on the Selected Aggregation Event format the URI
-exports.CreateAggregationEventURI	= function(Query,callback){
-	//var Query		=	JSON.parse(Query);
-	//CHANGE THIS AFTER ALL
-	//var input		=	Query.input;
+exports.EPCsIdentifierCreation	= function(Query,callback){
 	var input		=	Query.input;
 	var syntaxType	=	Query.formdata.ElementssyntaxType;
 		EpcLists 	= 	[];
@@ -122,7 +119,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 				{				
 					var Start	=	parseInt(input.AEPSSCCStartValue,10);
 					
-					for(var i=0; i<=Count; i++)
+					for(var i=0; i<Count; i++)
 					{
 						var EPCValue	=	GCP + Start;
 						var EPCValueLen	=	EPCValue.length;
@@ -135,6 +132,7 @@ exports.CreateAggregationEventURI	= function(Query,callback){
 						EpcLists.push(epcID);
 						Start++;
 					}
+					console.log(EpcLists);
 					callback(EpcLists);
 				}
 				else if(input.SSCCType == 'random')
@@ -2315,7 +2313,7 @@ function RandomGenerator(min_Length,max_Length,randomType,randomCount){
 	else if(randomType	== 'alphaNumericwithSpecial')
 	{
 		var itemProcessed 	= 0;
-		var charset     	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+		var charset     	= "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 		
 		for(var id=0;id<randomCount;id++)
 		{

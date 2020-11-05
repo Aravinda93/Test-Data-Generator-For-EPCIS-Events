@@ -585,7 +585,7 @@
 						<!-- Aggregation Event Parent ID is CPI (Al 8010 8011) -->
 						<span ng-show="AEPCPIDisp">
 							<span>(8010)</span>&nbsp;										
-							<input type="text" ng-required="AEPCPIDisp" ng-model="CommonForm.AEPCPI1" pattern="^.{7,30}$" maxlength="30" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('CPI must be between 7 and 30 digits')" title="CPI must be between 7 and 30 digits" placeholder="Enter GCP (6 - 12 digits)" class="form-control" style="width: 200px;">&nbsp;
+							<input type="text" ng-required="AEPCPIDisp" ng-model="CommonForm.AEPCPI1" pattern="^.{7,30}$" maxlength="30" oninput="setCustomValidity('');" oninvalid="this.setCustomValidity('CPI must be between 7 and 30 digits')" title="CPI must be between 7 and 30 digits" placeholder="Enter CPI (7 - 30 digits)" class="form-control" style="width: 200px;">&nbsp;
 							
 							<span ng-show="CommonForm.SSCCType == 'userCustomized' || CommonForm.SSCCType == 'random' ">							
 								<span ng-show="CommonForm.SSCCType == 'userCustomized'">

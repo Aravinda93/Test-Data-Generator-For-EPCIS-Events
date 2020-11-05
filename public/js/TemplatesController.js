@@ -14,22 +14,32 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 	$scope.nodeCounter					=	1;
 	
 	//Export the Nodes in the digaram
-	$scope.ExportDiagram	=	function(){
+	$scope.ExportDiagram	=	function()
+	{		
 		var diagram 		=  	angular.element("#diagram").ejDiagram("instance");
-		var options 		= 	{
-									fileName	:	"EventsDiagram",
-									mode		: 	ej.datavisualization.Diagram.ExportModes.Download,
-									format		: 	ej.datavisualization.Diagram.FileFormats.SVG,
-									stretch		: 	"fill",
-									margin		: 
-													{
-														left	: 30,
-														right	: 30,
-														top		: 30,
-														bottom	: 30
-													},
-								};
-		diagram.exportDiagram(options);
+		
+		//Export the templates if there are more than 2 events
+		if(diagram._nodes.length >= 2 && diagram._nodes.length != undefined)
+		{
+			var options 		= 	{
+										fileName	:	"EventsDiagram",
+										mode		: 	ej.datavisualization.Diagram.ExportModes.Download,
+										format		: 	ej.datavisualization.Diagram.FileFormats.SVG,
+										stretch		: 	"fill",
+										margin		: 
+														{
+															left	: 30,
+															right	: 30,
+															top		: 30,
+															bottom	: 30
+														},
+									};
+			diagram.exportDiagram(options);	
+		}
+		else
+		{
+			alertify.alert("Test Data Generator", "For exporting please create at least 2 events and establish connection among them.")
+		}			
 	}
 	
 	//Add Node to Diagram on click
@@ -93,139 +103,149 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 	
 	//Create the event on click of the submit button 
 	$scope.submitEvents			=	function(){
-		AllEventFinalArray		=	[];		
-		$scope.outputElements 	= 	true;
-		$scope.inputElements 	= 	false;
-		var LastCounter			=	0;
-		var ParentEPCsArray		=	[];		
 		
-		for(var con=0; con<connectorArray.length; con++)
+		//Show error message if only one event or no connector is established
+		if(connectorArray.length == 0)
 		{
-			var ConnectorSource		=	connectorArray[con].SourceNode;
-			var ConnectorTarget		=	connectorArray[con].TargetNode;			
+			alertify.alert("Test Data Generator", "For data generation please create at least 2 events and establish connection among them.")
+		}		
+		else
+		{
+			AllEventFinalArray		=	[];		
+			$scope.outputElements 	= 	true;
+			$scope.inputElements 	= 	false;
+			var LastCounter			=	0;
+			var ParentEPCsArray		=	[];		
 			
-			for(var e=0; e<$rootScope.AllEventsArray.length; e++)
-			{				
-				if($rootScope.AllEventsArray[e].NodeID == ConnectorSource)
-				{
-					if (!AllEventFinalArray.find(o => o.NodeName == ConnectorSource))
-					{				
-						var NodeObj				=	new Object();
-						NodeObj.NodeName		=	$rootScope.AllEventsArray[e].NodeID;
-						NodeObj.Type			=	"Source";
-						NodeObj.Count			=	connectorArray[con].Count;
-						NodeObj.QuantityCount	=	connectorArray[con].QuantityCount;
-						NodeObj.Childrens		=	[];
-						NodeObj.FormData		=	$rootScope.AllEventsArray[e];
-						
-						//Find the child nodes
-						for(var e2=0; e2<$rootScope.AllEventsArray.length; e2++)
-						{							
-							if($rootScope.AllEventsArray[e2].NodeID == ConnectorTarget)
-							{	
-								var NodeChildren			=	new Object();
-								NodeChildren.ChildNodeName	=	$rootScope.AllEventsArray[e2].NodeID;
-								NodeChildren.Count			=	connectorArray[con].Count;
-								NodeChildren.QuantityCount	=	connectorArray[con].QuantityCount;
-								NodeChildren.ChildType		=	"Target";								
-								NodeChildren.FormData		=	$rootScope.AllEventsArray[e2];
-								NodeObj.Childrens.push(NodeChildren);			
-							}
-						}						
-						AllEventFinalArray.push(NodeObj);						
-					}
-					else
+			for(var con=0; con<connectorArray.length; con++)
+			{
+				var ConnectorSource		=	connectorArray[con].SourceNode;
+				var ConnectorTarget		=	connectorArray[con].TargetNode;			
+				
+				for(var e=0; e<$rootScope.AllEventsArray.length; e++)
+				{				
+					if($rootScope.AllEventsArray[e].NodeID == ConnectorSource)
 					{
-						var index 	=	 AllEventFinalArray.findIndex(x => x.NodeName === ConnectorSource);
-						
-						for(var e3=0; e3<$rootScope.AllEventsArray.length; e3++)
+						if (!AllEventFinalArray.find(o => o.NodeName == ConnectorSource))
+						{				
+							var NodeObj				=	new Object();
+							NodeObj.NodeName		=	$rootScope.AllEventsArray[e].NodeID;
+							NodeObj.Type			=	"Source";
+							NodeObj.Count			=	connectorArray[con].Count;
+							NodeObj.QuantityCount	=	connectorArray[con].QuantityCount;
+							NodeObj.Childrens		=	[];
+							NodeObj.FormData		=	$rootScope.AllEventsArray[e];
+							
+							//Find the child nodes
+							for(var e2=0; e2<$rootScope.AllEventsArray.length; e2++)
+							{							
+								if($rootScope.AllEventsArray[e2].NodeID == ConnectorTarget)
+								{	
+									var NodeChildren			=	new Object();
+									NodeChildren.ChildNodeName	=	$rootScope.AllEventsArray[e2].NodeID;
+									NodeChildren.Count			=	connectorArray[con].Count;
+									NodeChildren.QuantityCount	=	connectorArray[con].QuantityCount;
+									NodeChildren.ChildType		=	"Target";								
+									NodeChildren.FormData		=	$rootScope.AllEventsArray[e2];
+									NodeObj.Childrens.push(NodeChildren);			
+								}
+							}						
+							AllEventFinalArray.push(NodeObj);						
+						}
+						else
 						{
-							if($rootScope.AllEventsArray[e3].NodeID == ConnectorTarget)
+							var index 	=	 AllEventFinalArray.findIndex(x => x.NodeName === ConnectorSource);
+							
+							for(var e3=0; e3<$rootScope.AllEventsArray.length; e3++)
 							{
-								if (!AllEventFinalArray[index].Childrens.find(o => o.ChildNodeName == ConnectorSource))
+								if($rootScope.AllEventsArray[e3].NodeID == ConnectorTarget)
 								{
-									var NodeChildren				=	new Object();
-									NodeChildren.ChildNodeName		=	$rootScope.AllEventsArray[e3].NodeID;									
-									NodeChildren.Count				=	connectorArray[con].Count;
-									NodeChildren.QuantityCount		=	connectorArray[con].QuantityCount;
-									NodeChildren.ChildType			=	"Target";
-									NodeChildren.FormData			=	$rootScope.AllEventsArray[e3];
-									AllEventFinalArray[index].Childrens.push(NodeChildren);
+									if (!AllEventFinalArray[index].Childrens.find(o => o.ChildNodeName == ConnectorSource))
+									{
+										var NodeChildren				=	new Object();
+										NodeChildren.ChildNodeName		=	$rootScope.AllEventsArray[e3].NodeID;									
+										NodeChildren.Count				=	connectorArray[con].Count;
+										NodeChildren.QuantityCount		=	connectorArray[con].QuantityCount;
+										NodeChildren.ChildType			=	"Target";
+										NodeChildren.FormData			=	$rootScope.AllEventsArray[e3];
+										AllEventFinalArray[index].Childrens.push(NodeChildren);
+									}
 								}
 							}
-						}
-					}						
-				}
-			}
-
-			//Find the last event that does not have any connector source
-			if(con == connectorArray.length-1)
-			{
-				for (var l = 0; l<$rootScope.AllEventsArray.length;l++)
-				{
-					var NodeName 	=	$rootScope.AllEventsArray[l].NodeID;
-					
-					if (!AllEventFinalArray.find(o => o.NodeName == NodeName))
-					{						
-						var NodeObj				=	new Object();
-						NodeObj.NodeName		=	$rootScope.AllEventsArray[l].NodeID;
-						NodeObj.FormData		=	$rootScope.AllEventsArray[l];
-						NodeObj.Count			=	connectorArray[con].Count;
-						NodeObj.QuantityCount	=	connectorArray[con].QuantityCount;
-						NodeObj.Type			=	"Source";
-						NodeObj.Childrens		=	[];
-						AllEventFinalArray.push(NodeObj);
+						}						
 					}
+				}
+
+				//Find the last event that does not have any connector source
+				if(con == connectorArray.length-1)
+				{
+					for (var l = 0; l<$rootScope.AllEventsArray.length;l++)
+					{
+						var NodeName 	=	$rootScope.AllEventsArray[l].NodeID;
+						
+						if (!AllEventFinalArray.find(o => o.NodeName == NodeName))
+						{						
+							var NodeObj				=	new Object();
+							NodeObj.NodeName		=	$rootScope.AllEventsArray[l].NodeID;
+							NodeObj.FormData		=	$rootScope.AllEventsArray[l];
+							NodeObj.Count			=	connectorArray[con].Count;
+							NodeObj.QuantityCount	=	connectorArray[con].QuantityCount;
+							NodeObj.Type			=	"Source";
+							NodeObj.Childrens		=	[];
+							AllEventFinalArray.push(NodeObj);
+						}
+						
+					}
+				}
+			}
+			
+			//Sort the events based on the name
+			//AllEventFinalArray.sort((a, b) => (a.NodeName > b.NodeName) ? 1 : -1);		
+			//console.log(AllEventFinalArray);
+			
+			//Check if the Child count matches the parent Count
+			for(var parentCount=0; parentCount<AllEventFinalArray.length; parentCount++)
+			{
+				var TotalParentEPCCount			=	parseInt(AllEventFinalArray[parentCount].Count, 10);
+				var TotalParentQuantityCount	=	parseInt(AllEventFinalArray[parentCount].QuantityCount, 10);
+				var TotalChildEPCCount			=	0;
+				var TotalChildQuantityCount		=	0;
+				
+				for(var childCount=0; childCount<AllEventFinalArray[parentCount].Childrens.length; childCount++)
+				{
+					TotalChildEPCCount			=	TotalChildEPCCount		+ parseInt(AllEventFinalArray[parentCount].Childrens[childCount].Count, 10);
+					TotalChildQuantityCount		=	TotalChildQuantityCount	+ parseInt(AllEventFinalArray[parentCount].Childrens[childCount].QuantityCount, 10);;
+				}
+				
+				if(TotalParentEPCCount != TotalChildEPCCount || TotalParentQuantityCount != TotalChildQuantityCount)
+				{
+					//console.log("Some Child Quantities/EPCs do not match: "+AllEventFinalArray[parentCount].NodeName)
+					//alertify.alert(" Error during the split ",' Please check the count provided for EPCs/Quantities');
+				}
+				else
+				{
+					//console.log("Eveything is correct");
 					
 				}
 			}
-		}
-		
-		//Sort the events based on the name
-		//AllEventFinalArray.sort((a, b) => (a.NodeName > b.NodeName) ? 1 : -1);		
-		//console.log(AllEventFinalArray);
-		
-		//Check if the Child count matches the parent Count
-		for(var parentCount=0; parentCount<AllEventFinalArray.length; parentCount++)
-		{
-			var TotalParentEPCCount			=	parseInt(AllEventFinalArray[parentCount].Count, 10);
-			var TotalParentQuantityCount	=	parseInt(AllEventFinalArray[parentCount].QuantityCount, 10);
-			var TotalChildEPCCount			=	0;
-			var TotalChildQuantityCount		=	0;
-			
-			for(var childCount=0; childCount<AllEventFinalArray[parentCount].Childrens.length; childCount++)
-			{
-				TotalChildEPCCount			=	TotalChildEPCCount		+ parseInt(AllEventFinalArray[parentCount].Childrens[childCount].Count, 10);
-				TotalChildQuantityCount		=	TotalChildQuantityCount	+ parseInt(AllEventFinalArray[parentCount].Childrens[childCount].QuantityCount, 10);;
-			}
-			
-			if(TotalParentEPCCount != TotalChildEPCCount || TotalParentQuantityCount != TotalChildQuantityCount)
-			{
-				//console.log("Some Child Quantities/EPCs do not match: "+AllEventFinalArray[parentCount].NodeName)
-				//alertify.alert(" Error during the split ",' Please check the count provided for EPCs/Quantities');
-			}
-			else
-			{
-				//console.log("Eveything is correct");
-				
-			}
-		}
 
-		var data	=	JSON.stringify({AllEventFinalArray:AllEventFinalArray});
-		$http({
-			url		:	"/CreateConfiguredXML",
-			headers	: 	{'Content-Type': 'application/json'},
-			method	:	"POST",
-			data	:	data
-		}).success(function(response) {
-			$scope.xmldata 		=	response[0].XML;			
-			//$scope.jsondata 	= 	response[1].JSON;
-			var obj = JSON.parse(response[1].JSON);
-			var pretty = JSON.stringify(obj, undefined, 4);
-			$scope.jsondata 	= 	pretty;
-		}).error(function(error) {
-			console.log(error);
-		});		
+			var data	=	JSON.stringify({AllEventFinalArray:AllEventFinalArray});
+			$http({
+				url		:	"/CreateConfiguredXML",
+				headers	: 	{'Content-Type': 'application/json'},
+				method	:	"POST",
+				data	:	data
+			}).success(function(response) {
+				console.log(response);
+				$scope.xmldata 		=	response[1].XML;			
+				//$scope.jsondata 	= 	response[1].JSON;
+				var obj 			= 	JSON.parse(response[0].JSON);
+				var pretty = JSON.stringify(obj, undefined, 4);
+				$scope.jsondata 	= 	pretty;
+			}).error(function(error) {
+				console.log(error);
+			});		
+		}
 	}
 	
 	//On click of Back button show the input data with EJ Diagram
@@ -277,7 +297,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 		}
 		else if(type == 'JSON')
 		{
-			var FileName	=	"EPCIS_Events_"+DateTime+".json";			
+			var FileName	=	"EPCIS_Events_"+DateTime+".jsonld";			
 			var blob		= 	new Blob([Content], {type: "text/json"});
 			
 			if (window.navigator && window.navigator.msSaveOrOpenBlob)
@@ -382,8 +402,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 		$rootScope.TotalSensorElementsArray.push(TemporaryArray)
 		$scope.ToalSensorElementCount++;
 		$scope.SensorElementsArray		=	[];
-		$scope.SensorElementCount		=	0;		
-		console.log($rootScope.TotalSensorElementsArray)
+		$scope.SensorElementCount		=	0;
 	}
 	
 	//For Every Sensor Element addition populate the corresponding Array

@@ -12,16 +12,12 @@ var 	upload 						= 	multer({ dest: 'uploads/' });
 
 const 	populateFields				=	require("./controller/populateFields");
 const 	QuantitiesURI				=	require("./controller/QuantitiesURI");
-const 	CreateAggregationEventURI	=	require("./controller/CreateAggregationEventURI");
-const 	ReadExcelFile				=	require("./controller/ReadExcelFile");
+const 	EPCsIdentifierCreation		=	require("./controller/EPCsIdentifierCreation");
 
 const 	createXML					=	require("./controller/createXML");
 const 	createJSON					=	require("./controller/createJSON");
 const 	CreateConfiguredXML			=	require("./controller/CreateConfiguredXML");
 const 	DataExporter				=	require("./controller/DataExporter");
-
-//Create an XML and JSON document based on the user inputs
-
 
 app.set('views', reqPath + "\\public");
 app.engine('html', require('ejs').renderFile);
@@ -54,7 +50,7 @@ app.post('/CreateObjectEventQuantities', function(req,res){
 
 //call the function to create URI and display for Object Event
 app.post('/CreateAggregationEventURI', function(req,res){
-	CreateAggregationEventURI.CreateAggregationEventURI(req.body,function(data){
+	EPCsIdentifierCreation.EPCsIdentifierCreation(req.body,function(data){
 		res.send(data);
 	});
 });
@@ -62,22 +58,16 @@ app.post('/CreateAggregationEventURI', function(req,res){
 //call functions to create XML and JSON
 app.post('/createEvents', function(req,res){
 	var data = [];
-	createXML.createXMLData(req.body,'dummy',function(XMLdata){
-		var xml = {'XML':XMLdata};
-		data.push(xml);
-		createJSON.createJSONData(req.body,'dummy',function(JSONdata){
-			var json = {'JSON':JSONdata}
-			data.push(json);
-			res.send(data);
-		});
-	});
-});
-
-//Read the Excel File Data
-app.post('/UploadFIle',function(req,res){
-	ReadExcelFile.ReadExcelFileContent(function(data){
+	createJSON.createJSONData(req.body,'dummy',function(JSONdata){
+		var json = {'JSON':JSONdata}
+		data.push(json);
 		
-	});
+		createXML.createXMLData(req.body,'dummy',function(XMLdata){
+			var xml = {'XML':XMLdata};
+			data.push(xml);	
+			res.send(data);			
+		});
+	});	
 });
 
 //Read the Excel File Data

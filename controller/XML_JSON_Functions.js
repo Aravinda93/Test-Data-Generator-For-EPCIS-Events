@@ -11,7 +11,6 @@ var HeaderArray			=	[];
 //Extensions and ILMD elements to add to JSON and XML header
 exports.schemaHeaders		=	function(InputData,callback)
 {
-	
 	//Add the Elements from ILMD to XML Header
 	for(var i=0; i<InputData.length; i++)
 	{
@@ -84,7 +83,7 @@ exports.RandomEventTimeGenerator	=	function(DateFrom,DateTo,Count,File,callback)
 	var DateFrom			= 	new Date(DateFrom);
 	var DateTo				= 	new Date(DateTo);
 	
-	if(File == 'XML')
+	if(File == 'JSON')
 	{
 		EventTimeArray		=	[];
 		
@@ -93,11 +92,12 @@ exports.RandomEventTimeGenerator	=	function(DateFrom,DateTo,Count,File,callback)
 			var RandomEventTime		=	new Date(DateFrom.getTime() + Math.random() * (DateTo.getTime() - DateFrom.getTime()));
 			RandomEventTime			=	RandomEventTime.toISOString();
 			RandomEventTime			=	RandomEventTime.substring(0,RandomEventTime.length-1);
+			RandomEventTime			=	moment(RandomEventTime).format("YYYY-MM-DDTHH:mm:ss.000")+'Z';
 			EventTimeArray.push(RandomEventTime)
 		}
 		callback(EventTimeArray);	
 	}
-	else if(File == 'JSON')
+	else if(File == 'XML')
 	{
 		callback(EventTimeArray);
 	}	
@@ -106,7 +106,7 @@ exports.RandomEventTimeGenerator	=	function(DateFrom,DateTo,Count,File,callback)
 //Random EventID generator based on the count of event
 exports.RandomEventIDGenerator		=	function(File,Count,Type,callback){
 	
-	if(File == 'XML')
+	if(File == 'JSON')
 	{
 		EventIDArray	=	[];
 		
@@ -121,7 +121,7 @@ exports.RandomEventIDGenerator		=	function(File,Count,Type,callback){
 		}		
 		callback(EventIDArray);
 	}
-	else if(File == 'JSON')
+	else if(File == 'XML')
 	{
 		callback(EventIDArray);
 	}

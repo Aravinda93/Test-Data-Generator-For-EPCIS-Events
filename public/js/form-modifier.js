@@ -1,48 +1,27 @@
-app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$copyToClipboard,$window,$rootScope){
-	
-	//On enter of the Qunatity UOM show the suggestions
-	/*$scope.QuantityUOMAutoComplete	=	function(enteredData){
-		$scope.hidethis = false;  
-		var OutPut 	=	[];
-		angular.forEach($scope.UOMs, function(uom){
-			if(uom.text.toLowerCase().indexOf(enteredData.toLowerCase()) >= 0)
-			{
-				OutPut.push(uom);
-			}
-		});
-		
-		$scope.QuantityUOMsList = OutPut;  
-	}
-	
-	$scope.fillQUantityUOMTextbox = function(UOMText){  
-           $scope.CommonFormQuantity.ObjectEventQuantityQuantityUOM = UOMText;  
-           $scope.hidethis = true;  
-      } */
-	
-	
+app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$copyToClipboard,$window,$rootScope)
+{	
 	//Set the default values for some of the fields
 	
 	//Set the date fields with current values
+	var yesterday								=	new Date();
+	yesterday.setDate(new Date().getDate()-1);
+	
 	$scope.formdata.EventTimeSelector			=	"SpecificTime";
 	$scope.formdata.RecordTimeOption			=	"no";
 	$scope.formdata.eventtimeSpecific			=	new Date();
-	$scope.formdata.EventTimeFrom				=	new Date();
+	$scope.formdata.EventTimeFrom				=	yesterday;
+	$scope.formdata.EventTimeTo					=	new Date();
 	$scope.formdata.ErrorDeclarationTime		=	new Date();
-	$scope.formdata.ErrorDeclarationTimeFrom	=	new Date();
+	$scope.formdata.ErrorDeclarationTimeFrom		=	yesterday;
+	$scope.formdata.ErrorDeclarationTimeTo		=	new Date();
 	var h 										= 	$scope.formdata.eventtimeSpecific.getHours();
 	var m 										= 	$scope.formdata.eventtimeSpecific.getMinutes();
 	
 	$scope.formdata.eventtimeSpecific.setHours(h,m,0,0);
 	$scope.formdata.EventTimeFrom.setHours(h,m,0,0);
+	$scope.formdata.EventTimeTo.setHours(h,m,0,0);
 	$scope.formdata.ErrorDeclarationTime.setHours(h,m,0,0);
 	$scope.formdata.ErrorDeclarationTimeFrom.setHours(h,m,0,0);
-	
-	var tomorrow								=	new Date();
-	tomorrow.setDate(new Date().getDate()+1);
-
-	$scope.formdata.EventTimeTo					=	tomorrow;
-	$scope.formdata.ErrorDeclarationTimeTo		=	tomorrow;
-	$scope.formdata.EventTimeTo.setHours(h,m,0,0);
 	$scope.formdata.ErrorDeclarationTimeTo.setHours(h,m,0,0);
 	
 	//Set the default values for timezone field
@@ -54,7 +33,6 @@ app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$
 	
 	//Set initial default value for EventCount as 1
 	$scope.formdata.eventcount					=	1;
-	
 	  
 	//Reset all the fields onclick of Reset Button
 	$scope.ReloadTable	=	function(){
@@ -123,11 +101,11 @@ app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$
 		{
 			if(DatasetName == '' || DatasetName == undefined || DatasetName == null)
 			{
-				FileName	=	"EPCIS_Events_"+DateTime+".json";
+				FileName	=	"EPCIS_Events_"+DateTime+".jsonld";
 			}
 			else
 			{
-				FileName	=	DatasetName+".json";
+				FileName	=	DatasetName+".jsonld";
 			}
 			
 			var blob = new Blob([Content], {type: "text/json"});
