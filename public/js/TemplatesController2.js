@@ -251,7 +251,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 		$scope.formdata.ErrorTimeZone				=	"+02:00";
 		
 		//Set default value for action field
-		$scope.formdata.action						=	"ADD";
+		//$scope.formdata.action						=	"ADD";
 		
 		//Set initial default value for EventCount as 1
 		$scope.formdata.eventcount					=	1;
