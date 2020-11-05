@@ -17,7 +17,6 @@ const 	EPCsIdentifierCreation		=	require("./controller/EPCsIdentifierCreation");
 const 	createXML					=	require("./controller/createXML");
 const 	createJSON					=	require("./controller/createJSON");
 const 	CreateConfiguredXML			=	require("./controller/CreateConfiguredXML");
-const 	DataExporter				=	require("./controller/DataExporter");
 
 app.set('views', reqPath + "\\public");
 app.engine('html', require('ejs').renderFile);
@@ -95,14 +94,6 @@ app.post('/CreateConfiguredXML',function(req,res){
 		res.send(data);
 	});
 });
-
-//Export the Data into the Text file
-app.post('/ExportData',function(req,res){
-	DataExporter.exportfile(req,res,function(data){
-		res.send(data);
-	});
-})
-
 
 //Make NodeJS to Listen to a particular Port in Localhost
 app.listen(port,'0.0.0.0', function(){
