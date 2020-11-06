@@ -211,6 +211,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 						//Add Error Declaration Time
 						ObjectEvent.errorDeclaration['declarationTime']		=	input.ErrorDeclarationTime+input.ErrorTimeZone;
 						HashStringInput['declarationTime']					=	input.ErrorDeclarationTime;
+						HashStringInput['ErrorTimeZone']					=	input.ErrorTimeZone;
 					}
 					else if(input.ErrorDeclarationTimeSelector == 'TimeRange')
 					{
@@ -228,7 +229,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 						}
 						
 						ObjectEvent.errorDeclaration['declarationTime']		=	ErrorTimeArray[count]+input.ErrorTimeZone;
-						HashStringInput['declarationTime']					=	ErrorTimeArray[count];						
+						HashStringInput['declarationTime']					=	ErrorTimeArray[count];	
+						HashStringInput['ErrorTimeZone']					=	input.ErrorTimeZone;						
 					}
 				}
 

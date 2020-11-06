@@ -8,9 +8,10 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 {
 	if(File == 'JSON')
 	{
-		var Domain			=	'https://ns.gs1.org/';
-		var Domain2			=	'https://id.gs1.org/';
+		console.log(HashInput)
 		
+		var Domain			=	'https://ns.gs1.org/';
+		var Domain2			=	'https://id.gs1.org/';		
 		var input			=	HashInputDirect;
 		var HashIDString	=	"eventType=";
 		var	hash			=	"";
@@ -19,6 +20,9 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 		
 		//Check for type of Event
 		HashIDString		=	HashIDString 	+ 	HashInput.eventType;
+
+		HashInput.eventTime	=	moment.utc(HashInput.eventTime).local().format('YYYY-MM-DDTHH:mm:SS.000');
+		HashInput.eventTime	=	moment(HashInput.eventTime, 'YYYY-MM-DDTHH:mm:ss.000').subtract(HashInput.eventTimeZoneOffset).format('YYYY-MM-DDTHH:mm:ss.000') + 'Z';
 		
 		//Check for EventTime
 		HashIDString		=	HashIDString	+ 	"\neventTime="	+ HashInput.eventTime;
@@ -32,10 +36,16 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 			HashIDString	=	HashIDString	+ 	"\nerrorDeclaration";
 			
 			//Add declarationTime
+			HashInput.declarationTime	=	moment.utc(HashInput.declarationTime).local().format('YYYY-MM-DDTHH:mm:SS.000');
+			HashInput.declarationTime	=	moment(HashInput.declarationTime, 'YYYY-MM-DDTHH:mm:ss.000').subtract(HashInput.ErrorTimeZone).format('YYYY-MM-DDTHH:mm:ss.000') + 'Z';
+			
 			HashIDString	=	HashIDString	+ 	"\ndeclarationTime="	+ HashInput.declarationTime;
 			
-			//Add reason
-			HashIDString	=	HashIDString	+ 	"\nreason="				+ HashInput.reason;
+			//Add reason if undefined			
+			if(HashInput.reason != undefined)
+			{
+				HashIDString	=	HashIDString	+ 	"\nreason="				+ HashInput.reason;
+			}			
 			
 			//Add corrective Ids
 			if(HashInput.correctiveEventIDs.length > 0 && typeof HashInput.correctiveEventIDs !== 'undefined')
@@ -277,13 +287,8 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 							HashIDString	=	HashIDString	+ '\nepc=' + returnEPCs[epc]; 
 						}
 					});
-				}
-				
-				
+				}				
 			}
-			
-			HashIDString			=	HashIDString	+	'\nquantityList';			
-			var QuantityArray		=	[];		
 			
 			//Check if Child Quantity has been added
 			if(HashInput.childQuantityList.length > 0)
@@ -928,9 +933,13 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 			{
 				HashIDString	=	HashIDString	+ '\nid=' + HashInput.ReadPointID;
 			}
-			else if(input.readpointselector == 'sgln')
+			else if(input.readpointselector == 'sgln' && input.readpointsgln2 == 0)
 			{
-				HashIDString	=	HashIDString	+ '\nid=' + Domain2 + input.readpointsgln1 + '/254/' + input.readpointsgln2;
+				HashIDString	=	HashIDString	+ '\nid=' + Domain2 + '414/'  + input.readpointsgln1;
+			}
+			else
+			{
+				HashIDString	=	HashIDString	+ '\nid=' + Domain2 + '414/'  + input.readpointsgln1 + '/254/' + input.readpointsgln2;
 			}
 		}
 		
@@ -943,10 +952,14 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 			{
 				HashIDString	=	HashIDString	+ '\nid=' + HashInput.bizLocationID;
 			}
+			else if(input.businesslocationselector == 'sgln' && input.businesspointsgln2  == 0)
+			{
+				HashIDString	=	HashIDString 	+ '\nid=' + Domain2 + '414/'  + input.businesspointsgln1;
+			}
 			else if(input.businesslocationselector == 'sgln')
 			{
-				HashIDString	=	HashIDString 	+ '\nid=' + Domain2 + input.businesspointsgln1 + '/254/' + input.businesspointsgln2;
-			}		
+				HashIDString	=	HashIDString 	+ '\nid=' + Domain2 + '414/'  + input.businesspointsgln1 + '/254/' + input.businesspointsgln2;
+			}				
 		}
 		
 		//Check if bizTransactionList  is populated

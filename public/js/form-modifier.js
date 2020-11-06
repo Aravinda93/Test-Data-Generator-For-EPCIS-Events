@@ -40,11 +40,6 @@ app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$
 		$window.location.reload();
 		//$route.reload();
 	}
-
-	//Show the SGLN option in Events only for association event
-	$scope.FilterSGLNType	=	function(InputType){
-		console.log(InputType);
-	}
 	 
 	
 	//Copy to Clipboard the XML and JSON data
