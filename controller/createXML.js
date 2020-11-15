@@ -3,11 +3,8 @@ var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 const gs1 				= 	require('gs1');
 var xml_json_functions	=	require('./XML_JSON_Functions');
-var HashID				=	require('./EventIDSHA256Calculation');
-const xml2js 			= 	require('xml2js');
-const util 				= 	require('util');
-const XMLParse			= 	require('xml-parse');
-								
+var HashID				=	require('./EventIDCalculator');
+
 exports.createXMLData	=	function(Query,Root,callback){
 	var input			=	Query.input;
 	var itemProcessed 	=	0;
@@ -20,7 +17,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 	var SyntaxType		=	input.VocabSyntaxType;
 	var XMLHeaders		=	[];
 	var AESubExtension	=	"";
-	var root			=	"";	
+	var root;	
 
 	//Assign the root node based on calling function							
 	if(Query.XMLElement == 'Single')
@@ -47,6 +44,8 @@ exports.createXMLData	=	function(Query,Root,callback){
 	}
 	else
 	{
+		root		=	Root;
+		
 		//Call function to collect all the URLS from ILMD, Extension and Error Extension
 		XMLHeaderFn();
 		
@@ -56,9 +55,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 		for(var head=0; head<XMLHeaders.length; head++)
 		{
 			Root.att('xmlns:'+XMLHeaders[head].xmlns,XMLHeaders[head].URL)
-		}	
-		
-		var root		=	Root;
+		}			
 	}
 	
 	//Function to Add all ILMD, Error Extension and Extension into an Arry
@@ -607,8 +604,8 @@ exports.createXMLData	=	function(Query,Root,callback){
 			{
 				//Find the check digit in 13th place
 				input.readpointsgln1	=	input.readpointsgln1.substring(0,12) + gs1.checkdigit(input.readpointsgln1.substring(0,12));
-
-				var readPoint = ObjectEvent.ele('readPoint')
+				var readPoint			= 	ObjectEvent.ele('readPoint')
+				
 				if(SyntaxType == 'urn')
 				{
 					xml_json_functions.ReadPointFormatter(input,File,function(data){
@@ -617,7 +614,14 @@ exports.createXMLData	=	function(Query,Root,callback){
 				}
 				else if(SyntaxType == 'webURI')
 				{
-					var readPoint = readPoint.ele('id', 'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2)
+					if(input.readpointsgln2 != 0)
+					{
+						var readPoint = readPoint.ele('id', 'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2)
+					}
+					else if(input.readpointsgln2 == 0)
+					{
+						var readPoint = readPoint.ele('id', 'https://id.gs1.org/414/'+input.readpointsgln1)
+					}					
 				}						
 			}
 		}
@@ -645,7 +649,15 @@ exports.createXMLData	=	function(Query,Root,callback){
 				}	
 				else if(SyntaxType == 'webURI')
 				{
-					businesslocation.ele('id', 'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2)
+					if(input.businesspointsgln2 != 0)
+					{
+						businesslocation.ele('id', 'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2)
+					}
+					else if(input.businesspointsgln2 == 0)
+					{
+						businesslocation.ele('id', 'https://id.gs1.org/414/'+input.businesspointsgln1)
+					}
+					
 				}
 			}
 		}

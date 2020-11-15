@@ -2,13 +2,11 @@ const 	express 					= 	require('express');
 const   bodyParser 					= 	require('body-parser');
 const 	path 						= 	require('path');
 const 	fs							=	require('fs');
-const	multer  					= 	require('multer');
 
 //To get the HTML page
 const	port						= 	process.env.PORT || 3000;
 const 	reqPath 					= 	__dirname;
 const 	app 						= 	express();
-var 	upload 						= 	multer({ dest: 'uploads/' });
 
 const 	populateFields				=	require("./controller/populateFields");
 const 	QuantitiesURI				=	require("./controller/QuantitiesURI");
@@ -67,25 +65,6 @@ app.post('/createEvents', function(req,res){
 			res.send(data);			
 		});
 	});	
-});
-
-//Read the Excel File Data
-app.get('/UploadFIle',function(req,res){
-	var data = [];
-	ReadExcelFile.ReadExcelFileContent(function(XMLdata){
-		var xml = {'XML':XMLdata};
-		data.push(xml);
-		res.send(data);
-	});
-});
-
-app.post('/DrawFieldsData',function(req,res){
-	var data = [];
-	ReadExcelFile.DrawDataXML(req.body,function(XMLdata){
-		var xml = {'XML':XMLdata};
-		data.push(xml);
-		res.send(data);
-	});
 });
 
 //Create XML data for the drag and drop field

@@ -1,7 +1,7 @@
 var moment 				= 	require('moment-timezone');
 var moment 				= 	require('moment');
 const gs1 				= 	require('gs1');
-var HashID				=	require('./EventIDSHA256Calculation');
+var HashID				=	require('./EventIDCalculator');
 var xml_json_functions	=	require('./XML_JSON_Functions');
 
 exports.createJSONData	=	function(Query,JSONHeader,callback){
@@ -91,7 +91,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 	
 	//Loop through the event count and create append to JSON data
 	for(var count=0; count<input.eventcount; count++)
-	{
+	{		
 		var ObjectEvent								=	{};
 		var HashIDInput								=	input;
 		var HashStringInput							=	{};
@@ -649,8 +649,16 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				}
 				else if(SyntaxType == 'webURI')
 				{
-					ObjectEvent.readPoint["id"]			=	'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2;
-					HashStringInput['ReadPointID']		=	'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2;	
+					if(input.readpointsgln2 != 0)
+					{
+						ObjectEvent.readPoint["id"]			=	'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2;
+						HashStringInput['ReadPointID']		=	'https://id.gs1.org/414/'+input.readpointsgln1+'/254/'+input.readpointsgln2;
+					}
+					else if(input.readpointsgln2 == 0)
+					{
+						ObjectEvent.readPoint["id"]			=	'https://id.gs1.org/414/'+input.readpointsgln1;
+						HashStringInput['ReadPointID']		=	'https://id.gs1.org/414/'+input.readpointsgln1;
+					}						
 				}					
 			}
 		}
@@ -677,8 +685,16 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				}
 				else if(SyntaxType == 'webURI')
 				{
-					ObjectEvent.bizLocation['id'] 		=	'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2;
-					HashStringInput['bizLocationID']	=	'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2;
+					if(input.businesspointsgln2 != 0)
+					{
+						ObjectEvent.bizLocation['id'] 		=	'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2;
+						HashStringInput['bizLocationID']	=	'https://id.gs1.org/414/'+input.businesspointsgln1+'/254/'+input.businesspointsgln2;
+					}
+					else if(input.businesspointsgln2 == 0)
+					{
+						ObjectEvent.bizLocation['id'] 		=	'https://id.gs1.org/414/'+input.businesspointsgln1;
+						HashStringInput['bizLocationID']	=	'https://id.gs1.org/414/'+input.businesspointsgln1;
+					}
 				}				
 			}
 		}
@@ -1236,29 +1252,26 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			}
 		}
 		
+		//Increment the count and push the each event to an array
+		itemProcessed++;
 		MainArray.push(ObjectEvent)
 		
 		//Calculate the HashId for the event based on other information if EventiD is choosen as SHA256
-		if(input.EventIDOption == "yes")
+		if(input.EventIDOption == "yes" && input.EventIDType == 'sha256')
 		{
-			if(input.EventIDType == 'sha256')
-			{
-				HashStringInput['Extension']	=	Query.Extension;
-				HashStringInput['Sensor']		=	Query.SensorForm;
-				HashStringInput['ILMD']			=	Query.ILMD;
-				
-				HashID.HashIDCreator(HashStringInput,HashIDInput,File,EventIDArrayStore,function(hashID){
-					ObjectEvent.eventID			=	hashID;
-					EventIDArrayStore.push(hashID);
-				});
-			}
+			HashStringInput['Extension']	=	Query.Extension;
+			HashStringInput['Sensor']		=	Query.SensorForm;
+			HashStringInput['ILMD']			=	Query.ILMD;
+			
+			HashID.HashIDCreator(HashStringInput,HashIDInput,File,EventIDArrayStore,function(hashID){
+				ObjectEvent.eventID			=	hashID;
+				EventIDArrayStore.push(hashID);
+			});
 		}
 		
-		//Increment the count and push the each event to an array
-		itemProcessed++;
-	
+		
 		if(itemProcessed == input.eventcount)
-		{
+		{			
 			if(Query.XMLElement == 'Single')
 			{
 				JSONschemaParse.epcisBody['eventList'] 	= 	[];
@@ -1270,6 +1283,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 				JSONschemaParse.epcisBody['eventList'] = JSONschemaParse.epcisBody['eventList'].concat(MainArray);
 				callback(JSON.stringify(JSONschemaParse));
 			}
-		}
+		}	
+		
 	}
 };

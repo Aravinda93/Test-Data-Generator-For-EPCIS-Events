@@ -83,6 +83,7 @@ syncApp.controller('diagramCtrl2', function ($scope,$http,$rootScope,$sce) {
 													OtherDestinationURI2			:	PreviousInput.OtherDestinationURI2,
 													EventIDOption					:	PreviousInput.EventIDOption,
 													EventIDType						:	PreviousInput.EventIDType,
+													HashIDType						:	PreviousInput.HashIDType,
 													action							:	PreviousInput.action,
 													transformationXformId			:	PreviousInput.transformationXformId,
 													ErrorDeclarationTimeSelector	:	PreviousInput.ErrorDeclarationTimeSelector,

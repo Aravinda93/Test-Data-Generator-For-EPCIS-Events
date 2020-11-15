@@ -1,5 +1,5 @@
 <!-- MODAL FOR EVENT INFORMATION -->
-<div class="modal fade" id="EventModalForm" style="overflow-y: auto;">
+<div class="modal fade" id="EventModalForm" style="overflow-y: auto;" data-keyboard="false" data-backdrop="static">
 	<div class="modal-dialog" style="max-height:100%; max-width:100%;">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -566,8 +566,19 @@
 										
 										<div class="custom-control custom-radio custom-control-inline">
 											<input type="radio" class="custom-control-input" value="sha256" ng-model="formdata.EventIDType" name="EventIDType" id="EventIDType2">
-											<label class="custom-control-label" for="EventIDType2">EPCIS event hash (TBD)</label>
+											<label class="custom-control-label" for="EventIDType2">EPCIS event hash ID (TBD)</label>
 										</div>
+									</td>
+									
+									<td ng-show="formdata.EventIDOption == 'yes' && formdata.EventIDType == 'sha256'" class="form-inline" style="display: block;margin: auto;">
+										<select ng-model="formdata.HashIDType" class="form-control" ng-required="formdata.EventIDOption == 'yes' && formdata.EventIDType == 'sha256' ">
+											<option class="dropdown-item" value="" selected> Choose HASH type </option>
+											<option class="dropdown-item" value="SHA256"> 		SHA256 		</option>
+											<option class="dropdown-item" value="SHA512"> 		SHA512 		</option>
+											<option class="dropdown-item" value="SHA384"> 		SHA384 		</option>
+											<option class="dropdown-item" value="SHA512_256">   SHA512_256 	</option>
+											<option class="dropdown-item" value="SHA512_224">   SHA512_224 	</option>
+										</select>
 									</td>									
 							</tr>
 							

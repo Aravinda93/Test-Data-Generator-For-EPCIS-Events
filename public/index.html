@@ -634,8 +634,19 @@
 										
 										<div class="custom-control custom-radio custom-control-inline">
 											<input type="radio" class="custom-control-input" value="sha256" ng-model="formdata.EventIDType" name="EventIDType" id="EventIDType2">
-											<label class="custom-control-label" for="EventIDType2">EPCIS event hash (TBD)</label>
+											<label class="custom-control-label" for="EventIDType2">EPCIS event hash ID (TBD)</label>
 										</div>
+									</td>
+									
+									<td ng-show="formdata.EventIDOption == 'yes' && formdata.EventIDType == 'sha256'" class="form-inline" style="display: block;margin: auto;">
+										<select ng-model="formdata.HashIDType" class="form-control" ng-required="formdata.EventIDOption == 'yes' && formdata.EventIDType == 'sha256' ">
+											<option class="dropdown-item" value="" selected> Choose HASH type </option>
+											<option class="dropdown-item" value="SHA256"> 		SHA256 		</option>
+											<option class="dropdown-item" value="SHA512"> 		SHA512 		</option>
+											<option class="dropdown-item" value="SHA384"> 		SHA384 		</option>
+											<option class="dropdown-item" value="SHA512_256">   SHA512_256 	</option>
+											<option class="dropdown-item" value="SHA512_224">   SHA512_224 	</option>
+										</select>
 									</td>
 								</tr>	
 								
@@ -645,7 +656,7 @@
 									<td>
 										<button ng-click="AddILMDModalShow()" type="button" class="btn-btn-info" >Add ILMD</button><br/>
 										<table ng-show="formdata.eventtype1 == 'ObjectEvent'">
-											<tr ng-repeat="(key, value) in ObjectEventILMDList">
+											<tr ng-repeat="(key, value) in ObjectEventILMDList" class="form-inline">
 												<td>
 													<button title="Delete ILMD" type="button" ng-click="DeleteObjectEventILMD(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
 													<button title="Edit ILMD" type="button" ng-click="EditObjectEventILMD(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
@@ -670,7 +681,7 @@
 										</table>						
 										
 										<table ng-show="formdata.eventtype1 == 'TransformationEvent'">
-											<tr ng-repeat="(key, value) in TransformationEventILMDList">
+											<tr ng-repeat="(key, value) in TransformationEventILMDList" class="form-inline">
 												<td>
 													<button title="Delete ILMD" type="button" ng-click="DeleteTransformationEventILMD(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
 													<button title="Edit ILMD" 	type="button" ng-click="EditTransformationEventILMD(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
@@ -702,7 +713,7 @@
 									<td>
 										<button ng-click="AddExtensionsModalShow()" type="button" class="btn-btn-info" >Add Extension</button><br/>
 										<table>
-											<tr ng-repeat="(key, value) in CommonExtensionsList">
+											<tr ng-repeat="(key, value) in CommonExtensionsList" class="form-inline">
 												<td class="form-inline">
 													<button title="Delete Extension" type="button" id="{{value.ID}}" ng-click="Delete_Extension(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
 													<button title="Edit Extension" type="button" ng-click="Edit_Extension(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>
@@ -817,7 +828,7 @@
 										<button ng-click="ErrorExtensionAddModal()" type="button" class="btn-btn-info" >Add Another</button><br/>
 										
 										<table>
-											<tr ng-repeat="(key,value) in ErrorExtensionList">
+											<tr ng-repeat="(key,value) in ErrorExtensionList" class="form-inline">
 												<td>
 													<button title="Delete Error Extension" type="button" ng-click="DeleteErrorExtension(value.ID)"><span class="fa fa-trash-o" aria-hidden="true"></span></button>
 													<button title="Edit Error Extension" type="button" ng-click="EditErrorExtension(value.ID)"><span class="fa fa-pencil" aria-hidden="true"></span></button>

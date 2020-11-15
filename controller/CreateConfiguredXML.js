@@ -283,12 +283,10 @@ exports.createXML	=	function(AllData,callback){
 		//Call createJSON function to create JSON
 		createJSON.createJSONData(Query,JSONHeader,function(JSONdata){
 			FinalJSON	=	JSONdata;
-			//FinalJSON = JSONdata;
 		});
 		
 		//Call create XML function to create the XML
 		createXML.createXMLData(Query,root,function(data){
-			//FinalXML	=	FinalXML.concat(data);
 			FinalXML	=	data;
 		});
 	}

@@ -1,8 +1,12 @@
-var crypto        			= 	require('crypto');
-var moment 					= 	require('moment');
-var EventIDArray			=	[];
+const moment 				= 	require('moment');
 const gs1 					= 	require('gs1');
 const EPCsformatter			=	require('./URNtoURIEPCsformatter');
+var EventIDArray			=	[];
+const crypto        		= 	require('crypto');
+const sha512 				= 	require('js-sha512').sha512;
+const sha384 				= 	require('js-sha512').sha384;
+const sha512_256 			= 	require('js-sha512').sha512_256;
+const sha512_224 			= 	require('js-sha512').sha512_224;
 
 exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArrayStore,callback)
 {
@@ -1295,14 +1299,29 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 		//Remove the Linebreaks
 		HashIDString	=	HashIDString.replace(/(\r\n|\n|\r)/gm, "");
 		
-		//const hash = crypto.createHash('sha256').update(HashIDString).digest('base64');
-		hash	=	'ni:///sha-256;' + crypto.createHash('sha256').update(HashIDString).digest('hex') + '?ver=CBV2.0';
+		//Based on user selection of HASH ID create the HASHING		
+		if(input.HashIDType == 'SHA256')
+		{
+			hash	=	'ni:///sha-256;' + crypto.createHash('sha256').update(HashIDString).digest('hex') + '?ver=CBV2.0';
+		}
+		else if(input.HashIDType == 'SHA512')
+		{
+			hash	=	'ni:///sha-512;' + sha512(HashIDString) + '?ver=CBV2.0';
+		}
+		else if(input.HashIDType == 'SHA384')
+		{
+			hash	=	'ni:///sha-384;' + sha384(HashIDString) + '?ver=CBV2.0';
+		}
+		else if(input.HashIDType == 'SHA512_256')
+		{
+			hash	=	'ni:///sha-512_256;' + sha512_256(HashIDString) + '?ver=CBV2.0';
+		}
+		else if(input.HashIDType == 'SHA512_224')
+		{
+			hash	=	'ni:///sha-512_224;' + sha512_224(HashIDString) + '?ver=CBV2.0';
+		}		
+		console.log("**********************");
 		
-		
-		console.log(HashIDString);
-		console.log(hash);
-		console.log("**********************")
-
 		callback(hash);
 	}
 	else if(File == 'XML')
