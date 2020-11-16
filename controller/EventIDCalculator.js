@@ -11,9 +11,7 @@ const sha512_224 			= 	require('js-sha512').sha512_224;
 exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArrayStore,callback)
 {
 	if(File == 'JSON')
-	{
-		console.log(HashInput)
-		
+	{		
 		var Domain			=	'https://ns.gs1.org/';
 		var Domain2			=	'https://id.gs1.org/';		
 		var input			=	HashInputDirect;
@@ -976,8 +974,8 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 			for(var btt=0; btt<HashInput.BTT.length; btt++)
 			{
 				var BTTString	=	"";
-				BTTString		=	BTTString	+	Domain+'BTT-'+HashInput.BTT[btt].BTT.Type + Domain+'BT-'+HashInput.BTT[btt].BTT.Value;
-				BusinessTransactionArray.push(BTTString);
+				BTTString		=	BTTString	+ Domain +'BT-'+HashInput.BTT[btt].BTT.Value + Domain + 'BTT-' + HashInput.BTT[btt].BTT.Type;
+				BusinessTransactionArray.push(BTTString); 
 			}
 			
 			//Order the contents of Business Transaction
@@ -1003,18 +1001,18 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 				{
 					if(input.SourceLNType == 'pgln')
 					{
-						HashIDString	=	HashIDString	+ '\nsource=' + Domain + 'voc/SDT-'+input.sourcesType + Domain + '417/'+input.SourceGLN;	
+						HashIDString	=	HashIDString	+ '\nsource=' + Domain + '417/' + input.SourceGLN + Domain + 'voc/SDT-'+input.sourcesType;	
 					}
 					else if(input.SourceLNType == 'sgln')
 					{
-						HashIDString	=	HashIDString	+ '\nsource=' + Domain + 'voc/SDT-'+input.sourcesType + Domain + '417/'+input.SourceGLN +'/254/'+input.SourceGLNExtension;
+						HashIDString	=	HashIDString	+ '\nsource='  + Domain + '417/' + input.SourceGLN +'/254/'+input.SourceGLNExtension + Domain + 'voc/SDT-'+input.sourcesType;
 					}
 				}
+				else if(input.sourcesType == 'location')
+				{
+					HashIDString	=	HashIDString	+ '\nsource=' + Domain + '417/'+input.SourceGLN +'/254/'+input.SourceGLNExtension + Domain + 'voc/SDT-'+input.sourcesType;
+				}
 			}			
-			else if(input.sourcesType == 'location')
-			{
-				HashIDString	=	HashIDString	+ '\nsource=' + Domain + 'voc/SDT-'+input.sourcesType + Domain + '417/'+input.SourceGLN +'/254/'+input.SourceGLNExtension;
-			}
 			else if(input.sourcesType == 'other')
 			{
 				HashIDString	=	HashIDString	+ '\nsource=' +	input.OtherSourceURI1 + input.OtherSourceURI2;
@@ -1036,17 +1034,17 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 					//If PGLN then directly append
 					if(input.DestinationLNType == 'pgln')
 					{
-						HashIDString	=	HashIDString	+ '\ndestination=' + Domain + 'voc/SDT-'+input.destinationsType + Domain + '417/'+input.DestinationGLN;	
+						HashIDString	=	HashIDString	+ '\ndestination=' + Domain + '417/'+input.DestinationGLN + Domain + 'voc/SDT-'+input.destinationsType;	
 					}
 					else if(input.DestinationLNType == 'sgln')
 					{
-						HashIDString	=	HashIDString	+ '\ndestination=' + Domain + 'voc/SDT-'+input.destinationsType + Domain + '414/' + input.DestinationGLN + '/254/' + input.DestinationGLNExtension;
+						HashIDString	=	HashIDString	+ '\ndestination=' + Domain + '414/' + input.DestinationGLN + '/254/' + input.DestinationGLNExtension + Domain + 'voc/SDT-'+input.destinationsType;
 					}
+				}
+				else if(input.destinationsType == 'location')
+				{
+					HashIDString	=	HashIDString	+ '\ndestination=' + Domain + '414/' + input.DestinationGLN + '/254/' + input.DestinationGLNExtension + Domain + 'voc/SDT-'+input.destinationsType;
 				}				
-			}
-			else if(input.destinationsType == 'location')
-			{
-				HashIDString	=	HashIDString	+ '\ndestination=' + Domain + 'voc/SDT-'+input.destinationsType + Domain + '414/' + input.DestinationGLN + '/254/' + input.DestinationGLNExtension;
 			}
 			else if(input.destinationsType == 'other')
 			{
@@ -1293,8 +1291,8 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 			}
 		}
 		
-		console.log("**********************")
-		console.log(HashIDString);
+		//console.log("**********************")
+		//console.log(HashIDString);
 		
 		//Remove the Linebreaks
 		HashIDString	=	HashIDString.replace(/(\r\n|\n|\r)/gm, "");
@@ -1319,8 +1317,11 @@ exports.HashIDCreator		=	function(HashInput,HashInputDirect,File,EventIDArraySto
 		else if(input.HashIDType == 'SHA512_224')
 		{
 			hash	=	'ni:///sha-512_224;' + sha512_224(HashIDString) + '?ver=CBV2.0';
-		}		
-		console.log("**********************");
+		}
+		
+		//console.log(HashIDString);
+		//console.log(hash);
+		//console.log("**********************");
 		
 		callback(hash);
 	}

@@ -639,7 +639,7 @@
 									</td>
 									
 									<td ng-show="formdata.EventIDOption == 'yes' && formdata.EventIDType == 'sha256'" class="form-inline" style="display: block;margin: auto;">
-										<select ng-model="formdata.HashIDType" class="form-control" ng-required="formdata.EventIDOption == 'yes' && formdata.EventIDType == 'sha256' ">
+										<select ng-model="formdata.HashIDType" class="form-control" ng-required="formdata.EventIDOption == 'yes' && formdata.EventIDType == 'sha256' " oninvalid="this.setCustomValidity('Please select type of Hashing algoritham required')" oninput="this.setCustomValidity('')">
 											<option class="dropdown-item" value="" selected> Choose HASH type </option>
 											<option class="dropdown-item" value="SHA256"> 		SHA256 		</option>
 											<option class="dropdown-item" value="SHA512"> 		SHA512 		</option>
