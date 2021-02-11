@@ -1097,7 +1097,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					
 					if(Object.keys(SensorMetadatObj).length != 0)
 					{
-						SensorMetaOuterObj["sensorMetaData"]	=	SensorMetadatObj;
+						SensorMetaOuterObj["sensorMetadata"]	=	SensorMetadatObj;
 					}				
 					
 					var SensorElements		=	SensorForm[sf][t].SensorElements;

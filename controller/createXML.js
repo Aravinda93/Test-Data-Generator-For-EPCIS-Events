@@ -1111,7 +1111,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 				//Loop through Each sensor Element
 				for(var t=0; t<SensorForm[sf].length; t++)
 				{
-					var sensorMetaData		=	sensorElement.ele('sensorMetaData')
+					var sensorMetaData		=	sensorElement.ele('sensorMetadata')
 					//sensorMetaData.att('time',moment(SensorForm[sf][t].Time).format())
 					
 					//Add the Sensor Metadata information if its populated
