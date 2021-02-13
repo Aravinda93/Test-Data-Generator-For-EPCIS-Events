@@ -1119,7 +1119,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 					SensorChecker(SensorForm[sf][t].StartTime,'startTime',sensorMetaData)
 					SensorChecker(SensorForm[sf][t].EndTime,'endTime',sensorMetaData)
 					SensorChecker(SensorForm[sf][t].DeviceID,'deviceID',sensorMetaData)
-					SensorChecker(SensorForm[sf][t].DeviceMetadata,'deviceMetaData',sensorMetaData)
+					SensorChecker(SensorForm[sf][t].DeviceMetadata,'deviceMetadata',sensorMetaData)
 					SensorChecker(SensorForm[sf][t].RawData,'rawData',sensorMetaData)
 					SensorChecker(SensorForm[sf][t].DataProcessingMethod,'dataProcessingMethod',sensorMetaData)
 					SensorChecker(SensorForm[sf][t].BusinessRules,'bizRules',sensorMetaData)					
@@ -1143,7 +1143,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 							
 							//Check if the field is populated and add it to the sensor element list
 							SensorChecker(SensorElements[e].SensorFields.DeviceID,'deviceID',sensorReport)
-							SensorChecker(SensorElements[e].SensorFields.DeviceMetaData,'deviceMetaData',sensorReport)
+							SensorChecker(SensorElements[e].SensorFields.DeviceMetaData,'deviceMetadata',sensorReport)
 							SensorChecker(SensorElements[e].SensorFields.RawData,'rawData',sensorReport)
 							SensorChecker(SensorElements[e].SensorFields.DataProcessingMethod,'dataProcessingMethod',sensorReport)
 							SensorChecker(SensorElements[e].SensorFields.Time,'time',sensorReport)

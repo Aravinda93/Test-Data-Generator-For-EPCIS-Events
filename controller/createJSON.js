@@ -1090,7 +1090,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					SensorChecker(SensorForm[sf][t].StartTime,'startTime',SensorMetadatObj)
 					SensorChecker(SensorForm[sf][t].EndTime,'endTime',SensorMetadatObj)
 					SensorChecker(SensorForm[sf][t].DeviceID,'deviceID',SensorMetadatObj)
-					SensorChecker(SensorForm[sf][t].DeviceMetadata,'deviceMetaData',SensorMetadatObj)
+					SensorChecker(SensorForm[sf][t].DeviceMetadata,'deviceMetadata',SensorMetadatObj)
 					SensorChecker(SensorForm[sf][t].RawData,'rawData',SensorMetadatObj)
 					SensorChecker(SensorForm[sf][t].DataProcessingMethod,'dataProcessingMethod',SensorMetadatObj)
 					SensorChecker(SensorForm[sf][t].BusinessRules,'bizRules',SensorMetadatObj)
@@ -1119,7 +1119,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 							
 							//Check if the field is populated and add it to the sensor element list
 							SensorChecker(SensorElements[e].SensorFields.DeviceID,'deviceID',SensorReportElement)
-							SensorChecker(SensorElements[e].SensorFields.DeviceMetaData,'deviceMetaData',SensorReportElement)
+							SensorChecker(SensorElements[e].SensorFields.DeviceMetaData,'deviceMetadata',SensorReportElement)
 							SensorChecker(SensorElements[e].SensorFields.RawData,'rawData',SensorReportElement)
 							SensorChecker(SensorElements[e].SensorFields.DataProcessingMethod,'dataProcessingMethod',SensorReportElement)
 							SensorChecker(SensorElements[e].SensorFields.Time,'time',SensorReportElement)

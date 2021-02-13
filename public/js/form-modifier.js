@@ -224,8 +224,8 @@ app.controller('AppController2', function($scope,$http,$location,$anchorScroll,$
 				{
 					$scope.SensorElementsArray[s].SensorFields["DeviceID"]			=	$scope.SensorForm.SensorReportDeviceID[SensorElementID];
 				}
-				
-				if($scope.SensorForm.SelectReqReport.includes('Device MetaData') && Type == 'Device MetaData')
+
+				if($scope.SensorForm.SelectReqReport.includes('Device Metadata') && Type == 'Device MetaData')
 				{
 					$scope.SensorElementsArray[s].SensorFields["DeviceMetaData"]	=	$scope.SensorForm.SensorReportDeviceMetadata[SensorElementID];
 				}

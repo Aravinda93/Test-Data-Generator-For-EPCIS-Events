@@ -417,7 +417,7 @@ exports.BusinessStep = function(callback){
 									
 	var SensorReportDatas	=	[	
 									{value:'Device ID',									text:'Device ID'},
-									{value:'Device MetaData',							text:'Device MetaData'},
+									{value:'Device Metadata',							text:'Device Metadata'},
 									{value:'Raw Data',									text:'Raw Data'},
 									{value:'Data Processing Method',					text:'Data Processing Method'},
 									{value:'Time',										text:'Time'},
