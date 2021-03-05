@@ -1088,11 +1088,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 				}
 				else
 				{
-					if(input.eventtype1 == "AssociationEvent")
-					{
-						extension		=	ObjectEvent.ele('extension');
-					}
-					else if(input.eventtype1 == "TransformationEvent")
+					if(input.eventtype1 == "TransformationEvent")
 					{
 						OuterExtension	=	ObjectEvent.ele('extension')
 						extension		= 	OuterExtension
@@ -1149,7 +1145,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 							SensorChecker(SensorElements[e].SensorFields.Time,'time',sensorReport)
 							SensorChecker(SensorElements[e].SensorFields.Microorganism,'microorganism',sensorReport)
 							SensorChecker(SensorElements[e].SensorFields.ChemicalSubstance,'chemicalSubstance',sensorReport)							
-							SensorChecker(SensorElements[e].SensorFields.Value,'value',sensorReport)
+							SensorChecker(parseInt(SensorElements[e].SensorFields.Value),'value',sensorReport)
 							SensorChecker(SensorElements[e].SensorFields.Component,'component',sensorReport)
 							SensorChecker(SensorElements[e].SensorFields.StringValue,'stringValue',sensorReport)
 							SensorChecker(SensorElements[e].SensorFields.BooleanValue,'booleanValue',sensorReport)

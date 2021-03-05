@@ -40,7 +40,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			JSONschemaParse[JSONHeaders[head].xmlns]	=	JSONHeaders[head].URL;
 		}
 		
-		JSONschemaParse["schemaVersion"]		=	"2.0";
+		JSONschemaParse["schemaVersion"]		=	2.0;
 		JSONschemaParse["creationDate"]			=	currentTime;
 		JSONschemaParse["epcisBody"]			=	{};	
 	}
@@ -462,11 +462,11 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					
 					if(InputQuantities[q].QuantityType == 'Fixed Measure Quantity')
 					{
-						obj["quantity"]	=	InputQuantities[q].Quantity;
+						obj["quantity"]	=	parseInt(InputQuantities[q].Quantity);
 					}
 					else if(InputQuantities[q].QuantityType == 'Variable Measure Quantity')
 					{
-						obj["quantity"]	=	InputQuantities[q].Quantity;
+						obj["quantity"]	=	parseInt(InputQuantities[q].Quantity);
 						obj["uom"]		=	InputQuantities[q].QuantityUOM;
 					}
 					
@@ -501,11 +501,11 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					
 					if(OutputQuantities[q].QuantityType == 'Fixed Measure Quantity')
 					{
-						obj["quantity"]	=	OutputQuantities[q].Quantity;
+						obj["quantity"]	=	parseInt(OutputQuantities[q].Quantity);
 					}
 					else if(OutputQuantities[q].QuantityType == 'Variable Measure Quantity')
 					{
-						obj["quantity"]	=	OutputQuantities[q].Quantity;
+						obj["quantity"]	=	parseInt(OutputQuantities[q].Quantity);
 						obj["uom"]		=	OutputQuantities[q].QuantityUOM;
 					}
 					
@@ -561,11 +561,11 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					
 					if(ChildQuantitiesURI[c].QuantityType == 'Fixed Measure Quantity')
 					{
-						obj["quantity"]	=	ChildQuantitiesURI[c].Quantity;
+						obj["quantity"]	=	parseInt(ChildQuantitiesURI[c].Quantity);
 					}
 					else if(ChildQuantitiesURI[c].QuantityType == 'Variable Measure Quantity')
 					{
-						obj["quantity"]	=	ChildQuantitiesURI[c].Quantity;
+						obj["quantity"]	=	parseInt(ChildQuantitiesURI[c].Quantity);
 						obj["uom"]		=	ChildQuantitiesURI[c].QuantityUOM;
 					}
 					ObjectEvent['childQuantityList'].push(obj);
@@ -726,11 +726,11 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 
 					if(QuantitiesURIs[q].QuantityType == 'Fixed Measure Quantity')
 					{
-						obj["quantity"]	=	QuantitiesURIs[q].Quantity;
+						obj["quantity"]	=	parseInt(QuantitiesURIs[q].Quantity);
 					}
 					else if(QuantitiesURIs[q].QuantityType == 'Variable Measure Quantity')
 					{
-						obj["quantity"]	=	QuantitiesURIs[q].Quantity;
+						obj["quantity"]	=	parseInt(QuantitiesURIs[q].Quantity);
 						obj["uom"]		=	QuantitiesURIs[q].QuantityUOM;
 					}
 					
@@ -756,11 +756,11 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					
 					if(ChildQuantitiesURI[c].QuantityType == 'Fixed Measure Quantity')
 					{
-						obj["quantity"]	=	ChildQuantitiesURI[c].Quantity;
+						obj["quantity"]	=	parseInt(ChildQuantitiesURI[c].Quantity);
 					}
 					else if(ChildQuantitiesURI[c].QuantityType == 'Variable Measure Quantity')
 					{
-						obj["quantity"]	=	ChildQuantitiesURI[c].Quantity;
+						obj["quantity"]	=	parseInt(ChildQuantitiesURI[c].Quantity);
 						obj["uom"]		=	ChildQuantitiesURI[c].QuantityUOM;
 					}
 					ObjectEvent['childQuantityList'].push(obj);
@@ -785,11 +785,11 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 					
 					if(Quantities[q].QuantityType == 'Fixed Measure Quantity')
 					{
-						obj["quantity"]		=	Quantities[q].Quantity;
+						obj["quantity"]		=	parseInt(Quantities[q].Quantity);
 					}
 					else if(Quantities[q].QuantityType == 'Variable Measure Quantity')
 					{
-						obj["quantity"]		=	Quantities[q].Quantity;
+						obj["quantity"]		=	parseInt(Quantities[q].Quantity);
 						obj["uom"]			=	Quantities[q].QuantityUOM;
 					}
 					
@@ -1125,7 +1125,7 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 							SensorChecker(SensorElements[e].SensorFields.Time,'time',SensorReportElement)
 							SensorChecker(SensorElements[e].SensorFields.Microorganism,'microorganism',SensorReportElement)
 							SensorChecker(SensorElements[e].SensorFields.ChemicalSubstance,'chemicalSubstance',SensorReportElement)							
-							SensorChecker(SensorElements[e].SensorFields.Value,'value',SensorReportElement)
+							SensorChecker(parseInt(SensorElements[e].SensorFields.Value),'value',SensorReportElement)
 							SensorChecker(SensorElements[e].SensorFields.Component,'component',SensorReportElement)
 							SensorChecker(SensorElements[e].SensorFields.StringValue,'stringValue',SensorReportElement)
 							SensorChecker(SensorElements[e].SensorFields.BooleanValue,'booleanValue',SensorReportElement)
