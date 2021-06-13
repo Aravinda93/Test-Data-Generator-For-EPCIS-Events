@@ -495,7 +495,7 @@ exports.createXMLData	=	function(Query,Root,callback){
 			}
 			
 			//Check if Transformation ID is populated
-			if(input.transformationXformId != '' && typeof input.transformationXformId != undefined)
+			if(input.transformationXformId != '' && input.transformationXformId != undefined)
 			{
 				ObjectEvent.ele('transformationID', input.transformationXformId)
 			}
@@ -1088,14 +1088,18 @@ exports.createXMLData	=	function(Query,Root,callback){
 				}
 				else
 				{
-					if(input.eventtype1 == "TransformationEvent")
+					if(input.eventtype1 == "AssociationEvent")
+					{
+						extension		=	ObjectEvent;
+					}
+					else if(input.eventtype1 == "TransformationEvent")
 					{
 						OuterExtension	=	ObjectEvent.ele('extension')
 						extension		= 	OuterExtension
 					}
 				}							
 			}
-				
+
 			var SensorForm			=	Query.SensorForm;
 			var sensorElementList	=	extension.ele('sensorElementList')
 			

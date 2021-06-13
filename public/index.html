@@ -72,7 +72,7 @@
 			
 			<div id="inputElements" ng-cloak ng-show="inputElements">
 				<div class="row" ng-cloak>
-					<label for="DatasetName" style="padding-top:0.4%;font-weight;bold;padding-left: 3.5%;" class="control-label"> Dataset Name </label>
+					<label for="DatasetName" style="padding-top:0.4%;font-weight:bold;padding-left: 3.5%;" class="control-label"> Dataset Name </label>
 					<div class="col-md-3">
 						<input type="text" class="form-control" id="DatasetName" ng-model="DatasetName" placeholder="Enter the Dataset name" ng-disabled="isDisabled"></input>
 					</div>
@@ -86,7 +86,7 @@
 									<td rowspan="{{ EventTypeRowSpan }}" style="background-color: #F2F3F4;"></td>
 									<td> Event Count </td>
 									<td>
-										<input id="eventcount" type="number" min="1" max="1000" class="form-control" ng-model="formdata.eventcount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');"  oninvalid="this.setCustomValidity('Number of Events must be between 1 and 1000')" placeholder="Number of events required" required ></input>
+										<input id="eventcount" type="number" min="1" max="5000" class="form-control" ng-model="formdata.eventcount" oninput="this.value=this.value.replace(/[^0-9]/g,'');setCustomValidity('');"  oninvalid="this.setCustomValidity('Number of Events must be between 1 and 1000')" placeholder="Number of events required" required ></input>
 									</td>
 								</tr>
 								<tr>

@@ -461,9 +461,118 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		
 		//Call the function to create the URI and Display it
 		angular.element('#ParentTypeModal').modal('hide');
-		var ItemCount			=	0;
+		var ItemCount	=	0;
+		var data 		=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues, formdata:$scope.formdata});
+					
+		$http({
+			url		: 	"/CreateAggregationEventURI",
+			method	: 	"POST",
+			headers	: 	{'Content-Type': 'application/json'},
+			data	:	data
+		}).success(function(response){
+			if($scope.AEParentEPCsFlag || $scope.TransactionEventParentIDFlag || $scope.AssociationEventParentFlag)
+			{
+				//Aggregation Event PARENT ID has been clicked				
+				if($scope.AEParentEPCsFlag)
+				{
+					$scope.AggregationEventParentURI = response;
+				}
+				
+				//Transaction Event Parent has been clicked
+				if($scope.TransactionEventParentIDFlag)
+				{
+					$scope.TransactionEventParentIDURI = response;
+				}
+				
+				//AssociationEvent Parent
+				if($scope.AssociationEventParentFlag)
+				{
+					$scope.AssociationEventParentURI = response;	
+				}
+				
+				//After all the event creation reset the flag and button
+				
+				//Aggregation Event Parent ID
+				$scope.AEParentEPCsFlag				=	false;
+				$scope.ParentButton					=	false;						
+				
+				//Transaction Event Parent ID
+				$scope.TransactionEventParentIDFlag	=	false;
+				$scope.TransactionEventParent		=	false;						
+				
+				//Association Event Parent ID
+				$scope.AssociationEventParentButton = 	false;
+				$scope.AssociationEventParentFlag	=	false;
+									
+			}
+			else
+			{				
+				//If Object Event EPCS has been clicked
+				if($scope.ObjectEventAddEPCsFlag)
+				{
+					$scope.ObjectEventEpcsURI = response;
+				}					
+				
+				//Aggregation Event Child EPCS has been clicked
+				if($scope.AEChildEPCSFlage)
+				{				
+					$scope.AggregationEventChildEPCsURI = response;
+				}
+				
+				//Transaction Event EPCs
+				if($scope.TransactionEventChildEPCS)
+				{				
+					$scope.TransactionEventEPCsURI = response;
+				}
+				
+				//Transformation Event Input EPCS
+				if($scope.TransformationEventInputEPCsFlag)
+				{				
+					$scope.TransformationEventInputEPCsURI = response;
+					
+					//After the loop set all values of the button and flag to false
+					$scope.TransformationEventInputEPCsFlag		=	false;
+					$scope.TransformInputEPCsButton				=	false;	
+				}
+				
+				//Transformation Event Output EPCs
+				if($scope.TransformationEventOutputEPCsFlag)
+				{				
+					$scope.TransformationEventOutputEPCSURI.push(response);
+					
+					//After the loop set all values of the button and flag to false
+					$scope.TransformationEventOutputEPCsFlag 	= 	false;
+					$scope.TransformOutputEPCsButton			=	false;
+				}
+				
+				//Association Event Child EPCs
+				if($scope.AssociationEventChildEPCSFlag)
+				{
+					$scope.AssociationEventChildEPCsURI = response;
+				}
+				
+				//After the loop set all values of the button and flag to false								
+				
+				//EPCs and Child EPCs section
+				$scope.ObjectEventAddEPCsFlag				=	false;
+				$scope.ObjectEventEPCSbutton				=	false;						
+				
+				$scope.AEChildEPCSFlage						=	false;
+				$scope.AEChildEPCButton						=	false;				
+				
+				$scope.TransactionEventChildEPCS			=	false;
+				$scope.TransactionEventEPCSbutton			=	false;
+				
+				$scope.AssociationEventChildEPCSButton		=	false;
+				$scope.AssociationEventChildEPCSFlag		=	false;					
+			}	
+				
+		}).error(function(error){
+			console.log(error)
+		});
 		
 		//Loop through the Event count to create random EPCs
+		/*
 		for(var eventEPC=0; eventEPC<$scope.formdata.eventcount; eventEPC++)
 		{
 			var data 				=	JSON.stringify({input:$scope.CommonForm, MultiValues: $scope.MultiValues, formdata:$scope.formdata, EventCount:eventEPC});
@@ -590,6 +699,7 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 				console.log(error)
 			});
 		}
+		*/
 	}
 	
 	//Object Event Quantities Submit call the URI function
@@ -598,8 +708,75 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 		var data 				=	JSON.stringify({input:$scope.CommonFormQuantity, formdata:$scope.formdata});
 		var ItemCount			=	0;		
 		angular.element('#ChildTypeModal').modal('hide');
-		angular.element('#EventModalForm').modal('show');
+		//angular.element('#EventModalForm').modal('show');
+
+		$http({
+			url: "/CreateObjectEventQuantities",
+			method: "POST",
+			headers: {'Content-Type': 'application/json'},
+			data:data
+		}).success(function(response) {
+			console.log(response);
+			//IF OBJECT EVENT QUANTITIES CLICKED
+			if($scope.OEQuantitiesFlag)
+			{
+				$scope.ObjectEventQuantitiesURI = response;				
+			}
+			
+			//If AGGREGATION EVENT CHILD QUANTITIES CLICKED
+			if($scope.AEChildQuantitiesFlag)
+			{
+				$scope.AggregationEventChildQuantitiesURI = response;	
+			}
+			
+			//Transaction Event Quantities
+			if($scope.TransactionEventQuantitiesFlag)
+			{
+				$scope.TransactionEventQuantitiesURI = response;						
+			}
+			
+			//Transformation Event Input Quantities
+			if($scope.TransformationEventInputQuantitiesFlag)
+			{
+				$scope.TransformationEventInputQuantityURI = response;	
+				
+				$scope.TransformationEventInputQuantitiesFlag	=	false;
+				$scope.TransformationEventInputQuantitiesButton	=	false;
+				
+			}
+			
+			//Transformation Output Quantities
+			if($scope.TransformationEventOutputQuantitiesFlag)
+			{				
+				$scope.TransformationEventOutputQuantityURI = response;	
+			
+				$scope.TransformationEventOutputQuantitiesFlag	=	false;
+				$scope.TransformationEventOutputQuantitiesButton=	false;
+			}
+			
+			//Association Event Child Quantities
+			if($scope.AssociationEventChildQuantitiesFlag)
+			{
+				$scope.AssociationEventChildQuantitiesURI = response;	
+			}
+			
+			//After the loop set all values of the button and flag to false
+			$scope.OEQuantitiesFlag							=	false;
+			$scope.OEAddQuantitiesButton					=	false;					
+					
+			$scope.AEChildQuantitiesFlag					= 	false;
+			$scope.AEChildQuantitiesButton					= 	false;					
+					
+			$scope.TransactionEventQuantitiesFlag 			=	false;
+			$scope.TransactionEventQuantitiesButton			=	false;					
+			
+			$scope.AssociationEventChildQuantitiesFlag		=	false;
+			$scope.AssociationEventChildQuantitiesButton	=	false;				
+		}).error(function(error) {
+			console.log(error)
+		});
 		
+		/*
 		for(var eventEPC=0; eventEPC<$scope.formdata.eventcount; eventEPC++)
 		{
 			$http({
@@ -679,9 +856,9 @@ app.controller('AppController', function($scope,$http,$location,$anchorScroll,$c
 				}
 			}).error(function(error) {
 				console.log(error)
-			});
-			
+			});	
 		}
+		*/
 		
 	}	
 	

@@ -1160,7 +1160,8 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 		if(input.PersistentDisposition != '' && input.PersistentDisposition != null && typeof input.PersistentDisposition != undefined)
 		{
 			ObjectEvent['persistentDisposition']	=	{};	
-			
+			var peristentDispositionArr 			= 	[];
+
 			if(input.PersistentDisposition == 'DispositionEnter')
 			{
 				ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	input.EnterPersistentDispositionText;	
@@ -1169,13 +1170,15 @@ exports.createJSONData	=	function(Query,JSONHeader,callback){
 			{
 				if(SyntaxType == 'urn')
 				{
-					ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	'urn:epcglobal:cbv:disp:'+input.PersistentDisposition;
+					peristentDispositionArr.push('urn:epcglobal:cbv:disp:'+input.PersistentDisposition);
 				}
 				else if(SyntaxType == 'webURI')
 				{
-					ObjectEvent.persistentDisposition[input.PersistentDispositionType]	=	Domain+'voc/Disp-'+input.PersistentDisposition;
+					peristentDispositionArr.push(Domain+'voc/Disp-'+input.PersistentDisposition);
 				}
 			}
+
+			ObjectEvent.persistentDisposition[input.PersistentDispositionType] = peristentDispositionArr;
 		}		
 		
 		//Check if the extension field is filled and add the JSON
