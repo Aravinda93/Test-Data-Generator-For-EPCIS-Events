@@ -87,6 +87,16 @@ exports.createXML	=	function(AllData,callback){
 				ParentQuantitiy	=	ParentQuantitiy.concat(ParentData.FormData.Quantities[mergeQ]);
 			}
 		}
+
+		//Check if the parent event is Association, Aggreagation and Transaction event if so collect Parent IDs
+		if(ParentEventType == 'AggregationEvent' || ParentEventType == 'TransactionEvent' || ParentEventType == 'AssociationEvent')
+		{
+			//Merge all the Parent ID into a single Array
+			for(var mergeP=0;mergeP<ParentData.FormData.ParentID.length; mergeP++)
+			{
+				ParentIDArray	=	ParentIDArray.concat(ParentData.FormData.ParentID[mergeP]);
+			}
+		}
 		
 		//Loop through child and split the EPCs and Quantities
 		for(var child=0; child<AllEventsArray[parent].Childrens.length; child++)
@@ -97,14 +107,14 @@ exports.createXML	=	function(AllData,callback){
 			var EndQuantityCount=	parseInt(AllEventsArray[parent].Childrens[child].QuantityCount);
 			var ChildEventType	=	AllEventsArray[parent].Childrens[child].FormData.input.eventtype1;
 			var EventCount		=	parseInt(AllEventsArray[parent].Childrens[child].FormData.input.eventcount);
-				
+
 			//Check if the Child EPCs value is empty
 			if(ChildData.FormData.EPCs.length == 0 && ParentData.FormData.EPCs.length > 0)
 			{
 				//Obtain the complete list of EPCS belonging to particular Child EPCS
 				EPCsArray		=	ParentEPCs.slice(LastCounter,LastCounter+(EndCount*EventCount));
 				LastCounter		=	EndCount*EventCount;
-				
+
 				//Assign the EPCS based on number of events in Child NODE
 				var EventStart	=	0;
 				var EventEnd	=	0;
@@ -134,9 +144,44 @@ exports.createXML	=	function(AllData,callback){
 							}																			
 						}	
 					}
-					
-					
 				}
+			}
+
+			//Check if the ParentIDArray has some data if so add it to subsequent child event EPCs
+			if(ParentIDArray.length > 0)
+			{
+				var parentCountPerEvent = 	Math.ceil(ParentIDArray.length/EventCount)
+				ChildParentIDarray		=	ParentIDArray.slice(LastParentCount,LastParentCount + (parentCountPerEvent*EventCount));
+				LastParentCount 		= 	LastParentCount + parentCountPerEvent;
+				var parentStart			=	0;
+				var ParentIDEPCsArray	=	[];
+
+				for(var event=0; event<EventCount; event++)
+				{
+					ParentIDEPCsArray 	= ChildParentIDarray.slice(parentStart,parentCountPerEvent+parentStart);
+					ChildData.FormData.EPCs[event] = ChildData.FormData.EPCs[event].concat(ParentIDEPCsArray)	
+					parentStart = parentStart + parentCountPerEvent;
+
+					//Write the respective children data into the parent of same node
+					for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
+					{	
+						var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
+						
+						if(ChildNodeName	==	ParentNodeName)
+						{
+							if(AllEventsArray[ParentNode].FormData.EPCs.length > 0 && EventCount == 1)
+							{
+								AllEventsArray[ParentNode].FormData.EPCs[0] = AllEventsArray[ParentNode].FormData.EPCs[0].concat(ParentIDEPCsArray);	
+							}
+							else
+							{
+								AllEventsArray[ParentNode].FormData.EPCs[event] = AllEventsArray[ParentNode].FormData.EPCs[event].concat(ParentIDEPCsArray)
+							}																			
+						}	
+					}
+				}
+
+				
 			}
 			
 			//Check if the Quantity elements of the Children are empty
@@ -174,50 +219,7 @@ exports.createXML	=	function(AllData,callback){
 						}					
 					}
 				}
-			}
-			
-			//Check if ParentID of Child EPCS is empty for Association,Aggreagation and Transaction event
-			if(ChildEventType == 'AggregationEvent' || ChildEventType == 'TransactionEvent' || ChildEventType == 'AssociationEvent')
-			{			
-				//Check if the parent of the Event is Association,Aggreagation and Transaction event
-				if(ParentEventType == 'AggregationEvent' || ParentEventType == 'TransactionEvent' || ParentEventType == 'AssociationEvent')
-				{
-					//Merge all the Parent ID into a single Array
-					for(var mergeP=0;mergeP<ParentData.FormData.ParentID.length; mergeP++)
-					{
-						ParentIDArray	=	ParentIDArray.concat(ParentData.FormData.ParentID[mergeP]);
-					}
-				
-					//Check if child Parent ID value is 0
-					if(ChildData.FormData.ParentID.length == 0 && ParentData.FormData.ParentID.length != 0)
-					{	
-						
-						//Obtain the complete list of ParentIDs belonging to particular Child EPCS
-						ChildParentIDarray	=	ParentIDArray.slice(LastParentCount,LastParentCount+EventCount);
-						LastParentCount		=	LastParentCount + EventCount;
-
-						for(var event=0; event<EventCount; event++)
-						{
-							var ParentIDChildArray	=	[];
-							ParentIDChildArray.push(ChildParentIDarray[event]);
-							
-							//Push the Parent ID into the child Parent ID
-							ChildData.FormData.ParentID.push(ParentIDChildArray);
-							
-							//find the parent of the respective child and write the data into the same
-							for(var ParentNode=0; ParentNode<AllEventsArray.length; ParentNode++)
-							{
-								var ParentNodeName	=	AllEventsArray[ParentNode].NodeName;
-								
-								if(ChildNodeName	==	ParentNodeName)
-								{
-									AllEventsArray[ParentNode].FormData.ParentID.push(ParentIDChildArray);							
-								}					
-							}
-						}						
-					}
-				}			
-			}
+			}			
 		}
 	}
 	
