@@ -131,6 +131,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 							var NodeObj				=	new Object();
 							NodeObj.NodeName		=	$rootScope.AllEventsArray[e].NodeID;
 							NodeObj.Type			=	"Source";
+							NodeObj.ParentIdCount	=	connectorArray[con].ParentIdCount;
 							NodeObj.Count			=	connectorArray[con].Count;
 							NodeObj.QuantityCount	=	connectorArray[con].QuantityCount;
 							NodeObj.Childrens		=	[];
@@ -143,6 +144,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 								{	
 									var NodeChildren			=	new Object();
 									NodeChildren.ChildNodeName	=	$rootScope.AllEventsArray[e2].NodeID;
+									NodeChildren.ParentIdCount	=	connectorArray[con].ParentIdCount;
 									NodeChildren.Count			=	connectorArray[con].Count;
 									NodeChildren.QuantityCount	=	connectorArray[con].QuantityCount;
 									NodeChildren.ChildType		=	"Target";								
@@ -163,7 +165,8 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 									if (!AllEventFinalArray[index].Childrens.find(o => o.ChildNodeName == ConnectorSource))
 									{
 										var NodeChildren				=	new Object();
-										NodeChildren.ChildNodeName		=	$rootScope.AllEventsArray[e3].NodeID;									
+										NodeChildren.ChildNodeName		=	$rootScope.AllEventsArray[e3].NodeID;	
+										NodeChildren.ParentIdCount		=	connectorArray[con].ParentIdCount;								
 										NodeChildren.Count				=	connectorArray[con].Count;
 										NodeChildren.QuantityCount		=	connectorArray[con].QuantityCount;
 										NodeChildren.ChildType			=	"Target";
@@ -188,6 +191,7 @@ syncApp.controller('diagramCtrl', function ($scope,$http,$rootScope,$copyToClipb
 							var NodeObj				=	new Object();
 							NodeObj.NodeName		=	$rootScope.AllEventsArray[l].NodeID;
 							NodeObj.FormData		=	$rootScope.AllEventsArray[l];
+							NodeObj.ParentIdCount	=	connectorArray[con].ParentIdCount;
 							NodeObj.Count			=	connectorArray[con].Count;
 							NodeObj.QuantityCount	=	connectorArray[con].QuantityCount;
 							NodeObj.Type			=	"Source";
@@ -552,10 +556,10 @@ function connectorCollectionChange(args)
 		var connectorName	=	args.element.addInfo.name;
 		var diagram 		= 	$("#diagram").ejDiagram("instance");
         var connector 		= 	diagram.selectionList[0];
-        diagram.insertLabel(connector.name, {name: "EPCsCount", 		fontColor:"red", 		text:"EPCs", 		alignment: "before",	segmentOffset: 0.1}, 0);
-        diagram.insertLabel(connector.name, {name: "QuantitiesCount", 	fontColor:"green", 		text:"Quantity", 	alignment: "after", 	segmentOffset: 0.7}, 1);
-       
-	   
+        diagram.insertLabel(connector.name, {name: "EPCsCount", 		fontColor:"red", 		text:"EPCs", 		alignment: "before",	segmentOffset: 0.05}, 0);
+        diagram.insertLabel(connector.name, {name: "ParentIdCount", 	fontColor:"blue", 		text:"ParentIDs", 	alignment: "after", 	segmentOffset: 0.35}, 1);
+		diagram.insertLabel(connector.name, {name: "QuantitiesCount", 	fontColor:"green", 		text:"Quantity", 	alignment: "before", 	segmentOffset: 0.75}, 1);
+		
 		for(var c=0; c<connectorArray.length; c++)
 		{
 			if(connectorArray[c].Name == args.element.addInfo.name)
@@ -645,6 +649,16 @@ function textChange(args) {
 				if(connectorArray[t].Name == connectorName)
 				{
 					connectorArray[t].QuantityCount	=	args.value;
+					break;
+				}
+			}
+		}else if(args.label.name == "ParentIdCount")
+		{
+			for(var t=0; t<connectorArray.length; t++)
+			{
+				if(connectorArray[t].Name == connectorName)
+				{
+					connectorArray[t].ParentIdCount	=	args.value;
 					break;
 				}
 			}
