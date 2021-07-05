@@ -1,0 +1,111 @@
+{
+    "@context": "https://id.gs1.org/epcis-context.jsonld",
+    "isA": "EPCISDocument",
+    "creationDate": "2021-07-05T20:27:02+05:30",
+    "schemaVersion": 2,
+    "format": "application/ld+json",
+    "epcisBody": {
+        "eventList": [
+            {
+                "isA": "AggregationEvent",
+                "eventTime": "2021-07-01T20:24:00.000+02:00",
+                "eventTimeZoneOffset": "+02:00",
+                "parentID": "urn:epc:id:sscc:111111111111.10100",
+                "childEPCs": [
+                    "urn:epc:id:sgtin:2222222222.222.97",
+                    "urn:epc:id:sgtin:2222222222.222.31437"
+                ],
+                "action": "ADD"
+            },
+            {
+                "isA": "AggregationEvent",
+                "eventTime": "2021-07-01T20:24:00.000+02:00",
+                "eventTimeZoneOffset": "+02:00",
+                "parentID": "urn:epc:id:sscc:111111111111.10101",
+                "childEPCs": [
+                    "urn:epc:id:sgtin:2222222222.222.664",
+                    "urn:epc:id:sgtin:2222222222.222.49299"
+                ],
+                "action": "ADD"
+            },
+            {
+                "isA": "AggregationEvent",
+                "eventTime": "2021-07-01T20:24:00.000+02:00",
+                "eventTimeZoneOffset": "+02:00",
+                "parentID": "urn:epc:id:sscc:111111111111.10102",
+                "childEPCs": [
+                    "urn:epc:id:sgtin:2222222222.222.544",
+                    "urn:epc:id:sgtin:2222222222.222.44"
+                ],
+                "action": "ADD"
+            },
+            {
+                "isA": "AggregationEvent",
+                "eventTime": "2021-07-01T20:24:00.000+02:00",
+                "eventTimeZoneOffset": "+02:00",
+                "parentID": "urn:epc:id:sscc:111111111111.10103",
+                "childEPCs": [
+                    "urn:epc:id:sgtin:2222222222.222.45",
+                    "urn:epc:id:sgtin:2222222222.222.787"
+                ],
+                "action": "ADD"
+            },
+            {
+                "isA": "AggregationEvent",
+                "eventTime": "2021-07-02T20:25:00.000+02:00",
+                "eventTimeZoneOffset": "+02:00",
+                "parentID": "urn:epc:id:sscc:111111111111.10100",
+                "childEPCs": [
+                    "urn:epc:id:sgtin:2222222222.222.97",
+                    "urn:epc:id:sgtin:2222222222.222.31437"
+                ],
+                "action": "OBSERVE"
+            },
+            {
+                "isA": "AggregationEvent",
+                "eventTime": "2021-07-02T20:25:00.000+02:00",
+                "eventTimeZoneOffset": "+02:00",
+                "parentID": "urn:epc:id:sscc:111111111111.10101",
+                "childEPCs": [
+                    "urn:epc:id:sgtin:2222222222.222.664",
+                    "urn:epc:id:sgtin:2222222222.222.49299"
+                ],
+                "action": "OBSERVE"
+            },
+            {
+                "isA": "AggregationEvent",
+                "eventTime": "2021-07-02T20:26:00.000+02:00",
+                "eventTimeZoneOffset": "+02:00",
+                "parentID": "urn:epc:id:sscc:111111111111.10102",
+                "childEPCs": [
+                    "urn:epc:id:sgtin:2222222222.222.544",
+                    "urn:epc:id:sgtin:2222222222.222.44"
+                ],
+                "action": "OBSERVE"
+            },
+            {
+                "isA": "AggregationEvent",
+                "eventTime": "2021-07-02T20:26:00.000+02:00",
+                "eventTimeZoneOffset": "+02:00",
+                "parentID": "urn:epc:id:sscc:111111111111.10103",
+                "childEPCs": [
+                    "urn:epc:id:sgtin:2222222222.222.45",
+                    "urn:epc:id:sgtin:2222222222.222.787"
+                ],
+                "action": "OBSERVE"
+            },
+            {
+                "isA": "ObjectEvent",
+                "eventTime": "2021-07-03T20:26:00.000+02:00",
+                "eventTimeZoneOffset": "+02:00",
+                "epcList": [
+                    "urn:epc:id:sscc:111111111111.10100",
+                    "urn:epc:id:sscc:111111111111.10101",
+                    "urn:epc:id:sscc:111111111111.10102",
+                    "urn:epc:id:sscc:111111111111.10103"
+                ],
+                "action": "ADD"
+            }
+        ]
+    }
+}
