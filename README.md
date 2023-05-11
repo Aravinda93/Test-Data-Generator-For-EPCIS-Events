@@ -1,3 +1,6 @@
+# NOTE:
+This project archieved as it is no longer compitable with latest version of the GS1 EPCIS standard not it will be maintained in the future. Kinfly visit the https://github.com/openepcis/epcis-testdata-generator developed by OpenEPCIS team which is much more powerful and advanced than this. Also, please find various EPCIS related tools and artifacts developed by OpenEPCIS team: https://github.com/orgs/openepcis/repositories?type=all
+
 # Test Data Generator for EPCIS Events
 
 ### Introduction
